@@ -1,0 +1,69 @@
+{
+  "data":[
+    {
+      "format": "3g2",
+      "description": "3gp2 format",
+      "type": "video"
+    },
+    {
+      "format": "3gp",
+      "description": "3gp format",
+      "type": "video"
+    },
+    {
+      "format": "amr",
+      "description": "3gpp amr file format",
+      "type": "video"
+    },
+    {
+      "format": "avi",
+      "description": "avi format",
+      "type": "video"
+    },
+    {
+      "format": "dvd",
+      "description": "MPEG2 PS format (DVD VOB)",
+      "type": "video"
+    },
+    {
+      "format": "mp4",
+      "description": "mp4 format",
+      "type": "video"
+    },
+    {
+      "format": "flv",
+      "description": "flv format",
+      "type": "video"
+    },
+    {
+      "format": "m4v",
+      "description": "raw MPEG4 video format",
+      "type": "video"
+    },
+    {
+      "format": "mov",
+      "description": "mov format",
+      "type": "video"
+    },
+    {
+      "format": "mp2",
+      "description": "MPEG audio layer 2",
+      "type": "video"
+    },
+    {
+      "format": "mp3",
+      "description": "MPEG audio layer 3",
+      "type": "audio"
+    },
+    {
+      "format": "mpeg",
+      "description": "MPEG1 System format",
+      "type": "video"
+    },
+    {
+      "format": "swf",
+      "description": "Flash format",
+      "type": "video"
+    }
+  ]
+}
