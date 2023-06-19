@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Created by IntelliJ IDEA.
+ * Language: XML
+ * Property of Umesh Gunasekara
+ * @Author: SLMORA
+ * @DateTime: 06/13/2023 09:40 PM
+ *
+ * This log4j2.xml comes with basic log4j2 configuration for mora-file-organizer-005-20230613001 Project
+ *
+ * Version      Date            Editor              Note
+ * ======================================================
+ * 1.0			06/13/2023		SLMORA              Initial Code
+ * 1.1          06/13/2023		SLMORA              Get copy from mora-gradle-groovy-template-001-202305220743
+ *
+-->
+<Configuration status="info">
+    <Properties>
+        <Property name="layout">%d [%t] %-5level %logger - %m%n</Property>
+        <Property name="logdir">D:/SLMORAWorkSpace/IntelliJProjects/slmora-io-learn/mora-file-organizer-005-20230613001/logs</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="LogToConsole" target="SYSTEM_OUT">
+            <PatternLayout pattern="${layout}" />
+        </Console>
+        <RollingFile name="LogToFile" fileName="${logdir}/mora-file-organizer-005-20230613001-info.log"
+                     filePattern="${logdir}/$${date:yyy-MM-dd}/mora-file-organizer-005-20230613001-info.%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${layout}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="1 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10" />
+        </RollingFile>
+        <Async name="Async">
+            <AppenderRef ref="LogToFile" />
+        </Async>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="com.slmora" level="info" additivity="false" >
+            <AppenderRef ref="LogToConsole" />
+            <AppenderRef ref="LogToFile" />
+            <AppenderRef ref="Async" />
+        </Logger>
+        <Root level="error">
+            <AppenderRef ref="LogToConsole" />
+            <AppenderRef ref="LogToFile" />
+        </Root>
+    </Loggers>
+</Configuration>

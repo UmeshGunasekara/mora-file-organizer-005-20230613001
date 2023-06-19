@@ -3,6 +3,7 @@
  */
 package com.slmora.learn;
 
+import com.slmora.learn.app.App;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

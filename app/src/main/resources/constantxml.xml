@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Test Comment</comment>
+<entry key="MORA.CONSTANT.TEST">mora@#12346</entry>
+<entry key="MORA.CONSTANT.TEST_EMAIL">mora@slmora.com</entry>
+</properties>
