@@ -12,6 +12,7 @@ import org.hibernate.Session;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * This Interface created for
@@ -31,13 +32,17 @@ public interface IGenericDao<K, T extends BaseEntity>
 {
     public Optional<K> add(T entity);
 
-    public Optional<byte[]> persist(T entity);
+    public Optional<byte[]> persistReturnId(T entity);
+
+    public T persist(T entity);
 
     public void saveOrUpdate(T entity);
 
     public void delete(T entity);
 
     public Optional<T> getById(K key);
+
+    public Optional<T> getByUUID(UUID uuidKey);
 
     public Optional<T> getByCode(Integer code);
 

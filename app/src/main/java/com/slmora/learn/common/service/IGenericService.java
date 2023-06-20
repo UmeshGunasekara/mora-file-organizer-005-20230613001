@@ -8,9 +8,11 @@
 package com.slmora.learn.common.service;
 
 import com.slmora.learn.jpa.entity.common.BaseEntity;
+import org.hibernate.Session;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * This Interface created for
@@ -30,7 +32,9 @@ public interface IGenericService<PK, T extends BaseEntity> {
 
     public Optional<PK> add(T entity);
 
-    public Optional<byte[]> persist(T entity);
+    public Optional<byte[]> persistReturnId(T entity);
+
+    public T persist(T entity);
 
     public void saveOrUpdate(T entity);
 
@@ -38,10 +42,14 @@ public interface IGenericService<PK, T extends BaseEntity> {
 
     public Optional<T> getById(PK key);
 
+    public Optional<T> getByUUID(UUID uuidKey);
+
     public Optional<T> getByCode(Integer code);
 
     public List<T> getAll();
 
     public void close();
+
+    public Session getSession();
 
 }

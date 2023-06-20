@@ -10,13 +10,18 @@ package com.slmora.learn.service.impl;
 import com.slmora.learn.common.dao.IGenericDao;
 import com.slmora.learn.common.service.impl.GenericServiceImpl;
 import com.slmora.learn.dao.IMFODirectoryDao;
+import com.slmora.learn.dao.impl.MFOFileDaoImpl;
+import com.slmora.learn.dto.DirectoryDto;
+import com.slmora.learn.dto.FileDto;
 import com.slmora.learn.jpa.entity.EMFODirectory;
 import com.slmora.learn.service.IMFODirectoryService;
+import com.slmora.learn.service.IMFOFileService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  *  This Class created for
@@ -52,7 +57,7 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
      */
     @Override
     public Optional<byte[]> addMFODirectory(EMFODirectory directory) {
-        System.out.println("com.payboot.merchant.service.impl.MerchantAddressServiceImpl.addAddress()");
+        System.out.println("com.slmora.learn.service.impl.MFODirectoryServiceImpl.addMFODirectory()");
         return directoryDao.addMFODirectory(directory);
     }
 
@@ -63,8 +68,14 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
      */
     @Override
     public Optional<EMFODirectory> getMFODirectoryById(byte[] id) {
-        System.out.println("com.payboot.merchant.service.impl.MerchantAddressServiceImpl.getAddressById()");
+        System.out.println("com.slmora.learn.service.impl.MFODirectoryServiceImpl.getMFODirectoryById()");
         return directoryDao.getMFODirectoryById(id);
+    }
+
+    @Override
+    public Optional<EMFODirectory> getMFODirectoryByUUID(UUID uuidKey)
+    {
+        return directoryDao.getMFODirectoryByUUID(uuidKey);
     }
 
     /**
@@ -73,7 +84,7 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
      */
     @Override
     public void deleteMFODirectory(EMFODirectory directory) {
-        System.out.println("com.payboot.merchant.service.impl.MerchantAddressServiceImpl.deleteAddress()");
+        System.out.println("com.slmora.learn.service.impl.MFODirectoryServiceImpl.deleteMFODirectory()");
         directoryDao.deleteMFODirectory(directory);
     }
 
@@ -82,7 +93,7 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
      */
     @Override
     public List<EMFODirectory> getAllMFODirectories() {
-        System.out.println("com.payboot.merchant.service.impl.MerchantAddressServiceImpl.getAllAddresses()");
+        System.out.println("com.slmora.learn.service.impll.MFODirectoryServiceImpl.getAllMFODirectories()");
         return directoryDao.getAllMFODirectories();
     }
 
@@ -93,9 +104,27 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
     }
 
     @Override
-    public Optional<byte[]> persistMFODirectory(EMFODirectory directory)
+    public Optional<byte[]> persistReturnIdMFODirectory(EMFODirectory directory)
+    {
+        return directoryDao.persistReturnIdMFODirectory(directory);
+    }
+
+    @Override
+    public EMFODirectory persistMFODirectory(EMFODirectory directory)
     {
         return directoryDao.persistMFODirectory(directory);
+    }
+
+    @Override
+    public Optional<byte[]> persistMFODirectory(DirectoryDto directoryDto)
+    {
+        EMFODirectory eDir = directoryDao.persistMFODirectory(directoryDto.getEntity());
+        if(!directoryDto.getFiles().isEmpty()){
+            IMFOFileService fileService = new MFOFileServiceImpl(new MFOFileDaoImpl());
+            directoryDto.getFiles().stream().map(FileDto::getEntity).peek(i->i.setDirectory(eDir)).forEach(i->fileService.persistMFOFile(i));
+            fileService.close();
+        }
+        return Optional.of(eDir.getId());
     }
 
 }

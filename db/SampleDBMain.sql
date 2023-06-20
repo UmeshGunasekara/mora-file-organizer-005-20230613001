@@ -48,34 +48,9 @@ ALTER TABLE MFO_DIRECTORY ADD CONSTRAINT FRK_DIRECTORY_A_DIRECTORY
 DROP TABLE IF EXISTS MFO_FILE_CATEGORY;
 CREATE TABLE MFO_FILE_CATEGORY
 (
-    file_category_id BINARY(16) NOT NULL,
-    file_category_name Varchar(150),
-    file_category_note Text,
-    raw_create_user_account_id Int NOT NULL DEFAULT '0',
-    raw_last_update_user_account_id Int NOT NULL DEFAULT '0',
-    raw_create_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    raw_last_update_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    raw_last_update_log_id Int NOT NULL DEFAULT '0',
-    raw_show_status Int NOT NULL DEFAULT '0',
-    raw_update_status Int NOT NULL DEFAULT '0',
-    raw_delete_status Int NOT NULL DEFAULT '0',
-    raw_active_status Int NOT NULL DEFAULT '0',
-    extra_01 Text,
-    extra_02 Text,
-    extra_03 Text,
-    PRIMARY KEY (file_category_id)
-);
-
-ALTER TABLE MFO_FILE_CATEGORY ADD CONSTRAINT UNK_FILE_CATEGORY_A_FILE_CATEGORY_NAME
-    UNIQUE (file_category_name);
-
-DROP TABLE IF EXISTS MFO_FILE;
-CREATE TABLE MFO_FILE
-(
     id BINARY(16) NOT NULL,
     code Int NOT NULL AUTO_INCREMENT UNIQUE KEY,
-    file_name Varchar(150),
-    file_full_path  Varchar(255),
+    file_category_name Varchar(150),
     note Text,
     raw_create_user_account_id Int NOT NULL DEFAULT '0',
     raw_last_update_user_account_id Int NOT NULL DEFAULT '0',
@@ -89,20 +64,46 @@ CREATE TABLE MFO_FILE
     extra_01 Text,
     extra_02 Text,
     extra_03 Text,
-    directory_parent_id BINARY(16),
     PRIMARY KEY (id)
+);
 
-        file_size Decimal(15,2),
-    file_created_date_time Datetime,
+ALTER TABLE MFO_FILE_CATEGORY ADD CONSTRAINT UNK_FILE_CATEGORY_A_FILE_CATEGORY_NAME
+    UNIQUE (file_category_name);
+
+DROP TABLE IF EXISTS MFO_FILE;
+CREATE TABLE MFO_FILE
+(
+    id BINARY(16) NOT NULL,
+    code Int NOT NULL AUTO_INCREMENT UNIQUE KEY,
+    file_name Varchar(150),
+    file_full_path  Varchar(255),
     file_extension Char(5),
+    file_size Decimal(15,2),
+    file_created_date_time Datetime,
+    note Text,
+    raw_create_user_account_id Int NOT NULL DEFAULT '0',
+    raw_last_update_user_account_id Int NOT NULL DEFAULT '0',
+    raw_create_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_log_id Int NOT NULL DEFAULT '0',
+    raw_show_status Int NOT NULL DEFAULT '0',
+    raw_update_status Int NOT NULL DEFAULT '0',
+    raw_delete_status Int NOT NULL DEFAULT '0',
+    raw_active_status Int NOT NULL DEFAULT '0',
+    extra_01 Text,
+    extra_02 Text,
+    extra_03 Text,
     directory_id BINARY(16),
     file_category_id BINARY(16),
-    PRIMARY KEY (file_id)
+    PRIMARY KEY (id)
 );
 
 CREATE INDEX IX_FILE_A_DIRECTORY ON MFO_FILE (directory_id);
 
 CREATE INDEX IX_FILE_A_FILE_CATEGORY ON MFO_FILE (file_category_id);
+
+ALTER TABLE MFO_FILE ADD CONSTRAINT UNK_FILE_A_FILE_FULL_PATH
+    UNIQUE (file_full_path);
 
 ALTER TABLE MFO_FILE ADD CONSTRAINT FRK_FILE_A_DIRECTORY
     FOREIGN KEY (directory_id) REFERENCES MFO_DIRECTORY (id)
@@ -111,6 +112,7 @@ ALTER TABLE MFO_FILE ADD CONSTRAINT FRK_FILE_A_DIRECTORY
 ALTER TABLE MFO_FILE ADD CONSTRAINT FRK_FILE_A_FILE_CATEGORY
     FOREIGN KEY (file_category_id) REFERENCES MFO_FILE_CATEGORY (id)
         ON DELETE SET NULL ON UPDATE CASCADE;
+
 
 ----------------------------------------------------------------------------------
 -- STORED PROCEDURE

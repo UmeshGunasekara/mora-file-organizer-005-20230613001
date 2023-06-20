@@ -10,11 +10,13 @@ package com.slmora.learn.jpa.entity;
 import com.slmora.learn.jpa.entity.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,6 +40,7 @@ import java.io.Serial;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
+@EqualsAndHashCode(callSuper=false)
 @Entity
 @Table(name = "MFO_FILE")
 public class EMFOFile extends BaseEntity
@@ -54,7 +57,7 @@ public class EMFOFile extends BaseEntity
     @Column(name = "file_full_path")
     private String fileFullPath;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="directory_id", columnDefinition = "BINARY(16)")
     private EMFODirectory directory;
 }

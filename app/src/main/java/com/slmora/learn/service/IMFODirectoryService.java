@@ -8,10 +8,12 @@
 package com.slmora.learn.service;
 
 import com.slmora.learn.common.service.IGenericService;
+import com.slmora.learn.dto.DirectoryDto;
 import com.slmora.learn.jpa.entity.EMFODirectory;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * This Interface created for
@@ -44,6 +46,8 @@ public interface IMFODirectoryService extends IGenericService<byte[], EMFODirect
      */
     public Optional<EMFODirectory> getMFODirectoryById(byte[] id);
 
+    public Optional<EMFODirectory> getMFODirectoryByUUID(UUID uuidKey);
+
     /**
      * @param address as PbAddress Object.
      * @apiNote Delete Address.
@@ -57,6 +61,10 @@ public interface IMFODirectoryService extends IGenericService<byte[], EMFODirect
 
     public Optional<EMFODirectory> getMFODirectoryByCode(Integer code);
 
-    public Optional<byte[]> persistMFODirectory(EMFODirectory directory);
+    public Optional<byte[]> persistReturnIdMFODirectory(EMFODirectory directory);
+
+    public EMFODirectory persistMFODirectory(EMFODirectory directory);
+
+    public Optional<byte[]> persistMFODirectory(DirectoryDto directoryDto);
 
 }

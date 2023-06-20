@@ -12,9 +12,11 @@ import com.slmora.learn.common.service.IGenericService;
 import com.slmora.learn.jpa.entity.common.BaseEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.Session;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  *  This Class created for
@@ -48,7 +50,13 @@ public abstract class GenericServiceImpl <K, T extends BaseEntity> implements IG
     }
 
     @Override
-    public Optional<byte[]> persist(T entity)
+    public Optional<byte[]> persistReturnId(T entity)
+    {
+        return genericDao.persistReturnId(entity);
+    }
+
+    @Override
+    public T persist(T entity)
     {
         return genericDao.persist(entity);
     }
@@ -69,6 +77,11 @@ public abstract class GenericServiceImpl <K, T extends BaseEntity> implements IG
     }
 
     @Override
+    public Optional<T> getByUUID(UUID uuidKey) {
+        return genericDao.getByUUID(uuidKey);
+    }
+
+    @Override
     public Optional<T> getByCode(Integer code) {
         return genericDao.getByCode(code);
     }
@@ -82,5 +95,11 @@ public abstract class GenericServiceImpl <K, T extends BaseEntity> implements IG
     public void close()
     {
         genericDao.close();
+    }
+
+    @Override
+    public Session getSession()
+    {
+        return genericDao.getSession();
     }
 }

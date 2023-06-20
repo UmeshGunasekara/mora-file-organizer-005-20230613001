@@ -9,6 +9,7 @@ package com.slmora.learn.common.dao.impl;
 
 import com.slmora.learn.common.dao.IGenericDao;
 import com.slmora.learn.common.ds.hibernate.HibernateHikariAnoUtil;
+import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.jpa.entity.common.BaseEntity;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -26,6 +27,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  *  This Class created for
@@ -105,12 +107,13 @@ public abstract class GenericDaoImpl <K extends Serializable, T extends BaseEnti
     }
 
     @Override
-    public Optional<byte[]> persist(T entity)
+    public Optional<byte[]> persistReturnId(T entity)
     {
         Transaction transaction = null;
         try{
             transaction=session.beginTransaction();
             session.persist(entity);
+            session.flush();
             transaction.commit();
             return Optional.of(entity.getId());
         } catch (Throwable throwable) {
@@ -122,6 +125,26 @@ public abstract class GenericDaoImpl <K extends Serializable, T extends BaseEnti
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public T persist(T entity)
+    {
+        Transaction transaction = null;
+        try{
+            transaction=session.beginTransaction();
+            session.persist(entity);
+            session.flush();
+            transaction.commit();
+        } catch (Throwable throwable) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
+            throwable.printStackTrace();
+        }
+
+        return entity;
     }
 
     @Override
@@ -213,6 +236,30 @@ public abstract class GenericDaoImpl <K extends Serializable, T extends BaseEnti
             T t = (T)typedQuery.getSingleResult();
 //            transaction=getSession().beginTransaction();
 //            T t= (T) session.get(daoType, key);
+            transaction.commit();
+            return Optional.of(t);
+        } catch (Throwable throwable) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
+            throwable.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<T> getByUUID(UUID uuidKey)
+    {
+//        Transaction transaction=session.beginTransaction();
+//        T t= (T) session.get(daoType, key);
+//        transaction.commit();
+//        return t;
+        Transaction transaction = null;
+        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        try{
+            transaction=session.beginTransaction();
+            T t= (T) session.get(daoType, uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(uuidKey));
             transaction.commit();
             return Optional.of(t);
         } catch (Throwable throwable) {

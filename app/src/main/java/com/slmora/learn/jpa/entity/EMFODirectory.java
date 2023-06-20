@@ -11,6 +11,7 @@ import com.slmora.learn.jpa.entity.common.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -18,6 +19,7 @@ import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,6 +45,7 @@ import java.util.Collection;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
+@EqualsAndHashCode(callSuper=false)
 @Entity
 @Table(name = "MFO_DIRECTORY")
 public class EMFODirectory extends BaseEntity
@@ -131,7 +134,8 @@ public class EMFODirectory extends BaseEntity
 
     @OneToMany(
             mappedBy = "directory",
-            cascade = CascadeType.PERSIST
+            cascade = CascadeType.PERSIST,
+            fetch = FetchType.LAZY
     )
     private Collection<EMFOFile> files = new ArrayList();
 

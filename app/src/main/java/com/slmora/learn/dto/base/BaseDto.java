@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.dto.base;
 
+import com.slmora.learn.jpa.entity.common.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,21 +31,21 @@ import java.util.UUID;
  */
 @Data
 @NoArgsConstructor
-@AllArgsConstructor(staticName = "of")
 public abstract class BaseDto {
     private UUID id;
-    private int code;
+    private Integer code;
     private String note;
     private int rawCreateUserAccountId;
     private int rawLastUpdateUserAccountId;
     private LocalDateTime rawCreateDateTime;
     private LocalDateTime rawLastUpdateDateTime;
-    private Integer rawLastUpdateLogId=0;
-    private Integer rawShowStatus=0;
-    private Integer rawUpdateStatus=0;
-    private Integer rawDeleteStatus=0;
-    private Integer rawActiveStatus=0;
+    private int rawLastUpdateLogId=0;
+    private int rawShowStatus=0;
+    private int rawUpdateStatus=0;
+    private int rawDeleteStatus=0;
+    private int rawActiveStatus=0;
     private String extra01;
     private String extra02;
     private String extra03;
+
 }

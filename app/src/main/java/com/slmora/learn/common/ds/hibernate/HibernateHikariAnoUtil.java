@@ -9,6 +9,7 @@ package com.slmora.learn.common.ds.hibernate;
 
 import com.slmora.learn.common.property.util.MoraAccessProperties;
 import com.slmora.learn.jpa.entity.EMFODirectory;
+import com.slmora.learn.jpa.entity.EMFOFile;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -139,6 +140,7 @@ public class HibernateHikariAnoUtil {
 
     private static void entityConfiguration(Configuration configuration){
         configuration.addAnnotatedClass(EMFODirectory.class);
+        configuration.addAnnotatedClass(EMFOFile.class);
     }
 
     /**

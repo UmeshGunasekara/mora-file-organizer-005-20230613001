@@ -11,6 +11,7 @@ import com.slmora.learn.common.ds.hibernate.util.LocalDateTimeConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
@@ -51,6 +52,7 @@ public abstract class BaseEntity implements Serializable
     private byte[] id;
 
     @Column(name = "code")
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Integer code;
 
     @Column(name = "note")

@@ -77,7 +77,7 @@
         <property name="hibernate.dbcp.minIdle">5</property>
         <property name="hibernate.dbcp.maxWaitMillis">-1</property>
         <!-- Names the annotated entity class -->
-        <mapping class="com.slmora.learn.jpa.entity.MFODirectory" />
+        <mapping class="com.slmora.learn.jpa.entity.EMFODirectory" />
         <!--https://dzone.com/articles/hibernate-5-xml-configuration-example-->
     </session-factory>
 </hibernate-configuration>

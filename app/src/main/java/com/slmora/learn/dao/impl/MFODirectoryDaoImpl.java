@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  *  This Class created for
@@ -45,6 +46,12 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
     public Optional<EMFODirectory> getMFODirectoryById(byte[] id)
     {
         return getById(id);
+    }
+
+    @Override
+    public Optional<EMFODirectory> getMFODirectoryByUUID(UUID uuidKey)
+    {
+        return getByUUID(uuidKey);
     }
 
     @Override
@@ -93,7 +100,7 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
     }
 
     @Override
-    public Optional<byte[]> persistMFODirectory(EMFODirectory directory)
+    public Optional<byte[]> persistReturnIdMFODirectory(EMFODirectory directory)
     {
 //        Transaction transaction = null;
 //        try{
@@ -112,6 +119,12 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
 //        }
 //
 //        return Optional.empty();
+        return persistReturnId(directory);
+    }
+
+    @Override
+    public EMFODirectory persistMFODirectory(EMFODirectory directory)
+    {
         return persist(directory);
     }
 }

@@ -12,6 +12,7 @@ import com.slmora.learn.jpa.entity.EMFODirectory;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * This Interface created for
@@ -33,11 +34,15 @@ public interface IMFODirectoryDao extends IGenericDao<byte[], EMFODirectory>
 
     public Optional<EMFODirectory> getMFODirectoryById(byte[] id);
 
+    public Optional<EMFODirectory> getMFODirectoryByUUID(UUID uuidKey);
+
     public void deleteMFODirectory(EMFODirectory directory);
 
     public List<EMFODirectory> getAllMFODirectories();
 
     public Optional<EMFODirectory> getMFODirectoryByCode(Integer code);
 
-    public Optional<byte[]> persistMFODirectory(EMFODirectory directory);
+    public Optional<byte[]> persistReturnIdMFODirectory(EMFODirectory directory);
+
+    public EMFODirectory persistMFODirectory(EMFODirectory directory);
 }

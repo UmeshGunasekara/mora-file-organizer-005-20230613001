@@ -24,11 +24,40 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
+    id 'java'
+    id 'groovy'
+    id 'idea'
+}
+
+//Added
+group = 'com.slmora.learn'
+version = '1.0.1'
+description = 'moraFileOrganizer005'
+//sourceCompatibility = 17
+//targetCompatibility = 17
+mainClassName ='com.slmora.learn.app.App'
+
+//Added
+ext{
+    createdBy = "$version (Ceylon Code)"
+    builtBy = "SLMORA"
+    builtJDK = 17
+}
+
+//Added
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+//    myCompile
 }
 
 repositories {
+    //Added
+    mavenLocal()
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+//    maven {url 'http://nexus.com'}
 }
 
 dependencies {
@@ -135,4 +164,47 @@ application {
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+
+//Added
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+//Added
+//sourceSets.main.java.srcDir('src/main')
+sourceSets {
+    main{
+        java{
+            srcDirs = ['src/main/java', 'src/generated/java']
+//            exclude '**/com/slmora/learn/app/Main.java'
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+    test{
+        java{
+            srcDirs = ['src/test/java']
+//            exclude '**/com/slmora/learn/app/Main.java'
+        }
+        resources {
+            srcDirs = ['src/test/resources']
+        }
+    }
+}
+
+//Added
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest{
+        attributes 'Implementation-Title': 'Gradle Jar File Example',
+                'Manifest-Version': "${version}",
+                'Created-By': "${createdBy}",
+                'Built-By': "${builtBy}",
+                'Build-Jdk': "${builtJDK}",
+                'Main-Class': "${mainClassName}"
+    }
+    archiveBaseName.set('mora-file-organizer-005-20230613001')
+    from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 }
