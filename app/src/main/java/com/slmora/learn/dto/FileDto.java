@@ -18,7 +18,10 @@ import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 /**
  *  This Class created for
@@ -44,6 +47,9 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
 
     private String fileName;
     private String fileFullPath;
+    private String fileExtension;
+    private double fileSizeInMB;
+    private LocalDateTime fileCreatedDateTime;
     private DirectoryDto directory;
 
     public FileDto(EMFOFile jpaEntityFile){
@@ -72,6 +78,11 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
 
         this.setFileName(jpaEntityFile.getFileName());
         this.setFileFullPath(jpaEntityFile.getFileFullPath());
+        this.setFileExtension(jpaEntityFile.getFileExtension());
+        this.setFileSizeInMB(jpaEntityFile.getFileSizeInMB().doubleValue());
+        if(jpaEntityFile.getFileCreatedDateTime()!=null) {
+            this.setFileCreatedDateTime(jpaEntityFile.getFileCreatedDateTime().toLocalDateTime());
+        }
         this.setDirectory(new DirectoryDto(jpaEntityFile.getDirectory()));
     }
 
@@ -105,6 +116,11 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
 
         jpaEntityFile.setFileName(this.getFileName());
         jpaEntityFile.setFileFullPath(this.getFileFullPath());
+        jpaEntityFile.setFileExtension(this.getFileExtension());
+        jpaEntityFile.setFileSizeInMB(new BigDecimal(this.getFileSizeInMB(), MathContext.DECIMAL64));
+        if(this.getFileCreatedDateTime()!=null) {
+            jpaEntityFile.setFileCreatedDateTime(Timestamp.valueOf(this.getFileCreatedDateTime()));
+        }
         if(this.getDirectory()!=null){
             jpaEntityFile.setDirectory(this.getDirectory().getEntity());
         }

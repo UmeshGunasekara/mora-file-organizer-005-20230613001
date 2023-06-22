@@ -19,6 +19,9 @@ import com.slmora.learn.service.IMFOFileService;
 import com.slmora.learn.service.impl.MFODirectoryServiceImpl;
 import com.slmora.learn.service.impl.MFOFileServiceImpl;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,7 +48,7 @@ public class T04 {
         IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
         IMFOFileService fileService = new MFOFileServiceImpl(new MFOFileDaoImpl());
 
-        Optional<EMFODirectory> opDir = dirService.getMFODirectoryByCode(6);
+        Optional<EMFODirectory> opDir = dirService.getMFODirectoryByCode(1);
         EMFODirectory dir = null;
         if(opDir.isPresent()){
             dir = opDir.get();
@@ -56,6 +59,9 @@ public class T04 {
 
         file.setFileName("6.mp4");
         file.setFileFullPath("D:\\MORA\\Video\\Java Brains\\Brain Byte\\6.mp4");
+        file.setFileExtension("mp4");
+        file.setFileSizeInMB(new BigDecimal(23456.23, MathContext.DECIMAL64));
+        file.setFileCreatedDateTime(new Timestamp(System.currentTimeMillis()));
         file.setNote("Test Note 01");
         file.setDirectory(dir);
 

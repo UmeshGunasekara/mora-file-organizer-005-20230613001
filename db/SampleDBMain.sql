@@ -2,15 +2,43 @@
 -- DATABSE
 ----------------------------------------------------------------------------------
 
-DROP DATABASE IF EXISTS MORA_FILE_ORGANIZER_DB_V002;
-CREATE DATABASE MORA_FILE_ORGANIZER_DB_V002;
-USE MORA_FILE_ORGANIZER_DB_V002;
+DROP DATABASE IF EXISTS MORA_FILE_ORGANIZER_DB_V003;
+CREATE DATABASE MORA_FILE_ORGANIZER_DB_V003;
+USE MORA_FILE_ORGANIZER_DB_V003;
 
 ----------------------------------------------------------------------------------
 -- TABLES
 ----------------------------------------------------------------------------------
 
--- MFO_DIRECTORY --
+-- MFO_DIRECTORY
+
+DROP TABLE IF EXISTS MFO_SYSTEM_PROPERTYT;
+CREATE TABLE MFO_SYSTEM_PROPERTY
+(
+    id BINARY(16) NOT NULL,
+    code Int NOT NULL AUTO_INCREMENT UNIQUE KEY,
+    system_prop_code Varchar(30) NOT NULL,
+    system_prop_value Varchar(150) NOT NULL,
+    system_prop_modify_ind Int NOT NULL,
+    system_prop_value_separator Char(1),
+    note Text,
+    raw_create_user_account_id Int NOT NULL DEFAULT '0',
+    raw_last_update_user_account_id Int NOT NULL DEFAULT '0',
+    raw_create_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_log_id Int NOT NULL DEFAULT '0',
+    raw_show_status Int NOT NULL DEFAULT '0',
+    raw_update_status Int NOT NULL DEFAULT '0',
+    raw_delete_status Int NOT NULL DEFAULT '0',
+    raw_active_status Int NOT NULL DEFAULT '0',
+    extra_01 Text,
+    extra_02 Text,
+    extra_03 Text,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE MFO_SYSTEM_PROPERTY ADD CONSTRAINT UNK_SYSTEM_PROPERTY_A_SYSTEM_PROPERTY_CODE
+    UNIQUE (system_prop_code);
 
 DROP TABLE IF EXISTS MFO_DIRECTORY;
 CREATE TABLE MFO_DIRECTORY
@@ -50,7 +78,7 @@ CREATE TABLE MFO_FILE_CATEGORY
 (
     id BINARY(16) NOT NULL,
     code Int NOT NULL AUTO_INCREMENT UNIQUE KEY,
-    file_category_name Varchar(150),
+    file_category_name Varchar(150) NOT NULL,
     note Text,
     raw_create_user_account_id Int NOT NULL DEFAULT '0',
     raw_last_update_user_account_id Int NOT NULL DEFAULT '0',
@@ -70,13 +98,115 @@ CREATE TABLE MFO_FILE_CATEGORY
 ALTER TABLE MFO_FILE_CATEGORY ADD CONSTRAINT UNK_FILE_CATEGORY_A_FILE_CATEGORY_NAME
     UNIQUE (file_category_name);
 
+INSERT INTO mora_file_organizer_db_v003.mfo_file_category
+(id, code, file_category_name, note, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03) VALUES
+    (FN_UUID_TO_BIN(uuid()), 1, 'Video', 'Video Files', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL);
+INSERT INTO mora_file_organizer_db_v003.mfo_file_category
+(id, code, file_category_name, note, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03) VALUES
+    (FN_UUID_TO_BIN(uuid()), 2, 'Image', 'Image Files', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL);
+INSERT INTO mora_file_organizer_db_v003.mfo_file_category
+(id, code, file_category_name, note, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03) VALUES
+    (FN_UUID_TO_BIN(uuid()), 3, 'Audio', 'Audio Files', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL);
+INSERT INTO mora_file_organizer_db_v003.mfo_file_category
+(id, code, file_category_name, note, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03) VALUES
+    (FN_UUID_TO_BIN(uuid()), 4, 'Document', 'Document Files', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL);
+INSERT INTO mora_file_organizer_db_v003.mfo_file_category
+(id, code, file_category_name, note, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03) VALUES
+    (FN_UUID_TO_BIN(uuid()), 5, 'Setup', 'Setup Files can execute', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL);
+INSERT INTO mora_file_organizer_db_v003.mfo_file_category
+(id, code, file_category_name, note, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03) VALUES
+    (FN_UUID_TO_BIN(uuid()), 6, 'Programming', 'Programming Files', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL);
+INSERT INTO mora_file_organizer_db_v003.mfo_file_category
+(id, code, file_category_name, note, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03) VALUES
+    (FN_UUID_TO_BIN(uuid()), 6, 'Other', 'Other Files', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL);
+
+
+DROP TABLE IF EXISTS MFO_FILE_FORMAT;
+CREATE TABLE MFO_FILE_FORMAT
+(
+    id BINARY(16) NOT NULL,
+    code Int NOT NULL AUTO_INCREMENT UNIQUE KEY,
+    file_format Varchar(150) NOT NULL,
+    file_format_description Varchar(255) NOT NULL,
+    note Text,
+    raw_create_user_account_id Int NOT NULL DEFAULT '0',
+    raw_last_update_user_account_id Int NOT NULL DEFAULT '0',
+    raw_create_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_log_id Int NOT NULL DEFAULT '0',
+    raw_show_status Int NOT NULL DEFAULT '0',
+    raw_update_status Int NOT NULL DEFAULT '0',
+    raw_delete_status Int NOT NULL DEFAULT '0',
+    raw_active_status Int NOT NULL DEFAULT '0',
+    extra_01 Text,
+    extra_02 Text,
+    extra_03 Text,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE MFO_FILE_FORMAT ADD CONSTRAINT UNK_FILE_FORMAT_A_FILE_CATEGORY_NAME
+    UNIQUE (file_format);
+
+
+DROP TABLE IF EXISTS MFO_FILE_PROPERTY;
+CREATE TABLE MFO_FILE_PROPERTY
+(
+    id BINARY(16) NOT NULL,
+    code Int NOT NULL AUTO_INCREMENT UNIQUE KEY,
+    file_property Varchar(150) NOT NULL,
+    file_property_description Varchar(255) NOT NULL,
+    note Text,
+    raw_create_user_account_id Int NOT NULL DEFAULT '0',
+    raw_last_update_user_account_id Int NOT NULL DEFAULT '0',
+    raw_create_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_log_id Int NOT NULL DEFAULT '0',
+    raw_show_status Int NOT NULL DEFAULT '0',
+    raw_update_status Int NOT NULL DEFAULT '0',
+    raw_delete_status Int NOT NULL DEFAULT '0',
+    raw_active_status Int NOT NULL DEFAULT '0',
+    extra_01 Text,
+    extra_02 Text,
+    extra_03 Text,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE MFO_FILE_PROPERTY ADD CONSTRAINT UNK_FILE_PROPERTY_A_FILE_CATEGORY_NAME
+    UNIQUE (file_property);
+
+DROP TABLE IF EXISTS MFO_FILE_FORMAT_PROPERTY;
+CREATE TABLE MFO_FILE_FORMAT_PROPERTY
+(
+    id BINARY(16) NOT NULL,
+    code Int NOT NULL AUTO_INCREMENT UNIQUE KEY,
+    note Text,
+    raw_create_user_account_id Int NOT NULL DEFAULT '0',
+    raw_last_update_user_account_id Int NOT NULL DEFAULT '0',
+    raw_create_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_log_id Int NOT NULL DEFAULT '0',
+    raw_show_status Int NOT NULL DEFAULT '0',
+    raw_update_status Int NOT NULL DEFAULT '0',
+    raw_delete_status Int NOT NULL DEFAULT '0',
+    raw_active_status Int NOT NULL DEFAULT '0',
+    extra_01 Text,
+    extra_02 Text,
+    extra_03 Text,
+    file_property_id BINARY(16),
+    file_format_id BINARY(16),
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE MFO_FILE_PROPERTY ADD CONSTRAINT UNK_FILE_PROPERTY_A_FILE_CATEGORY_NAME
+    UNIQUE (file_property);
+
 DROP TABLE IF EXISTS MFO_FILE;
 CREATE TABLE MFO_FILE
 (
     id BINARY(16) NOT NULL,
     code Int NOT NULL AUTO_INCREMENT UNIQUE KEY,
-    file_name Varchar(150),
-    file_full_path  Varchar(255),
+    file_name Varchar(150) NOT NULL,
+    file_full_path  Varchar(255) NOT NULL,
     file_extension Char(5),
     file_size Decimal(15,2),
     file_created_date_time Datetime,
@@ -113,6 +243,75 @@ ALTER TABLE MFO_FILE ADD CONSTRAINT FRK_FILE_A_FILE_CATEGORY
     FOREIGN KEY (file_category_id) REFERENCES MFO_FILE_CATEGORY (id)
         ON DELETE SET NULL ON UPDATE CASCADE;
 
+DROP TABLE IF EXISTS MFO_VIDEO_FILE_DATA;
+CREATE TABLE MFO_VIDEO_FILE_DATA
+(
+    id BINARY(16) NOT NULL,
+    code Int NOT NULL AUTO_INCREMENT UNIQUE KEY,
+    note Text,
+    video_frame_rate_per_second Decimal(5,2),
+    audio_bit_rate Int,
+    video_duration_seconds Int,
+    audio_channels Int,
+    audio_sampling_rate_hz Int,
+    video_resolution_height Int,
+    video_resolution_width Int,
+    raw_create_user_account_id Int NOT NULL DEFAULT '0',
+    raw_last_update_user_account_id Int NOT NULL DEFAULT '0',
+    raw_create_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_log_id Int NOT NULL DEFAULT '0',
+    raw_show_status Int NOT NULL DEFAULT '0',
+    raw_update_status Int NOT NULL DEFAULT '0',
+    raw_delete_status Int NOT NULL DEFAULT '0',
+    raw_active_status Int NOT NULL DEFAULT '0',
+    extra_01 Text,
+    extra_02 Text,
+    extra_03 Text,
+    file_id BINARY(16),
+    PRIMARY KEY (id)
+);
+
+CREATE INDEX IX_VIDEO_FILE_DATA_A_FILE ON MFO_FILE (file_id);
+
+ALTER TABLE MFO_VIDEO_FILE_DATA ADD CONSTRAINT FRK_VIDEO_FILE_DATA_A_FILE
+    FOREIGN KEY (file_id) REFERENCES MFO_FILE (id)
+        ON DELETE SET NULL ON UPDATE CASCADE;
+
+DROP TABLE IF EXISTS MFO_AUDIO_FILE_DATA;
+CREATE TABLE MFO_AUDIO_FILE_DATA
+(
+    id BINARY(16) NOT NULL,
+    code Int NOT NULL AUTO_INCREMENT UNIQUE KEY,
+    note Text,
+    video_frame_rate_per_second Decimal(5,2),
+    audio_bit_rate Int,
+    video_duration_seconds Int,
+    audio_channels Int,
+    audio_sampling_rate_hz Int,
+    video_resolution_height Int,
+    video_resolution_width Int,
+    raw_create_user_account_id Int NOT NULL DEFAULT '0',
+    raw_last_update_user_account_id Int NOT NULL DEFAULT '0',
+    raw_create_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_log_id Int NOT NULL DEFAULT '0',
+    raw_show_status Int NOT NULL DEFAULT '0',
+    raw_update_status Int NOT NULL DEFAULT '0',
+    raw_delete_status Int NOT NULL DEFAULT '0',
+    raw_active_status Int NOT NULL DEFAULT '0',
+    extra_01 Text,
+    extra_02 Text,
+    extra_03 Text,
+    file_id BINARY(16),
+    PRIMARY KEY (id)
+);
+
+CREATE INDEX IX_VIDEO_FILE_DATA_A_FILE ON MFO_FILE (file_id);
+
+ALTER TABLE MFO_VIDEO_FILE_DATA ADD CONSTRAINT FRK_VIDEO_FILE_DATA_A_FILE
+    FOREIGN KEY (file_id) REFERENCES MFO_FILE (id)
+        ON DELETE SET NULL ON UPDATE CASCADE;
 
 ----------------------------------------------------------------------------------
 -- STORED PROCEDURE
