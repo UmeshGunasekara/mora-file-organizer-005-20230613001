@@ -8,10 +8,16 @@
 package com.slmora.learn.common.ds.hibernate;
 
 import com.slmora.learn.common.property.util.MoraAccessProperties;
+import com.slmora.learn.jpa.entity.EMFOAudioFileData;
 import com.slmora.learn.jpa.entity.EMFODirectory;
 import com.slmora.learn.jpa.entity.EMFOFile;
 import com.slmora.learn.jpa.entity.EMFOFileCategory;
+import com.slmora.learn.jpa.entity.EMFOFileFormat;
+import com.slmora.learn.jpa.entity.EMFOFileFormatProperty;
+import com.slmora.learn.jpa.entity.EMFOFileProperty;
+import com.slmora.learn.jpa.entity.EMFOFilePropertyData;
 import com.slmora.learn.jpa.entity.EMFOSystemProperty;
+import com.slmora.learn.jpa.entity.EMFOVideoFileData;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -141,10 +147,16 @@ public class HibernateHikariAnoUtil {
     }
 
     private static void entityConfiguration(Configuration configuration){
+        configuration.addAnnotatedClass(EMFOSystemProperty.class);
+        configuration.addAnnotatedClass(EMFOFileCategory.class);
+        configuration.addAnnotatedClass(EMFOFileFormat.class);
+        configuration.addAnnotatedClass(EMFOFileProperty.class);
+        configuration.addAnnotatedClass(EMFOFileFormatProperty.class);
         configuration.addAnnotatedClass(EMFODirectory.class);
         configuration.addAnnotatedClass(EMFOFile.class);
-        configuration.addAnnotatedClass(EMFOFileCategory.class);
-        configuration.addAnnotatedClass(EMFOSystemProperty.class);
+        configuration.addAnnotatedClass(EMFOFilePropertyData.class);
+        configuration.addAnnotatedClass(EMFOVideoFileData.class);
+        configuration.addAnnotatedClass(EMFOAudioFileData.class);
     }
 
     /**

@@ -126,7 +126,7 @@ CREATE TABLE MFO_FILE_FORMAT
 (
     id BINARY(16) NOT NULL,
     code Int NOT NULL AUTO_INCREMENT UNIQUE KEY,
-    file_format Varchar(150) NOT NULL,
+    file_format_name Char(10) NOT NULL,
     file_format_description Varchar(255) NOT NULL,
     note Text,
     raw_create_user_account_id Int NOT NULL DEFAULT '0',
@@ -144,8 +144,8 @@ CREATE TABLE MFO_FILE_FORMAT
     PRIMARY KEY (id)
 );
 
-ALTER TABLE MFO_FILE_FORMAT ADD CONSTRAINT UNK_FILE_FORMAT_A_FILE_CATEGORY_NAME
-    UNIQUE (file_format);
+ALTER TABLE MFO_FILE_FORMAT ADD CONSTRAINT UNK_FILE_FORMAT_A_FILE_FORMAT
+    UNIQUE (file_format_name);
 
 
 DROP TABLE IF EXISTS MFO_FILE_PROPERTY;
@@ -153,7 +153,7 @@ CREATE TABLE MFO_FILE_PROPERTY
 (
     id BINARY(16) NOT NULL,
     code Int NOT NULL AUTO_INCREMENT UNIQUE KEY,
-    file_property Varchar(150) NOT NULL,
+    file_property_name Varchar(150) NOT NULL,
     file_property_description Varchar(255) NOT NULL,
     note Text,
     raw_create_user_account_id Int NOT NULL DEFAULT '0',
@@ -171,8 +171,8 @@ CREATE TABLE MFO_FILE_PROPERTY
     PRIMARY KEY (id)
 );
 
-ALTER TABLE MFO_FILE_PROPERTY ADD CONSTRAINT UNK_FILE_PROPERTY_A_FILE_CATEGORY_NAME
-    UNIQUE (file_property);
+ALTER TABLE MFO_FILE_PROPERTY ADD CONSTRAINT UNK_FILE_PROPERTY_A_FILE_PROPERTY
+    UNIQUE (file_property_name);
 
 DROP TABLE IF EXISTS MFO_FILE_FORMAT_PROPERTY;
 CREATE TABLE MFO_FILE_FORMAT_PROPERTY
@@ -197,8 +197,17 @@ CREATE TABLE MFO_FILE_FORMAT_PROPERTY
     PRIMARY KEY (id)
 );
 
-ALTER TABLE MFO_FILE_PROPERTY ADD CONSTRAINT UNK_FILE_PROPERTY_A_FILE_CATEGORY_NAME
-    UNIQUE (file_property);
+CREATE INDEX IX_FILE_FORMAT_PROPERTY_A_PROPERTY ON MFO_FILE_FORMAT_PROPERTY (file_property_id);
+
+CREATE INDEX IX_FILE_FORMAT_PROPERTY_A_FORMAT ON MFO_FILE_FORMAT_PROPERTY (file_format_id);
+
+ALTER TABLE MFO_FILE_FORMAT_PROPERTY ADD CONSTRAINT FRK_FILE_FORMAT_PROPERTY_A_PROPERTY
+    FOREIGN KEY (file_property_id) REFERENCES FILE_PROPERTY (id)
+        ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE MFO_FILE_FORMAT_PROPERTY ADD CONSTRAINT FRK_FILE_FORMAT_PROPERTY_A_FORMAT
+    FOREIGN KEY (file_format_id) REFERENCES FILE_FORMAT (id)
+        ON DELETE SET NULL ON UPDATE CASCADE;
 
 DROP TABLE IF EXISTS MFO_FILE;
 CREATE TABLE MFO_FILE
@@ -250,7 +259,7 @@ CREATE TABLE MFO_VIDEO_FILE_DATA
     code Int NOT NULL AUTO_INCREMENT UNIQUE KEY,
     note Text,
     video_frame_rate_per_second Decimal(5,2),
-    audio_bit_rate Int,
+    audio_bit_rate_kbps Int,
     video_duration_seconds Int,
     audio_channels Int,
     audio_sampling_rate_hz Int,
@@ -278,19 +287,53 @@ ALTER TABLE MFO_VIDEO_FILE_DATA ADD CONSTRAINT FRK_VIDEO_FILE_DATA_A_FILE
     FOREIGN KEY (file_id) REFERENCES MFO_FILE (id)
         ON DELETE SET NULL ON UPDATE CASCADE;
 
+DROP TABLE IF EXISTS MFO_FILE_PROPERTY_DATA;
+CREATE TABLE MFO_FILE_PROPERTY_DATA
+(
+    id BINARY(16) NOT NULL,
+    code Int NOT NULL AUTO_INCREMENT UNIQUE KEY,
+    note Text,
+    file_property_value Varchar(255),
+    file_property_value_type Varchar(20),
+    raw_create_user_account_id Int NOT NULL DEFAULT '0',
+    raw_last_update_user_account_id Int NOT NULL DEFAULT '0',
+    raw_create_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    raw_last_update_log_id Int NOT NULL DEFAULT '0',
+    raw_show_status Int NOT NULL DEFAULT '0',
+    raw_update_status Int NOT NULL DEFAULT '0',
+    raw_delete_status Int NOT NULL DEFAULT '0',
+    raw_active_status Int NOT NULL DEFAULT '0',
+    extra_01 Text,
+    extra_02 Text,
+    extra_03 Text,
+    file_id BINARY(16),
+    file_property_id BINARY(16),
+    PRIMARY KEY (id)
+);
+
+CREATE INDEX IX_FILE_PROPERTY_DATA_A_FILE ON MFO_FILE_PROPERTY_DATA (file_id);
+
+CREATE INDEX IX_FILE_PROPERTY_DATA_A_FILE ON MFO_FILE_PROPERTY_DATA (file_property_id);
+
+ALTER TABLE MFO_FILE_PROPERTY_DATA ADD CONSTRAINT FRK_FILE_PROPERTY_DATA_A_FILE
+    FOREIGN KEY (file_id) REFERENCES MFO_FILE (id)
+        ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE MFO_FILE_PROPERTY_DATA ADD CONSTRAINT FRK_FILE_PROPERTY_DATA_A_FILE
+    FOREIGN KEY (file_property_id) REFERENCES FILE_PROPERTY (id)
+        ON DELETE SET NULL ON UPDATE CASCADE;
+
 DROP TABLE IF EXISTS MFO_AUDIO_FILE_DATA;
 CREATE TABLE MFO_AUDIO_FILE_DATA
 (
     id BINARY(16) NOT NULL,
     code Int NOT NULL AUTO_INCREMENT UNIQUE KEY,
     note Text,
-    video_frame_rate_per_second Decimal(5,2),
-    audio_bit_rate Int,
-    video_duration_seconds Int,
+    audio_bit_rate_kbps Int,
+    audio_duration_seconds Int,
     audio_channels Int,
     audio_sampling_rate_hz Int,
-    video_resolution_height Int,
-    video_resolution_width Int,
     raw_create_user_account_id Int NOT NULL DEFAULT '0',
     raw_last_update_user_account_id Int NOT NULL DEFAULT '0',
     raw_create_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,

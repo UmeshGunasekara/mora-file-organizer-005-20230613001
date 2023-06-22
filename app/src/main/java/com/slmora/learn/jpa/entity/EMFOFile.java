@@ -8,11 +8,14 @@
 package com.slmora.learn.jpa.entity;
 
 import com.slmora.learn.jpa.entity.common.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -27,6 +30,8 @@ import org.apache.logging.log4j.Logger;
 import java.io.Serial;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  *  This Class created for
@@ -82,4 +87,32 @@ public class EMFOFile extends BaseEntity
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="file_category_id", columnDefinition = "BINARY(16)")
     private EMFOFileCategory fileCategory;
+
+    @OneToMany(
+            mappedBy = "file",
+            cascade = CascadeType.PERSIST,
+            fetch = FetchType.LAZY
+    )
+    private Collection<EMFOFilePropertyData> filePropertyData = new ArrayList();
+
+    @OneToMany(
+            mappedBy = "file",
+            cascade = CascadeType.PERSIST,
+            fetch = FetchType.LAZY
+    )
+    private Collection<EMFOVideoFileData> videoFileData = new ArrayList();
+
+    @OneToMany(
+            mappedBy = "file",
+            cascade = CascadeType.PERSIST,
+            fetch = FetchType.LAZY
+    )
+    private Collection<EMFOAudioFileData> audioFileData = new ArrayList();
+
+    @PreRemove
+    private void preRemove(){
+        filePropertyData.forEach(fileProperty -> fileProperty.setFile(null));
+        videoFileData.forEach(videoFile -> videoFile.setFile(null));
+        audioFileData.forEach(audioFile -> audioFile.setFile(null));
+    }
 }

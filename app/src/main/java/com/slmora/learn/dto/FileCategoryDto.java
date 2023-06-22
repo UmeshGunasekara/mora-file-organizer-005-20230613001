@@ -41,14 +41,14 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
 @EqualsAndHashCode(callSuper=false)
-public class FileCategory extends BaseDto implements IDto<EMFOFileCategory>
+public class FileCategoryDto extends BaseDto implements IDto<EMFOFileCategory>
 {
-    final static Logger LOGGER = LogManager.getLogger(FileCategory.class);
+    final static Logger LOGGER = LogManager.getLogger(FileCategoryDto.class);
 
     private String fileCategoryName;
     private List<FileDto> files;
 
-    public FileCategory(EMFOFileCategory jpaEntityFileCategory){
+    public FileCategoryDto(EMFOFileCategory jpaEntityFileCategory){
         if(jpaEntityFileCategory.getId()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
             this.setId(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityFileCategory.getId()));
