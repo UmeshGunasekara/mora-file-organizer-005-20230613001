@@ -106,6 +106,15 @@ public class EMFOFile extends BaseEntity
     @Column(name = "file_is_system", columnDefinition = "TINYINT(1)")
     private Integer fileIsSystem;
 
+    @Column(name = "file_is_readable", columnDefinition = "TINYINT(1)")
+    private Integer fileIsReadable;
+
+    @Column(name = "file_is_writable", columnDefinition = "TINYINT(1)")
+    private Integer fileIsWritable;
+
+    @Column(name = "file_is_executable", columnDefinition = "TINYINT(1)")
+    private Integer fileIsExecutable;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="directory_id", columnDefinition = "BINARY(16)")
     private EMFODirectory directory;

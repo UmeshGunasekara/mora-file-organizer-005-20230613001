@@ -55,8 +55,8 @@ import java.util.UUID;
 public class MFOFileController {
     final static Logger LOGGER = LogManager.getLogger(MFOFileController.class);
     public void addReadableFile(Path file){
-        if(Files.exists(file)&&Files.isRegularFile(file)){
-            if(Files.isReadable(file)) {
+        if(Files.exists(file)&&Files.isRegularFile(file)&&Files.isReadable(file)){
+//            if(Files.isReadable(file)) {
                 IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
                 IMFOFileCategoryService fileCategoryService = new MFOFileCategoryServiceImpl(new MFOFileCategoryDaoImpl());
                 MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
@@ -133,7 +133,7 @@ public class MFOFileController {
                 LOGGER.error(file.toAbsolutePath().toString()+" Not readable");
             }
 
-        }
+//        }
     }
 
 }

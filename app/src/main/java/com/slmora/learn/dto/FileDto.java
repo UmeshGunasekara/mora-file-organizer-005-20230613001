@@ -62,6 +62,9 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
     private Integer fileIsHidden;
     private Integer fileIsArchive;
     private Integer fileIsSystem;
+    private Integer fileIsReadable;
+    private Integer fileIsWritable;
+    private Integer fileIsExecutable;
     private DirectoryDto directory;
     private FileCategoryDto fileCategory;
 
@@ -107,6 +110,9 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
         this.setFileIsHidden(jpaEntityFile.getFileIsHidden());
         this.setFileIsArchive(jpaEntityFile.getFileIsArchive());
         this.setFileIsSystem(jpaEntityFile.getFileIsSystem());
+        this.setFileIsReadable(jpaEntityFile.getFileIsReadable());
+        this.setFileIsWritable(jpaEntityFile.getFileIsWritable());
+        this.setFileIsExecutable(jpaEntityFile.getFileIsExecutable());
         this.setDirectory(new DirectoryDto(jpaEntityFile.getDirectory()));
         this.setFileCategory(new FileCategoryDto(jpaEntityFile.getFileCategory()));
     }
@@ -169,6 +175,9 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
         jpaEntityFile.setFileIsHidden(this.getFileIsHidden());
         jpaEntityFile.setFileIsArchive(this.getFileIsArchive());
         jpaEntityFile.setFileIsSystem(this.getFileIsSystem());
+        jpaEntityFile.setFileIsReadable(this.getFileIsReadable());
+        jpaEntityFile.setFileIsWritable(this.getFileIsWritable());
+        jpaEntityFile.setFileIsExecutable(this.getFileIsExecutable());
         if(this.getDirectory()!=null){
             jpaEntityFile.setDirectory(this.getDirectory().getEntity());
         }

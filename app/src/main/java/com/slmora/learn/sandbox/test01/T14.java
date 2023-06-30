@@ -3,7 +3,7 @@
  * Language: Java
  * Property of Umesh Gunasekara
  * @Author: SLMORA
- * @DateTime: 6/22/2023 10:46 PM
+ * @DateTime: 6/30/2023 9:53 AM
  */
 package com.slmora.learn.sandbox.test01;
 
@@ -32,10 +32,10 @@ import java.util.HashSet;
  * <blockquote><pre>
  * <br>Version      Date            Editor              Note
  * <br>-------------------------------------------------------
- * <br>1.0          6/22/2023      SLMORA                Initial Code
+ * <br>1.0          6/30/2023      SLMORA                Initial Code
  * </pre></blockquote>
  */
-public class T07 {
+public class T14 {
     public static void main(String[] args)
     {
         String sourcePath = "D:\\MORA\\Video\\TM";
@@ -53,8 +53,9 @@ public class T07 {
                         {
                             System.out.printf("Visiting file %s\n", file);
 //                            LOGGER.info("Visiting file "+file+"\n");
-                            MFOFileController fileController =  new MFOFileController();
-                            fileController.addReadableFile(file);
+                            if(Files.isReadable(file)){
+                                System.out.printf("Read file %s\n", file);
+                            }
                             return FileVisitResult.CONTINUE;
                         }
 
@@ -72,8 +73,6 @@ public class T07 {
                         {
                             System.out.printf("About to visit directory %s\n", dir);
 //                            LOGGER.info("About to visit directory "+dir+"\n");
-                            MFODirectoryController directoryController = new MFODirectoryController();
-                            directoryController.addDirectory(dir);
                             return FileVisitResult.CONTINUE;
                         }
 
