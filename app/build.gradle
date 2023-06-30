@@ -147,6 +147,9 @@ dependencies {
 
 //    Mockito
     testImplementation 'org.mockito:mockito-core:4.8.0'
+
+    // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on
+    implementation group: 'org.bouncycastle', name: 'bcpkix-jdk18on', version: '1.75'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

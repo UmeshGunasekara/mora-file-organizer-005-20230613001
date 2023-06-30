@@ -16,6 +16,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -55,8 +56,13 @@ public class EMFOFileCategory extends BaseEntity
     private static final long serialVersionUID = -6682936022582917L;
 
     @Column(name = "file_category_name")
+    @Size(max = 150)
     @NotNull
     private String fileCategoryName;
+
+    @Column(name = "file_category_description")
+    @Size(max = 255)
+    private String fileCategoryDescription;
 
     @OneToMany(
             mappedBy = "fileCategory",
@@ -65,8 +71,16 @@ public class EMFOFileCategory extends BaseEntity
     )
     private Collection<EMFOFile> files = new ArrayList();
 
+    @OneToMany(
+            mappedBy = "fileCategory",
+            cascade = CascadeType.PERSIST,
+            fetch = FetchType.LAZY
+    )
+    private Collection<EMFOFileFormat> fileFormats = new ArrayList();
+
     @PreRemove
     private void preRemove(){
-        files.forEach(file -> file.setDirectory(null));
+        files.forEach(file -> file.setFileCategory(null));
+        fileFormats.forEach(fileFormat -> fileFormat.setFileCategory(null));
     }
 }

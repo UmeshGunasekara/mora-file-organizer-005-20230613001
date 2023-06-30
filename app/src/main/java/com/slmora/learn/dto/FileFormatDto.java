@@ -45,6 +45,7 @@ public class FileFormatDto extends BaseDto implements IDto<EMFOFileFormat>
 
     private String fileFormatName;
     private String fileFormatDescription;
+    private FileCategoryDto fileCategory;
     private List<FileFormatPropertyDto> fileFormatProperties;
 
     public FileFormatDto(EMFOFileFormat jpaEntityFileFormat){
@@ -73,6 +74,7 @@ public class FileFormatDto extends BaseDto implements IDto<EMFOFileFormat>
 
         this.setFileFormatName(jpaEntityFileFormat.getFileFormatName());
         this.setFileFormatDescription(jpaEntityFileFormat.getFileFormatDescription());
+        this.setFileCategory(new FileCategoryDto(jpaEntityFileFormat.getFileCategory()));
     }
 
     @Override
@@ -105,6 +107,9 @@ public class FileFormatDto extends BaseDto implements IDto<EMFOFileFormat>
 
         jpaEntityFileFormat.setFileFormatName(this.getFileFormatName());
         jpaEntityFileFormat.setFileFormatDescription(this.getFileFormatDescription());
+        if(this.getFileCategory()!=null){
+            jpaEntityFileFormat.setFileCategory(this.getFileCategory().getEntity());
+        }
 //        if(this.getSubDirectories()!=null && !this.getSubDirectories().isEmpty()){
 //            jpaEntityDirectory.setSubDirectories(this.getSubDirectories().stream().map(DirectoryDto::getEntity).toList());
 //        }

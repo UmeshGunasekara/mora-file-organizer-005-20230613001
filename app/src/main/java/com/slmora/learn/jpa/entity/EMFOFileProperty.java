@@ -16,6 +16,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -55,10 +56,12 @@ public class EMFOFileProperty extends BaseEntity
     private static final long serialVersionUID = 4899152973808420775L;
 
     @Column(name = "file_property_name")
+    @Size(max = 150)
     @NotNull
     private String filePropertyName;
 
     @Column(name = "file_property_description")
+    @Size(max = 255)
     private String filePropertyDescription;
 
     @OneToMany(

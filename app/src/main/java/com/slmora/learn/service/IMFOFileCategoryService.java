@@ -46,4 +46,6 @@ public interface IMFOFileCategoryService extends IGenericService<byte[], EMFOFil
     public Optional<byte[]> persistReturnIdMFOFileCategory(EMFOFileCategory fileCategory);
 
     public EMFOFileCategory persistMFOFileCategory(EMFOFileCategory fileCategory);
+
+    public Optional<EMFOFileCategory> getMFOFileCategoryByFileFormatName(String fileFormatName);
 }

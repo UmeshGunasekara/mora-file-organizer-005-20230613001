@@ -20,6 +20,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -62,6 +63,7 @@ public class EMFOFile extends BaseEntity
     private static final long serialVersionUID = 4954906237766057765L;
 
     @Column(name = "file_name")
+    @Size(max = 150)
     @NotNull
     private String fileName;
 
@@ -69,16 +71,40 @@ public class EMFOFile extends BaseEntity
     @NotNull
     private String fileFullPath;
 
+    @Column(name = "file_full_path_sha_256")
+    @Size(max = 150)
+    @NotNull
+    private String fileFullPathSha256;
+
     @Column(name = "file_extension")
     private String fileExtension;
 
-    @Column(name = "file_size_in_mb", precision = 15, scale = 2)
-    private BigDecimal fileSizeInMB;
+    @Column(name = "file_size_in_bytes", precision = 20, scale = 2)
+    private BigDecimal fileSizeInBytes;
 
     @Column(name = "file_created_date_time")
     @Temporal(TemporalType.TIMESTAMP)
-    @NotNull
     private Timestamp fileCreatedDateTime=new Timestamp(System.currentTimeMillis());
+
+    @Column(name = "file_last_modified_date_time")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Timestamp fileLastModifiedDateTime=new Timestamp(System.currentTimeMillis());
+
+    @Column(name = "file_last_access_date_time")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Timestamp fileLastAccessDateTime=new Timestamp(System.currentTimeMillis());
+
+    @Column(name = "file_is_read_only", columnDefinition = "TINYINT(1)")
+    private Integer fileIsReadOnly;
+
+    @Column(name = "file_is_hidden", columnDefinition = "TINYINT(1)")
+    private Integer fileIsHidden;
+
+    @Column(name = "file_is_archive", columnDefinition = "TINYINT(1)")
+    private Integer fileIsArchive;
+
+    @Column(name = "file_is_system", columnDefinition = "TINYINT(1)")
+    private Integer fileIsSystem;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="directory_id", columnDefinition = "BINARY(16)")

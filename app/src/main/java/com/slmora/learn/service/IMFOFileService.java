@@ -9,8 +9,11 @@ package com.slmora.learn.service;
 
 import com.slmora.learn.common.service.IGenericService;
 import com.slmora.learn.dto.FileDto;
+import com.slmora.learn.jpa.entity.EMFODirectory;
 import com.slmora.learn.jpa.entity.EMFOFile;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,4 +51,10 @@ public interface IMFOFileService extends IGenericService<byte[], EMFOFile>
     public EMFOFile persistMFOFile(EMFOFile file);
 
     public Optional<byte[]> persistMFOFile(FileDto fileDto);
+
+    public Optional<EMFOFile> getMFOFileByFileFullPathSha256(String fileFullPathSha256);
+
+    public Optional<EMFOFile> getMFOFileByFileFullPath(String fileFullPath) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException;
 }

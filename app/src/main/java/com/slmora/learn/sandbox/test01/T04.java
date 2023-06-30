@@ -60,7 +60,7 @@ public class T04 {
         file.setFileName("6.mp4");
         file.setFileFullPath("D:\\MORA\\Video\\Java Brains\\Brain Byte\\6.mp4");
         file.setFileExtension("mp4");
-        file.setFileSizeInMB(new BigDecimal(23456.23, MathContext.DECIMAL64));
+        file.setFileSizeInBytes(new BigDecimal(23456.23, MathContext.DECIMAL64));
         file.setFileCreatedDateTime(new Timestamp(System.currentTimeMillis()));
         file.setNote("Test Note 01");
         file.setDirectory(dir);

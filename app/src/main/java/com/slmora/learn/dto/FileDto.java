@@ -7,6 +7,8 @@
  */
 package com.slmora.learn.dto;
 
+import com.slmora.learn.common.cryptography.hmac.util.EHmacAlgorithm;
+import com.slmora.learn.common.cryptography.hmac.util.MoraHMACUtilities;
 import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dto.base.BaseDto;
 import com.slmora.learn.dto.base.IDto;
@@ -15,11 +17,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
@@ -47,10 +52,18 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
 
     private String fileName;
     private String fileFullPath;
+    private String fileFullPathSha256;
     private String fileExtension;
-    private double fileSizeInMB;
+    private Double fileSizeInBytes;
     private LocalDateTime fileCreatedDateTime;
+    private LocalDateTime fileLastModifiedDateTime;
+    private LocalDateTime fileLastAccessDateTime;
+    private Integer fileIsReadOnly;
+    private Integer fileIsHidden;
+    private Integer fileIsArchive;
+    private Integer fileIsSystem;
     private DirectoryDto directory;
+    private FileCategoryDto fileCategory;
 
     public FileDto(EMFOFile jpaEntityFile){
         if(jpaEntityFile.getId()!=null){
@@ -78,12 +91,24 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
 
         this.setFileName(jpaEntityFile.getFileName());
         this.setFileFullPath(jpaEntityFile.getFileFullPath());
+        this.setFileFullPathSha256(jpaEntityFile.getFileFullPathSha256());
         this.setFileExtension(jpaEntityFile.getFileExtension());
-        this.setFileSizeInMB(jpaEntityFile.getFileSizeInMB().doubleValue());
+        this.setFileSizeInBytes(jpaEntityFile.getFileSizeInBytes().doubleValue());
         if(jpaEntityFile.getFileCreatedDateTime()!=null) {
             this.setFileCreatedDateTime(jpaEntityFile.getFileCreatedDateTime().toLocalDateTime());
         }
+        if(jpaEntityFile.getFileLastModifiedDateTime()!=null) {
+            this.setFileLastModifiedDateTime(jpaEntityFile.getFileLastModifiedDateTime().toLocalDateTime());
+        }
+        if(jpaEntityFile.getFileLastAccessDateTime()!=null) {
+            this.setFileLastAccessDateTime(jpaEntityFile.getFileLastAccessDateTime().toLocalDateTime());
+        }
+        this.setFileIsReadOnly(jpaEntityFile.getFileIsReadOnly());
+        this.setFileIsHidden(jpaEntityFile.getFileIsHidden());
+        this.setFileIsArchive(jpaEntityFile.getFileIsArchive());
+        this.setFileIsSystem(jpaEntityFile.getFileIsSystem());
         this.setDirectory(new DirectoryDto(jpaEntityFile.getDirectory()));
+        this.setFileCategory(new FileCategoryDto(jpaEntityFile.getFileCategory()));
     }
 
     @Override
@@ -116,15 +141,47 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
 
         jpaEntityFile.setFileName(this.getFileName());
         jpaEntityFile.setFileFullPath(this.getFileFullPath());
+
+        if(this.getFileFullPathSha256()==null){
+            try {
+                this.setFileFullPathSha256BytFileFullPath();
+            } catch (NoSuchAlgorithmException e) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            } catch (InvalidKeyException e) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            }
+            jpaEntityFile.setFileFullPathSha256(this.getFileFullPathSha256());
+        }else{
+            jpaEntityFile.setFileFullPathSha256(this.getFileFullPathSha256());
+        }
         jpaEntityFile.setFileExtension(this.getFileExtension());
-        jpaEntityFile.setFileSizeInMB(new BigDecimal(this.getFileSizeInMB(), MathContext.DECIMAL64));
+        jpaEntityFile.setFileSizeInBytes(new BigDecimal(this.getFileSizeInBytes(), MathContext.DECIMAL64));
         if(this.getFileCreatedDateTime()!=null) {
             jpaEntityFile.setFileCreatedDateTime(Timestamp.valueOf(this.getFileCreatedDateTime()));
         }
+        if(this.getFileLastModifiedDateTime()!=null) {
+            jpaEntityFile.setFileLastModifiedDateTime(Timestamp.valueOf(this.getFileLastModifiedDateTime()));
+        }
+        if(this.getFileLastAccessDateTime()!=null) {
+            jpaEntityFile.setFileLastAccessDateTime(Timestamp.valueOf(this.getFileLastAccessDateTime()));
+        }
+        jpaEntityFile.setFileIsReadOnly(this.getFileIsReadOnly());
+        jpaEntityFile.setFileIsHidden(this.getFileIsHidden());
+        jpaEntityFile.setFileIsArchive(this.getFileIsArchive());
+        jpaEntityFile.setFileIsSystem(this.getFileIsSystem());
         if(this.getDirectory()!=null){
             jpaEntityFile.setDirectory(this.getDirectory().getEntity());
         }
+        if(this.getFileCategory()!=null){
+            jpaEntityFile.setFileCategory(this.getFileCategory().getEntity());
+        }
 
         return jpaEntityFile;
+    }
+
+    public void setFileFullPathSha256BytFileFullPath() throws NoSuchAlgorithmException, InvalidKeyException
+    {
+        MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
+        this.setFileFullPathSha256(hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(), this.getFileFullPath(), this.getFileName()));
     }
 }

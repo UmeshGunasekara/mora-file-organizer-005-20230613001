@@ -7,6 +7,8 @@
  */
 package com.slmora.learn.service.impl;
 
+import com.slmora.learn.common.cryptography.hmac.util.EHmacAlgorithm;
+import com.slmora.learn.common.cryptography.hmac.util.MoraHMACUtilities;
 import com.slmora.learn.common.dao.IGenericDao;
 import com.slmora.learn.common.service.impl.GenericServiceImpl;
 import com.slmora.learn.dao.IMFODirectoryDao;
@@ -18,6 +20,10 @@ import com.slmora.learn.service.IMFOFileService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -108,5 +114,25 @@ public class MFOFileServiceImpl extends GenericServiceImpl<byte[], EMFOFile> imp
     public Optional<byte[]> persistMFOFile(FileDto fileDto)
     {
         return fileDao.persistReturnIdMFOFile(fileDto.getEntity());
+    }
+
+    @Override
+    public Optional<EMFOFile> getMFOFileByFileFullPathSha256(String fileFullPathSha256)
+    {
+        return fileDao.getMFOFileByFileFullPathSha256(fileFullPathSha256);
+    }
+
+    @Override
+    public Optional<EMFOFile> getMFOFileByFileFullPath(String fileFullPath) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException
+    {
+        MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
+        Path file = Paths.get(fileFullPath);
+        String fileName = file.getFileName().toString();
+        return getMFOFileByFileFullPathSha256(
+                hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+                        EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+                        fileFullPath, fileName));
     }
 }

@@ -12,6 +12,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -49,10 +50,12 @@ public class EMFOSystemProperty extends BaseEntity
     private static final long serialVersionUID = -235997167691675905L;
 
     @Column(name = "system_prop_code")
+    @Size(max = 30)
     @NotNull
     private String systemPropCode;
 
     @Column(name = "system_prop_value")
+    @Size(max = 150)
     @NotNull
     private String systemPropValue;
 
@@ -61,6 +64,6 @@ public class EMFOSystemProperty extends BaseEntity
     private Integer systemPropModifyIND;
 
     @Column(name = "system_prop_value_separator")
-    @NotNull
+    @Size(max = 1)
     private Character systemPropValueSeparator;
 }

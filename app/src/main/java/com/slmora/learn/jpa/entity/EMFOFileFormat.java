@@ -12,10 +12,13 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -55,11 +58,17 @@ public class EMFOFileFormat extends BaseEntity
     private static final long serialVersionUID = -980164999832436355L;
 
     @Column(name = "file_format_name")
+    @Size(max = 10)
     @NotNull
     private String fileFormatName;
 
     @Column(name = "file_format_description")
+    @Size(max = 255)
     private String fileFormatDescription;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="file_category_id", columnDefinition = "BINARY(16)")
+    private EMFOFileCategory fileCategory;
 
     @OneToMany(
             mappedBy = "fileFormat",

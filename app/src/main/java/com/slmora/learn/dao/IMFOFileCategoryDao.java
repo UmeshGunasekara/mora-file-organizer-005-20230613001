@@ -45,4 +45,6 @@ public interface IMFOFileCategoryDao extends IGenericDao<byte[], EMFOFileCategor
     public Optional<byte[]> persistReturnIdMFOFileCategory(EMFOFileCategory fileCategory);
 
     public EMFOFileCategory persistMFOFileCategory(EMFOFileCategory fileCategory);
+
+    public Optional<EMFOFileCategory> getMFOFileCategoryByFileFormatName(String fileFormatName);
 }

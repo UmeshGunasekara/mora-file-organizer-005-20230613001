@@ -7,6 +7,8 @@
  */
 package com.slmora.learn.dto;
 
+import com.slmora.learn.common.cryptography.hmac.util.EHmacAlgorithm;
+import com.slmora.learn.common.cryptography.hmac.util.MoraHMACUtilities;
 import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dto.base.BaseDto;
 import com.slmora.learn.dto.base.IDto;
@@ -15,9 +17,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
@@ -47,6 +52,7 @@ public class DirectoryDto extends BaseDto implements IDto<EMFODirectory>
 
     private String directoryName;
     private String directoryFullPath;
+    private String directoryFullPathSha256;
     private DirectoryDto directoryParent;
     private List<DirectoryDto> subDirectories;
     private List<FileDto> files;
@@ -77,6 +83,7 @@ public class DirectoryDto extends BaseDto implements IDto<EMFODirectory>
 
         this.setDirectoryName(jpaEntityDirectory.getDirectoryName());
         this.setDirectoryFullPath(jpaEntityDirectory.getDirectoryFullPath());
+        this.setDirectoryFullPathSha256(jpaEntityDirectory.getDirectoryFullPathSha256());
         if(jpaEntityDirectory.getDirectoryParent()!=null){
             this.setDirectoryParent(new DirectoryDto(jpaEntityDirectory.getDirectoryParent()));
         }
@@ -119,6 +126,18 @@ public class DirectoryDto extends BaseDto implements IDto<EMFODirectory>
 
         jpaEntityDirectory.setDirectoryName(this.getDirectoryName());
         jpaEntityDirectory.setDirectoryFullPath(this.getDirectoryFullPath());
+        if(this.getDirectoryFullPathSha256()==null){
+            try {
+                this.setDirectoryFullPathSha256BytDirectoryFullPath();
+            } catch (NoSuchAlgorithmException e) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            } catch (InvalidKeyException e) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            }
+            jpaEntityDirectory.setDirectoryFullPathSha256(this.getDirectoryFullPathSha256());
+        }else{
+            jpaEntityDirectory.setDirectoryFullPathSha256(this.getDirectoryFullPathSha256());
+        }
         if(this.getDirectoryParent()!=null){
             jpaEntityDirectory.setDirectoryParent(this.getDirectoryParent().getEntity());
         }
@@ -130,6 +149,12 @@ public class DirectoryDto extends BaseDto implements IDto<EMFODirectory>
 //        }
 
         return jpaEntityDirectory;
+    }
+
+    public void setDirectoryFullPathSha256BytDirectoryFullPath() throws NoSuchAlgorithmException, InvalidKeyException
+    {
+        MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
+        this.setDirectoryFullPathSha256(hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(), this.getDirectoryFullPath(), this.getDirectoryName()));
     }
 
 }

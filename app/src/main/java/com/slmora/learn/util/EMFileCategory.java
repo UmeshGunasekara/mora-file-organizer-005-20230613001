@@ -29,7 +29,8 @@ public enum EMFileCategory
     FILE_CAT_DOC (4, "Document"),
     FILE_CAT_SETUP (5, "Setup"),
     FILE_CAT_PROGRAMMING (6, "Programming"),
-    FILE_CAT_Other (7, "Other");
+    FILE_CAT_COMPRESSED (7, "Compressed"),
+    FILE_CAT_OTHER (8, "Other");
 
     private int fileCategoryCode;
     private String fileCategoryName;

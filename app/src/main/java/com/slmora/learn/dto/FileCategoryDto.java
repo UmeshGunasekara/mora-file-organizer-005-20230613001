@@ -46,7 +46,9 @@ public class FileCategoryDto extends BaseDto implements IDto<EMFOFileCategory>
     final static Logger LOGGER = LogManager.getLogger(FileCategoryDto.class);
 
     private String fileCategoryName;
+    private String fileCategoryDescription;
     private List<FileDto> files;
+    private List<FileDto> fileFormats;
 
     public FileCategoryDto(EMFOFileCategory jpaEntityFileCategory){
         if(jpaEntityFileCategory.getId()!=null){
@@ -73,6 +75,7 @@ public class FileCategoryDto extends BaseDto implements IDto<EMFOFileCategory>
         this.setExtra03(jpaEntityFileCategory.getExtra03());
 
         this.setFileCategoryName(jpaEntityFileCategory.getFileCategoryName());
+        this.setFileCategoryDescription(jpaEntityFileCategory.getFileCategoryDescription());
     }
 
     @Override
@@ -104,6 +107,7 @@ public class FileCategoryDto extends BaseDto implements IDto<EMFOFileCategory>
         jpaEntityFileCategory.setExtra03(this.getExtra03());
 
         jpaEntityFileCategory.setFileCategoryName(this.getFileCategoryName());
+        jpaEntityFileCategory.setFileCategoryDescription(this.getFileCategoryDescription());
 //        if(this.getSubDirectories()!=null && !this.getSubDirectories().isEmpty()){
 //            jpaEntityDirectory.setSubDirectories(this.getSubDirectories().stream().map(DirectoryDto::getEntity).toList());
 //        }

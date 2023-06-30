@@ -8,6 +8,7 @@
 package com.slmora.learn.dao;
 
 import com.slmora.learn.common.dao.IGenericDao;
+import com.slmora.learn.jpa.entity.EMFODirectory;
 import com.slmora.learn.jpa.entity.EMFOFile;
 
 import java.util.List;
@@ -45,4 +46,6 @@ public interface IMFOFileDao extends IGenericDao<byte[], EMFOFile>
     public Optional<byte[]> persistReturnIdMFOFile(EMFOFile file);
 
     public EMFOFile persistMFOFile(EMFOFile file);
+
+    public Optional<EMFOFile> getMFOFileByFileFullPathSha256(String fileFullPathSha256);
 }

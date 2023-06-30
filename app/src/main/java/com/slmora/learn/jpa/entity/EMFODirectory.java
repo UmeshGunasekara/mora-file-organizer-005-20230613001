@@ -14,9 +14,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -48,6 +52,9 @@ import java.util.Collection;
 @EqualsAndHashCode(callSuper=false)
 @Entity
 @Table(name = "MFO_DIRECTORY")
+@NamedQueries({
+        @NamedQuery(name = "EMFODirectory.findByDirectoryFullPath", query = "FROM EMFODirectory WHERE directoryFullPath = :dirFullPath")
+})
 public class EMFODirectory extends BaseEntity
 {
 
@@ -67,10 +74,18 @@ public class EMFODirectory extends BaseEntity
 //    private Integer directoryCode;
 
     @Column(name = "directory_name")
+    @Size(max = 150)
+    @NotNull
     private String directoryName;
 
     @Column(name = "directory_full_path")
+    @NotNull
     private String directoryFullPath;
+
+    @Column(name = "directory_full_path_sha_256")
+    @Size(max = 150)
+    @NotNull
+    private String directoryFullPathSha256;
 
 //    @Column(name = "directory_note")
 //    private String directoryNote;

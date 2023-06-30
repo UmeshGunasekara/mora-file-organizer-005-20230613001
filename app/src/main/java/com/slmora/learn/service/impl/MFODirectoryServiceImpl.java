@@ -7,6 +7,8 @@
  */
 package com.slmora.learn.service.impl;
 
+import com.slmora.learn.common.cryptography.hmac.util.EHmacAlgorithm;
+import com.slmora.learn.common.cryptography.hmac.util.MoraHMACUtilities;
 import com.slmora.learn.common.dao.IGenericDao;
 import com.slmora.learn.common.service.impl.GenericServiceImpl;
 import com.slmora.learn.dao.IMFODirectoryDao;
@@ -19,6 +21,10 @@ import com.slmora.learn.service.IMFOFileService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -125,6 +131,29 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
             fileService.close();
         }
         return Optional.of(eDir.getId());
+    }
+
+    @Override
+    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256(String directoryFullPathSha256)
+    {
+        return directoryDao.getMFODirectoryByDirectoryFullPathSha256(directoryFullPathSha256);
+    }
+
+    @Override
+    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPath(String directoryFullPath) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException
+    {
+        MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
+        Path dir = Paths.get(directoryFullPath);
+        String dirName = dir.toString();
+        if(!dir.toString().equals(dir.getRoot().toString())){
+            dirName = dir.getFileName().toString();
+        }
+        return getMFODirectoryByDirectoryFullPathSha256(
+                hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+                        EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+                        directoryFullPath, dirName));
     }
 
 }

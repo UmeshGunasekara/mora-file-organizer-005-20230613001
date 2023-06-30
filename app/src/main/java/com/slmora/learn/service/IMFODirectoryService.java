@@ -11,6 +11,8 @@ import com.slmora.learn.common.service.IGenericService;
 import com.slmora.learn.dto.DirectoryDto;
 import com.slmora.learn.jpa.entity.EMFODirectory;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -66,5 +68,11 @@ public interface IMFODirectoryService extends IGenericService<byte[], EMFODirect
     public EMFODirectory persistMFODirectory(EMFODirectory directory);
 
     public Optional<byte[]> persistMFODirectory(DirectoryDto directoryDto);
+
+    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256(String directoryFullPathSha256);
+
+    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPath(String directoryFullPath) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException;
 
 }

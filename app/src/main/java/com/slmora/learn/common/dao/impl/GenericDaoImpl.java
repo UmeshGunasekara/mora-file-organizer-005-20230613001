@@ -222,7 +222,7 @@ public abstract class GenericDaoImpl <K extends Serializable, T extends BaseEnti
 //        return t;
         Transaction transaction = null;
         try{
-            transaction=session.beginTransaction();;
+            transaction=session.beginTransaction();
 
             CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
             CriteriaQuery criteriaQuery = criteriaBuilder.createQuery(daoType);

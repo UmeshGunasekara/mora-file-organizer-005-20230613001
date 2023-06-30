@@ -10,10 +10,9 @@ package com.slmora.learn.service.impl;
 import com.slmora.learn.common.dao.IGenericDao;
 import com.slmora.learn.common.service.impl.GenericServiceImpl;
 import com.slmora.learn.dao.IMFOFileCategoryDao;
-import com.slmora.learn.dao.IMFOFileDao;
-import com.slmora.learn.jpa.entity.EMFOFile;
 import com.slmora.learn.jpa.entity.EMFOFileCategory;
 import com.slmora.learn.service.IMFOFileCategoryService;
+import com.slmora.learn.util.EMFileCategory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,15 +34,15 @@ import java.util.UUID;
  * <br>1.0          6/20/2023      SLMORA                Initial Code
  * </pre></blockquote>
  */
-public class IMFOFileCategoryServiceImpl extends GenericServiceImpl<byte[], EMFOFileCategory> implements IMFOFileCategoryService
+public class MFOFileCategoryServiceImpl extends GenericServiceImpl<byte[], EMFOFileCategory> implements IMFOFileCategoryService
 {
-    final static Logger LOGGER = LogManager.getLogger(IMFOFileCategoryServiceImpl.class);
+    final static Logger LOGGER = LogManager.getLogger(MFOFileCategoryServiceImpl.class);
 
     private IMFOFileCategoryDao fileCategoryDao;
 
-    public IMFOFileCategoryServiceImpl() {}
+    public MFOFileCategoryServiceImpl() {}
 
-    public IMFOFileCategoryServiceImpl(IGenericDao<byte[], EMFOFileCategory> fileCategoryGenericDao) {
+    public MFOFileCategoryServiceImpl(IGenericDao<byte[], EMFOFileCategory> fileCategoryGenericDao) {
         super(fileCategoryGenericDao);
         fileCategoryDao = (IMFOFileCategoryDao) fileCategoryGenericDao;
     }
@@ -94,5 +93,15 @@ public class IMFOFileCategoryServiceImpl extends GenericServiceImpl<byte[], EMFO
     public EMFOFileCategory persistMFOFileCategory(EMFOFileCategory fileCategory)
     {
         return fileCategoryDao.persistMFOFileCategory(fileCategory);
+    }
+
+    @Override
+    public Optional<EMFOFileCategory> getMFOFileCategoryByFileFormatName(String fileFormatName)
+    {
+        Optional<EMFOFileCategory> opEFileCategory =  fileCategoryDao.getMFOFileCategoryByFileFormatName(fileFormatName);
+        if(!opEFileCategory.isPresent()){
+            return fileCategoryDao.getMFOFileCategoryByCode(EMFileCategory.FILE_CAT_OTHER.getFileCategoryCode());
+        }
+        return opEFileCategory;
     }
 }
