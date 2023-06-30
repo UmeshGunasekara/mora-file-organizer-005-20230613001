@@ -57,7 +57,7 @@ public class EMFOVideoFileData extends BaseEntity
     @Serial
     private static final long serialVersionUID = -8078770271321169417L;
 
-    @Column(name = "video_frame_rate_per_second", precision = 5, scale = 2)
+    @Column(name = "video_frame_rate_per_second", precision = 10, scale = 2)
     private BigDecimal videoFrameRatePerSecond;
 
     @Column(name = "audio_bit_rate_kbps")
@@ -77,6 +77,9 @@ public class EMFOVideoFileData extends BaseEntity
 
     @Column(name = "video_resolution_width")
     private Integer videoResolutionWidth;
+
+    @Column(name = "video_resolution_type")
+    private String videoResolutionType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="file_id", columnDefinition = "BINARY(16)")

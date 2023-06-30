@@ -17,16 +17,24 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.DosFileAttributes;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 /**
  *  This Class created for
@@ -67,12 +75,33 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
     private Integer fileIsExecutable;
     private DirectoryDto directory;
     private FileCategoryDto fileCategory;
+    private Path filePath;
+
+    public FileDto(Path file) throws NoSuchAlgorithmException, InvalidKeyException, IOException
+    {
+        this.setFilePath(file);
+
+        this.setFileName(file.getFileName().toString());
+        this.setFileFullPath(file.toAbsolutePath().toString());
+        this.setFileExtension(FilenameUtils.getExtension(this.getFileName()));
+        this.setFileFullPathSha256BytFileFullPath();
+        setBasicFileAttributes(file);
+        setDosFileAttributes(file);
+        setFileAccessAttributes(file);
+
+    }
+
+    public FileDto(String filePath) throws NoSuchAlgorithmException, IOException, InvalidKeyException
+    {
+        this(Paths.get(filePath));
+    }
 
     public FileDto(EMFOFile jpaEntityFile){
         if(jpaEntityFile.getId()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
             this.setId(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityFile.getId()));
         }
+        this.setFilePath(Paths.get(jpaEntityFile.getFileFullPath()));
         this.setCode(jpaEntityFile.getCode());
         this.setNote(jpaEntityFile.getNote());
         this.setRawCreateUserAccountId(jpaEntityFile.getRawCreateUserAccountId());
@@ -192,5 +221,35 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
     {
         MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
         this.setFileFullPathSha256(hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(), this.getFileFullPath(), this.getFileName()));
+    }
+
+    private void setDosFileAttributes(Path file) throws IOException
+    {
+        DosFileAttributes dosAttr = Files.readAttributes(file, DosFileAttributes.class);
+        this.setFileIsReadOnly(dosAttr.isReadOnly() ? 1 : 0);
+        this.setFileIsHidden(dosAttr.isHidden() ? 1 : 0);
+        this.setFileIsArchive(dosAttr.isArchive() ? 1 : 0);
+        this.setFileIsSystem(dosAttr.isSystem() ? 1 : 0);
+    }
+
+    private void setBasicFileAttributes(Path file) throws IOException
+    {
+        //https://docs.oracle.com/javase/tutorial/essential/io/fileAttr.html
+        BasicFileAttributes basicAttr = Files.readAttributes(file, BasicFileAttributes.class);
+        Long fileSize = basicAttr.size();
+        this.setFileSizeInBytes(fileSize.doubleValue());
+        this.setFileCreatedDateTime(LocalDateTime.ofInstant(basicAttr.creationTime().toInstant(),
+                ZoneId.systemDefault()));
+        this.setFileLastModifiedDateTime(LocalDateTime.ofInstant(basicAttr.lastModifiedTime()
+                .toInstant(), ZoneId.systemDefault()));
+        this.setFileLastAccessDateTime(LocalDateTime.ofInstant(basicAttr.lastAccessTime().toInstant(),
+                ZoneId.systemDefault()));
+    }
+
+    private void setFileAccessAttributes(Path file) throws IOException
+    {
+        this.setFileIsReadable(Files.isReadable(file) ? 1 : 0);
+        this.setFileIsWritable(Files.isWritable(file) ? 1 : 0);
+        this.setFileIsExecutable(Files.isExecutable(file) ? 1 : 0);
     }
 }

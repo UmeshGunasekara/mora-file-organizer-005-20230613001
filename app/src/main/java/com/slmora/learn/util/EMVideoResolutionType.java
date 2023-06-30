@@ -7,6 +7,8 @@
  */
 package com.slmora.learn.util;
 
+import java.util.stream.Stream;
+
 /**
  * This Enum created for
  * <ul>
@@ -30,7 +32,8 @@ public enum EMVideoResolutionType
     FILE_RES_QHD (4, "QHD (Quad HD)", "1440p", 1440, 2560),
     FILE_RES_2K (5, "2K video", "2K", 1080, 2048),
     FILE_RES_4K (6, "4K video or Ultra HD (UHD)", "4K", 2160, 3840),
-    ILE_RES_8K (7, "8K video or Full Ultra HD", "8K", 4320, 7680);
+    ILE_RES_8K (7, "8K video or Full Ultra HD", "8K", 4320, 7680),
+    ILE_RES_OTHER (8, "OtherResolution Type", "Other", 1, 1);
 
     private int resolutionCode;
     private String resolutionTypeDescription;
@@ -69,5 +72,9 @@ public enum EMVideoResolutionType
     public int getResolutionWidth()
     {
         return this.resolutionWidth;
+    }
+
+    public static Stream<EMVideoResolutionType> stream() {
+        return Stream.of(EMVideoResolutionType.values());
     }
 }

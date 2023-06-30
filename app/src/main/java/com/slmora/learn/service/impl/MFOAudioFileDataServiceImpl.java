@@ -11,6 +11,7 @@ import com.slmora.learn.common.dao.IGenericDao;
 import com.slmora.learn.common.service.impl.GenericServiceImpl;
 import com.slmora.learn.dao.IMFOAudioFileDataDao;
 import com.slmora.learn.jpa.entity.EMFOAudioFileData;
+import com.slmora.learn.service.IMFOAudioFileDataService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,7 +34,7 @@ import java.util.UUID;
  * </pre></blockquote>
  */
 public class MFOAudioFileDataServiceImpl extends GenericServiceImpl<byte[], EMFOAudioFileData> implements
-        IMFOAudioFileDataDao
+        IMFOAudioFileDataService
 {
     final static Logger LOGGER = LogManager.getLogger(MFOFileServiceImpl.class);
 

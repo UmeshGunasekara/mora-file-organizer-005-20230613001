@@ -26,6 +26,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,85 +56,97 @@ import java.util.UUID;
 public class MFOFileController {
     final static Logger LOGGER = LogManager.getLogger(MFOFileController.class);
     public void addReadableFile(Path file){
-        if(Files.exists(file)&&Files.isRegularFile(file)&&Files.isReadable(file)){
-//            if(Files.isReadable(file)) {
-                IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
-                IMFOFileCategoryService fileCategoryService = new MFOFileCategoryServiceImpl(new MFOFileCategoryDaoImpl());
-                MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
+        IMFOFileCategoryService fileCategoryService = new MFOFileCategoryServiceImpl(new MFOFileCategoryDaoImpl());
+        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
 
-                IMFOFileService fileService = new MFOFileServiceImpl(new MFOFileDaoImpl());
-                FileDto fileDto = new FileDto();
-
-                try {
-                    //https://docs.oracle.com/javase/tutorial/essential/io/fileAttr.html
-                    BasicFileAttributes basicAttr = Files.readAttributes(file, BasicFileAttributes.class);
-                    fileDto.setFileName(file.getFileName().toString());
-                    fileDto.setFileFullPath(file.toAbsolutePath().toString());
-                    Long fileSize = basicAttr.size();
-                    fileDto.setFileSizeInBytes(fileSize.doubleValue());
-                    fileDto.setFileCreatedDateTime(LocalDateTime.ofInstant(basicAttr.creationTime().toInstant(),
-                            ZoneId.systemDefault()));
-                    fileDto.setFileLastModifiedDateTime(LocalDateTime.ofInstant(basicAttr.lastModifiedTime()
-                            .toInstant(), ZoneId.systemDefault()));
-                    fileDto.setFileLastAccessDateTime(LocalDateTime.ofInstant(basicAttr.lastAccessTime().toInstant(),
-                            ZoneId.systemDefault()));
-
-                    DosFileAttributes dosAttr = Files.readAttributes(file, DosFileAttributes.class);
-                    fileDto.setFileIsReadOnly(dosAttr.isReadOnly() ? 1 : 0);
-                    fileDto.setFileIsHidden(dosAttr.isHidden() ? 1 : 0);
-                    fileDto.setFileIsArchive(dosAttr.isArchive() ? 1 : 0);
-                    fileDto.setFileIsSystem(dosAttr.isSystem() ? 1 : 0);
-
-                    fileDto.setFileExtension(FilenameUtils.getExtension(fileDto.getFileName()));
-
-                    EMFOFile eFile = fileDto.getEntity();
-                    Path parentDir = file.getParent();
-                    if (parentDir != null && parentDir.toFile().isDirectory()) {
-                        Optional<EMFODirectory> opEntityDir = dirService.getMFODirectoryByDirectoryFullPath(parentDir.toAbsolutePath()
-                                .toString());
-
-                        if (opEntityDir.isPresent()) {
-                            eFile.setDirectory(opEntityDir.get());
-                        }
-                    }
-
-                    eFile.setFileCategory(fileCategoryService.getMFOFileCategoryByFileFormatName(fileDto.getFileExtension())
-                            .get());
-
-                    eFile = fileService.persistMFOFile(eFile);
-
-                    UUID uuid = uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eFile.getId());
-                    LOGGER.info("Added File " + file.toAbsolutePath()
-                            .toString() + " with UUID : " + uuid.toString());
-                    System.out.println("Added File " + file.toAbsolutePath()
-                            .toString() + " with UUID : " + uuid.toString());
-
-                    if(eFile.getFileCategory().getCode().equals(EMFileCategory.FILE_CAT_VIDEO.getFileCategoryCode())){
-                        MFOVideoFileDataController videoFileDataController = new MFOVideoFileDataController();
-                        videoFileDataController.addVideoFileDate(eFile);
-                    }
-
-                    if(eFile.getFileCategory().getCode().equals(EMFileCategory.FILE_CAT_AUDIO.getFileCategoryCode())){
-                        MFOAudioFileDataController audioFileDataController = new MFOAudioFileDataController();
-                        audioFileDataController.addAudioFileDate(eFile);
-                    }
+        IMFOFileService fileService = new MFOFileServiceImpl(new MFOFileDaoImpl());
 
 
-                } catch (IOException e) {
-                    LOGGER.error(ExceptionUtils.getStackTrace(e));
-                } catch (NoSuchAlgorithmException e) {
-                    LOGGER.error(ExceptionUtils.getStackTrace(e));
-                } catch (InvalidKeyException e) {
-                    LOGGER.error(ExceptionUtils.getStackTrace(e));
-                } finally {
-                    dirService.close();
+        try {
+            FileDto fileDto = new FileDto(file);
+//            fileDto.setFileName(file.getFileName().toString());
+//            fileDto.setFileFullPath(file.toAbsolutePath().toString());
+//
+//            setBasicFileAttributes(file, fileDto);
+//            setDosFileAttributes(file, fileDto);
+//            setFileAccessAttributes(file,fileDto);
+//            fileDto.setFileExtension(FilenameUtils.getExtension(fileDto.getFileName()));
+
+
+            EMFOFile eFile = fileDto.getEntity();
+            Path parentDir = file.getParent();
+            if (parentDir != null && parentDir.toFile().isDirectory()) {
+                Optional<EMFODirectory> opEntityDir = dirService.getMFODirectoryByDirectoryFullPath(parentDir.toAbsolutePath()
+                        .toString());
+
+                if (opEntityDir.isPresent()) {
+                    eFile.setDirectory(opEntityDir.get());
                 }
-
-            }else {
-                LOGGER.error(file.toAbsolutePath().toString()+" Not readable");
             }
 
-//        }
+            eFile.setFileCategory(fileCategoryService.getMFOFileCategoryByFileFormatName(fileDto.getFileExtension())
+                    .get());
+
+            eFile = fileService.persistMFOFile(eFile);
+
+            UUID uuid = uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eFile.getId());
+            LOGGER.info("Added File " + file.toAbsolutePath()
+                    .toString() + " with UUID : " + uuid.toString());
+            System.out.println("Added File " + file.toAbsolutePath()
+                    .toString() + " with UUID : " + uuid.toString());
+
+            if(eFile.getFileCategory().getCode().equals(EMFileCategory.FILE_CAT_VIDEO.getFileCategoryCode())){
+                MFOVideoFileDataController videoFileDataController = new MFOVideoFileDataController();
+                videoFileDataController.addVideoFileDate(eFile);
+            }
+
+            if(eFile.getFileCategory().getCode().equals(EMFileCategory.FILE_CAT_AUDIO.getFileCategoryCode())){
+                MFOAudioFileDataController audioFileDataController = new MFOAudioFileDataController();
+                audioFileDataController.addAudioFileDate(eFile);
+            }
+
+
+        } catch (IOException e) {
+            LOGGER.error(ExceptionUtils.getStackTrace(e));
+        } catch (NoSuchAlgorithmException e) {
+            LOGGER.error(ExceptionUtils.getStackTrace(e));
+        } catch (InvalidKeyException e) {
+            LOGGER.error(ExceptionUtils.getStackTrace(e));
+        } finally {
+            dirService.close();
+        }
+
+    }
+
+    private void setDosFileAttributes(Path file, FileDto fileDto) throws IOException
+    {
+        DosFileAttributes dosAttr = Files.readAttributes(file, DosFileAttributes.class);
+        fileDto.setFileIsReadOnly(dosAttr.isReadOnly() ? 1 : 0);
+        fileDto.setFileIsHidden(dosAttr.isHidden() ? 1 : 0);
+        fileDto.setFileIsArchive(dosAttr.isArchive() ? 1 : 0);
+        fileDto.setFileIsSystem(dosAttr.isSystem() ? 1 : 0);
+    }
+
+    private void setBasicFileAttributes(Path file, FileDto fileDto) throws IOException
+    {
+        //https://docs.oracle.com/javase/tutorial/essential/io/fileAttr.html
+        BasicFileAttributes basicAttr = Files.readAttributes(file, BasicFileAttributes.class);
+        Long fileSize = basicAttr.size();
+        fileDto.setFileSizeInBytes(fileSize.doubleValue());
+        fileDto.setFileCreatedDateTime(LocalDateTime.ofInstant(basicAttr.creationTime().toInstant(),
+                ZoneId.systemDefault()));
+        fileDto.setFileLastModifiedDateTime(LocalDateTime.ofInstant(basicAttr.lastModifiedTime()
+                .toInstant(), ZoneId.systemDefault()));
+        fileDto.setFileLastAccessDateTime(LocalDateTime.ofInstant(basicAttr.lastAccessTime().toInstant(),
+                ZoneId.systemDefault()));
+    }
+
+    private void setFileAccessAttributes(Path file, FileDto fileDto) throws IOException
+    {
+        fileDto.setFileIsReadable(Files.isReadable(file) ? 1 : 0);
+        fileDto.setFileIsWritable(Files.isWritable(file) ? 1 : 0);
+        fileDto.setFileIsExecutable(Files.isExecutable(file) ? 1 : 0);
     }
 
 }

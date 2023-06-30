@@ -53,6 +53,7 @@ public class VideoFileDataDto extends BaseDto implements IDto<EMFOVideoFileData>
     private Integer audioSamplingRateHz;
     private Integer videoResolutionHeight;
     private Integer videoResolutionWidth;
+    private String videoResolutionType;
     private FileDto file;
 
     public VideoFileDataDto(EMFOVideoFileData jpaEntityVideoFileData){
@@ -86,6 +87,7 @@ public class VideoFileDataDto extends BaseDto implements IDto<EMFOVideoFileData>
         this.setAudioSamplingRateHz(jpaEntityVideoFileData.getAudioSamplingRateHz());
         this.setVideoResolutionHeight(jpaEntityVideoFileData.getVideoResolutionHeight());
         this.setVideoResolutionWidth(jpaEntityVideoFileData.getVideoResolutionWidth());
+        this.setVideoResolutionType(jpaEntityVideoFileData.getVideoResolutionType());
         this.setFile(new FileDto(jpaEntityVideoFileData.getFile()));
     }
 
@@ -124,6 +126,7 @@ public class VideoFileDataDto extends BaseDto implements IDto<EMFOVideoFileData>
         jpaEntityVideoFileData.setAudioSamplingRateHz(this.getAudioSamplingRateHz());
         jpaEntityVideoFileData.setVideoResolutionHeight(this.getVideoResolutionHeight());
         jpaEntityVideoFileData.setVideoResolutionWidth(this.getVideoResolutionWidth());
+        jpaEntityVideoFileData.setVideoResolutionType(this.getVideoResolutionType());
         if(this.getFile()!=null){
             jpaEntityVideoFileData.setFile(this.getFile().getEntity());
         }

@@ -38,7 +38,7 @@ import java.util.HashSet;
 public class T07 {
     public static void main(String[] args)
     {
-        String sourcePath = "D:\\MORA\\Video\\TM";
+        String sourcePath = "D:\\MORA\\Video";
 
         try{
             Files.walkFileTree(Paths.get(sourcePath),
