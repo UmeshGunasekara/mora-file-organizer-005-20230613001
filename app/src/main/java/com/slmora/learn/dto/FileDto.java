@@ -35,6 +35,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 
 /**
  *  This Class created for
@@ -73,9 +74,16 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
     private Integer fileIsReadable;
     private Integer fileIsWritable;
     private Integer fileIsExecutable;
+    private Integer fileIsZip=0;
     private DirectoryDto directory;
     private FileCategoryDto fileCategory;
     private Path filePath;
+
+    private List<FilePropertyDataDto> filePropertyData;
+    private List<VideoFileDataDto> videoFileData;
+    private List<AudioFileDataDto> audioFileData;
+    private List<ZipDirectoryFileDto> zipDirectoryFile;
+    private List<FileDto> subZipFiles;
 
     public FileDto(Path file) throws NoSuchAlgorithmException, InvalidKeyException, IOException
     {
@@ -85,6 +93,22 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
         this.setFileFullPath(file.toAbsolutePath().toString());
         this.setFileExtension(FilenameUtils.getExtension(this.getFileName()));
         this.setFileFullPathSha256BytFileFullPath();
+        this.setFileIsZip(0);
+        setBasicFileAttributes(file);
+        setDosFileAttributes(file);
+        setFileAccessAttributes(file);
+
+    }
+
+    public FileDto(Path file, Path dbFile, Integer zipFileLevel) throws NoSuchAlgorithmException, InvalidKeyException, IOException
+    {
+        this.setFilePath(dbFile);
+
+        this.setFileName(dbFile.getFileName().toString());
+        this.setFileFullPath(dbFile.toAbsolutePath().toString());
+        this.setFileExtension(FilenameUtils.getExtension(this.getFileName()));
+        this.setFileFullPathSha256BytFileFullPath();
+        this.setFileIsZip(zipFileLevel);
         setBasicFileAttributes(file);
         setDosFileAttributes(file);
         setFileAccessAttributes(file);
@@ -142,6 +166,7 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
         this.setFileIsReadable(jpaEntityFile.getFileIsReadable());
         this.setFileIsWritable(jpaEntityFile.getFileIsWritable());
         this.setFileIsExecutable(jpaEntityFile.getFileIsExecutable());
+        this.setFileIsZip(jpaEntityFile.getFileIsZip());
         this.setDirectory(new DirectoryDto(jpaEntityFile.getDirectory()));
         this.setFileCategory(new FileCategoryDto(jpaEntityFile.getFileCategory()));
     }
@@ -207,6 +232,7 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
         jpaEntityFile.setFileIsReadable(this.getFileIsReadable());
         jpaEntityFile.setFileIsWritable(this.getFileIsWritable());
         jpaEntityFile.setFileIsExecutable(this.getFileIsExecutable());
+        jpaEntityFile.setFileIsZip(this.getFileIsZip());
         if(this.getDirectory()!=null){
             jpaEntityFile.setDirectory(this.getDirectory().getEntity());
         }

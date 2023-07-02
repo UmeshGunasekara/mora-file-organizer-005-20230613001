@@ -53,9 +53,11 @@ public class DirectoryDto extends BaseDto implements IDto<EMFODirectory>
     private String directoryName;
     private String directoryFullPath;
     private String directoryFullPathSha256;
+    private Integer directoryIsZip=0;
     private DirectoryDto directoryParent;
     private List<DirectoryDto> subDirectories;
     private List<FileDto> files;
+    private List<FileDto> zipDirectoryFile;
 
     public DirectoryDto(EMFODirectory jpaEntityDirectory){
         if(jpaEntityDirectory.getId()!=null){
@@ -84,6 +86,7 @@ public class DirectoryDto extends BaseDto implements IDto<EMFODirectory>
         this.setDirectoryName(jpaEntityDirectory.getDirectoryName());
         this.setDirectoryFullPath(jpaEntityDirectory.getDirectoryFullPath());
         this.setDirectoryFullPathSha256(jpaEntityDirectory.getDirectoryFullPathSha256());
+        this.setDirectoryIsZip(jpaEntityDirectory.getDirectoryIsZip());
         if(jpaEntityDirectory.getDirectoryParent()!=null){
             this.setDirectoryParent(new DirectoryDto(jpaEntityDirectory.getDirectoryParent()));
         }
@@ -138,6 +141,7 @@ public class DirectoryDto extends BaseDto implements IDto<EMFODirectory>
         }else{
             jpaEntityDirectory.setDirectoryFullPathSha256(this.getDirectoryFullPathSha256());
         }
+        jpaEntityDirectory.setDirectoryIsZip(this.getDirectoryIsZip());
         if(this.getDirectoryParent()!=null){
             jpaEntityDirectory.setDirectoryParent(this.getDirectoryParent().getEntity());
         }

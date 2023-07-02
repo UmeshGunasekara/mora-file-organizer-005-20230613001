@@ -41,7 +41,7 @@ public class T09 {
         MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
         Optional<EMFODirectory> opEntityDir = null;
         try {
-            opEntityDir = dirService.getMFODirectoryByDirectoryFullPath(dir.toAbsolutePath().toString());
+            opEntityDir = dirService.getMFODirectoryByDirectoryFullPathAndZipLevel(dir.toAbsolutePath().toString(),0);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         } catch (InvalidKeyException e) {

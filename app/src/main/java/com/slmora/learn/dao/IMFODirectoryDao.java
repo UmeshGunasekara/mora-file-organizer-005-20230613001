@@ -46,5 +46,5 @@ public interface IMFODirectoryDao extends IGenericDao<byte[], EMFODirectory>
 
     public EMFODirectory persistMFODirectory(EMFODirectory directory);
 
-    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256(String directoryFullPathSha256);
+    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256AndZipLevel(String directoryFullPathSha256, Integer zipLevel);
 }

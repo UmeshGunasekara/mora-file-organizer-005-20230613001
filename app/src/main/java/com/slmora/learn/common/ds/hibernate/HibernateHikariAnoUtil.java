@@ -18,6 +18,7 @@ import com.slmora.learn.jpa.entity.EMFOFileProperty;
 import com.slmora.learn.jpa.entity.EMFOFilePropertyData;
 import com.slmora.learn.jpa.entity.EMFOSystemProperty;
 import com.slmora.learn.jpa.entity.EMFOVideoFileData;
+import com.slmora.learn.jpa.entity.EMFOZipDirectoryFile;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -157,6 +158,7 @@ public class HibernateHikariAnoUtil {
         configuration.addAnnotatedClass(EMFOFilePropertyData.class);
         configuration.addAnnotatedClass(EMFOVideoFileData.class);
         configuration.addAnnotatedClass(EMFOAudioFileData.class);
+        configuration.addAnnotatedClass(EMFOZipDirectoryFile.class);
     }
 
     /**

@@ -115,6 +115,6 @@ public class FilePropertyDataDto extends BaseDto implements IDto<EMFOFilePropert
         if(this.getFileProperty()!=null){
             jpaEntityFilePropertyData.setFileProperty(this.getFileProperty().getEntity());
         }
-        return null;
+        return jpaEntityFilePropertyData;
     }
 }

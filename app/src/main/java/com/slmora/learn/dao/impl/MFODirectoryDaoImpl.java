@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -138,7 +139,7 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
     }
 
     @Override
-    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256(String directoryFullPathSha256)
+    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256AndZipLevel(String directoryFullPathSha256, Integer zipLevel)
     {
         Transaction transaction = null;
         try{
@@ -150,8 +151,10 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
             Root<EMFODirectory> root = criteriaQuery.from(EMFODirectory.class);
             criteriaQuery.select(root);
 
-            Predicate predicate = criteriaBuilder.like(root.get("directoryFullPathSha256"), directoryFullPathSha256);
-            criteriaQuery.where(predicate);
+            Predicate zipPredicate = criteriaBuilder.equal(root.get("directoryIsZip"), zipLevel);
+            Predicate sha256Predicate = criteriaBuilder.equal(root.get("directoryFullPathSha256"), directoryFullPathSha256);
+            Predicate finalPredicate = criteriaBuilder.and(zipPredicate,sha256Predicate);
+            criteriaQuery.where(finalPredicate);
 
             TypedQuery<EMFODirectory> typedQuery = session.createQuery(criteriaQuery);
             EMFODirectory dir = typedQuery.getSingleResult();

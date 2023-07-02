@@ -49,11 +49,20 @@ public class MFOVideoFileDataController {
     final static Logger LOGGER = LogManager.getLogger(MFOVideoFileDataController.class);
 
     public void addVideoFileDate(EMFOFile eFile){
+        File source = new File(eFile.getFileFullPath());
+        addVideoFileDate(eFile,source);
+    }
+
+    public void addVideoFileDate(EMFOFile eFile, Path file){
+        File source = file.toFile();
+        addVideoFileDate(eFile, source);
+    }
+
+    public void addVideoFileDate(EMFOFile eFile, File source){
         IMFOVideoFileDataService videoFileDataService = new MFOVideoFileDataServiceImpl(new MFOVideoFileDataDaoImpl());
         MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
 
         FileDto fileDto = new FileDto(eFile);
-        File source = fileDto.getFilePath().toFile();
         Encoder encoder = new Encoder();
 
         try {
@@ -91,8 +100,10 @@ public class MFOVideoFileDataController {
             System.out.println("Added Video File " + fileDto.getFilePath() + " with UUID : " + uuid.toString());
 
         } catch (InputFormatException e) {
+            LOGGER.error("Error with source : "+source);
             LOGGER.error(ExceptionUtils.getStackTrace(e));
         } catch (EncoderException e) {
+            LOGGER.error("Error with source : "+source);
             LOGGER.error(ExceptionUtils.getStackTrace(e));
         }finally {
             videoFileDataService.close();

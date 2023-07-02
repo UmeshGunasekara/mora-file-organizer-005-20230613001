@@ -69,9 +69,9 @@ public interface IMFODirectoryService extends IGenericService<byte[], EMFODirect
 
     public Optional<byte[]> persistMFODirectory(DirectoryDto directoryDto);
 
-    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256(String directoryFullPathSha256);
+    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256AndZipLevel(String directoryFullPathSha256, Integer zipLevel);
 
-    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPath(String directoryFullPath) throws
+    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathAndZipLevel(String directoryFullPath, Integer zipLevel) throws
             NoSuchAlgorithmException,
             InvalidKeyException;
 

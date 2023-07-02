@@ -115,6 +115,10 @@ public class EMFOFile extends BaseEntity
     @Column(name = "file_is_executable", columnDefinition = "TINYINT(1)")
     private Integer fileIsExecutable;
 
+    @Column(name = "file_is_zip", columnDefinition = "TINYINT default '0'")
+    @NotNull
+    private Integer fileIsZip=0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="directory_id", columnDefinition = "BINARY(16)")
     private EMFODirectory directory;
@@ -122,6 +126,10 @@ public class EMFOFile extends BaseEntity
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="file_category_id", columnDefinition = "BINARY(16)")
     private EMFOFileCategory fileCategory;
+
+    @ManyToOne
+    @JoinColumn(name="file_zip_parent_id", columnDefinition = "BINARY(16)")
+    private EMFOFile fileZipParent;
 
     @OneToMany(
             mappedBy = "file",
@@ -144,10 +152,25 @@ public class EMFOFile extends BaseEntity
     )
     private Collection<EMFOAudioFileData> audioFileData = new ArrayList();
 
+    @OneToMany(
+            mappedBy = "file",
+            cascade = CascadeType.PERSIST,
+            fetch = FetchType.LAZY
+    )
+    private Collection<EMFOZipDirectoryFile> zipDirectoryFile = new ArrayList();
+
+    @OneToMany(
+            mappedBy = "fileZipParent",
+            cascade = CascadeType.PERSIST
+    )
+    private Collection<EMFOFile> subZipFiles = new ArrayList();
+
     @PreRemove
     private void preRemove(){
         filePropertyData.forEach(fileProperty -> fileProperty.setFile(null));
         videoFileData.forEach(videoFile -> videoFile.setFile(null));
         audioFileData.forEach(audioFile -> audioFile.setFile(null));
+        zipDirectoryFile.forEach(zipDirFile -> zipDirFile.setFile(null));
+        subZipFiles.forEach(file -> file.setFileZipParent(null));
     }
 }

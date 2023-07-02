@@ -87,6 +87,10 @@ public class EMFODirectory extends BaseEntity
     @NotNull
     private String directoryFullPathSha256;
 
+    @Column(name = "directory_is_zip", columnDefinition = "TINYINT default '0'")
+    @NotNull
+    private Integer directoryIsZip=0;
+
 //    @Column(name = "directory_note")
 //    private String directoryNote;
 //
@@ -154,6 +158,13 @@ public class EMFODirectory extends BaseEntity
     )
     private Collection<EMFOFile> files = new ArrayList();
 
+    @OneToMany(
+            mappedBy = "directory",
+            cascade = CascadeType.PERSIST,
+            fetch = FetchType.LAZY
+    )
+    private Collection<EMFOZipDirectoryFile> zipDirectoryFile = new ArrayList();
+
     /**
      * Apply ON DELETE SET NULL constrain on the Entity
      * @since                                   1.0
@@ -162,6 +173,7 @@ public class EMFODirectory extends BaseEntity
     private void preRemove(){
         subDirectories.forEach(dir -> dir.setDirectoryParent(null));
         files.forEach(file -> file.setDirectory(null));
+        zipDirectoryFile.forEach(zipDirFile -> zipDirFile.setDirectory(null));
     }
 
 //    /**

@@ -134,13 +134,13 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
     }
 
     @Override
-    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256(String directoryFullPathSha256)
+    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256AndZipLevel(String directoryFullPathSha256, Integer zipLevel)
     {
-        return directoryDao.getMFODirectoryByDirectoryFullPathSha256(directoryFullPathSha256);
+        return directoryDao.getMFODirectoryByDirectoryFullPathSha256AndZipLevel(directoryFullPathSha256, zipLevel);
     }
 
     @Override
-    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPath(String directoryFullPath) throws
+    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathAndZipLevel(String directoryFullPath, Integer zipLevel) throws
             NoSuchAlgorithmException,
             InvalidKeyException
     {
@@ -150,10 +150,10 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
         if(!dir.toString().equals(dir.getRoot().toString())){
             dirName = dir.getFileName().toString();
         }
-        return getMFODirectoryByDirectoryFullPathSha256(
+        return getMFODirectoryByDirectoryFullPathSha256AndZipLevel(
                 hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
                         EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
-                        directoryFullPath, dirName));
+                        directoryFullPath, dirName), zipLevel);
     }
 
 }

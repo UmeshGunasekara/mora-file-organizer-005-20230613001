@@ -32,6 +32,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.UUID;
 
 /**
@@ -52,11 +53,20 @@ public class MFOAudioFileDataController {
     final static Logger LOGGER = LogManager.getLogger(MFOAudioFileDataController.class);
 
     public void addAudioFileDate(EMFOFile eFile){
+        File source = new File(eFile.getFileFullPath());
+        addAudioFileDate(eFile,source);
+    }
+
+    public void addAudioFileDate(EMFOFile eFile, Path file){
+        File source = file.toFile();
+        addAudioFileDate(eFile, source);
+    }
+
+    public void addAudioFileDate(EMFOFile eFile, File source){
         IMFOAudioFileDataService audioFileDataService = new MFOAudioFileDataServiceImpl(new MFOAudioFileDataDaoImpl());
         MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
 
         FileDto fileDto = new FileDto(eFile);
-        File source = fileDto.getFilePath().toFile();
         Encoder encoder = new Encoder();
 
         try {
@@ -82,8 +92,10 @@ public class MFOAudioFileDataController {
             System.out.println("Added Audio File " + fileDto.getFilePath() + " with UUID : " + uuid.toString());
 
         } catch (InputFormatException e) {
+            LOGGER.error("Error with source : "+source);
             LOGGER.error(ExceptionUtils.getStackTrace(e));
         } catch (EncoderException e) {
+            LOGGER.error("Error with source : "+source);
             LOGGER.error(ExceptionUtils.getStackTrace(e));
         }finally {
             audioFileDataService.close();

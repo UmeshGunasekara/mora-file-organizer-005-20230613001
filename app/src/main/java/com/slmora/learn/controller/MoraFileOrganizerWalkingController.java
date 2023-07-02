@@ -3,12 +3,11 @@
  * Language: Java
  * Property of Umesh Gunasekara
  * @Author: SLMORA
- * @DateTime: 6/22/2023 10:46 PM
+ * @DateTime: 7/1/2023 3:24 PM
  */
-package com.slmora.learn.sandbox.test01;
+package com.slmora.learn.controller;
 
-import com.slmora.learn.controller.MFODirectoryController;
-import com.slmora.learn.controller.MFOFileController;
+import com.slmora.learn.jpa.entity.EMFOFile;
 
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
@@ -32,19 +31,16 @@ import java.util.HashSet;
  * <blockquote><pre>
  * <br>Version      Date            Editor              Note
  * <br>-------------------------------------------------------
- * <br>1.0          6/22/2023      SLMORA                Initial Code
+ * <br>1.0          7/1/2023      SLMORA                Initial Code
  * </pre></blockquote>
  */
-public class T07 {
-    public static void main(String[] args)
-    {
-        String sourcePath = "D:\\MORA_TEMP\\T";
-
+public class MoraFileOrganizerWalkingController {
+    public void sourcePathWalk(Path source, Integer zipFileLevel, Path zipParent, EMFOFile eFile){
         try{
-            Files.walkFileTree(Paths.get(sourcePath),
+            Files.walkFileTree(source,
                     new HashSet<FileVisitOption>(Arrays.asList(FileVisitOption.FOLLOW_LINKS)),
                     Integer.MAX_VALUE,
-                    new SimpleFileVisitor<Path>()
+                    new SimpleFileVisitor<>()
                     {
 
 
@@ -53,8 +49,12 @@ public class T07 {
                         {
                             System.out.printf("Visiting file %s\n", file);
 //                            LOGGER.info("Visiting file "+file+"\n");
-                            MFOFileController fileController =  new MFOFileController();
-                            fileController.addFile(file, 0, null, null);
+                            MFOFileController fileController = new MFOFileController();
+                            if(zipFileLevel<1) {
+                                fileController.addFile(file, 0);
+                            }else {
+                                fileController.addFile(file, zipFileLevel, eFile, zipParent);
+                            }
                             return FileVisitResult.CONTINUE;
                         }
 
@@ -73,13 +73,18 @@ public class T07 {
                             System.out.printf("About to visit directory %s\n", dir);
 //                            LOGGER.info("About to visit directory "+dir+"\n");
                             MFODirectoryController directoryController = new MFODirectoryController();
-                            directoryController.addDirectory(dir,0,null, null);
+                            if(zipFileLevel<1) {
+                                directoryController.addDirectory(dir,0);
+                            }else {
+                                directoryController.addDirectory(dir, zipFileLevel, eFile, zipParent);
+                            }
                             return FileVisitResult.CONTINUE;
                         }
 
                         @Override
-                        public FileVisitResult postVisitDirectory(Path dir, IOException exc){
-                            System.out.println("Post Visit Directory: "+dir);
+                        public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+                        {
+                            System.out.println("Post Visit Directory: " + dir);
                             return FileVisitResult.CONTINUE;
                         }
                     });
@@ -87,5 +92,9 @@ public class T07 {
 //            LOGGER.error(ExceptionUtils.getStackTrace(e));
             e.printStackTrace();
         }
+    }
+
+    public void sourcePathWalk(Path source, Integer zipFileLevel){
+        sourcePathWalk(source, zipFileLevel, null, null);
     }
 }
