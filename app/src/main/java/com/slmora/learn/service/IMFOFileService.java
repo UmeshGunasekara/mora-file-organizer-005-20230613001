@@ -11,6 +11,7 @@ import com.slmora.learn.common.service.IGenericService;
 import com.slmora.learn.dto.FileDto;
 import com.slmora.learn.jpa.entity.EMFODirectory;
 import com.slmora.learn.jpa.entity.EMFOFile;
+import com.slmora.learn.model.SearchPathModel;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -52,9 +53,31 @@ public interface IMFOFileService extends IGenericService<byte[], EMFOFile>
 
     public Optional<byte[]> persistMFOFile(FileDto fileDto);
 
-    public Optional<EMFOFile> getMFOFileByFileFullPathSha256(String fileFullPathSha256);
+    public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathSha256(String fileFullPathSha256);
 
-    public Optional<EMFOFile> getMFOFileByFileFullPath(String fileFullPath) throws
+    public Optional<List<EMFOFile>> getAllMFOFileByFileFullPath(String fileFullPath) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException;
+
+    public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathSha256AndZipLevel(String fileFullPathSha256, Integer zipLevel);
+
+    public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathSha256AndZipLevelDrive(String fileFullPathSha256, Integer zipLevel, Integer fileDriveCode);
+
+    public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathAndZipLevel(String fileFullPath, Integer zipLevel) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException;
+
+    public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathAndZipLevelDrive(String fileFullPath, Integer zipLevel, Integer fileDriveCode) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException;
+
+    public Optional<EMFOFile> getMFOFileByFileFullPathSha256AndZipLevelZipFileDrive(String fileFullPathSha256, Integer zipLevel, EMFOFile zipFile, Integer fileDriveCode);
+
+    public Optional<EMFOFile> getMFOFileByFileFullPathAndZipLevelZipFileDrive(String fileFullPath, Integer zipLevel, EMFOFile zipFile, Integer fileDriveCode) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException;
+
+    Optional<EMFOFile> getMFOFileBySearchPathModelDrive(SearchPathModel pathModel, Integer fileDriveCode) throws
             NoSuchAlgorithmException,
             InvalidKeyException;
 }

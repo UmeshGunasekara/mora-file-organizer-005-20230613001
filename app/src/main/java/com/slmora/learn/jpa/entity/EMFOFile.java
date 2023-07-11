@@ -76,6 +76,15 @@ public class EMFOFile extends BaseEntity
     @NotNull
     private String fileFullPathSha256;
 
+    @Column(name = "file_text_path")
+    @NotNull
+    private String fileTextPath;
+
+    @Column(name = "file_text_path_sha_256")
+    @Size(max = 150)
+    @NotNull
+    private String fileTextPathSha256;
+
     @Column(name = "file_extension")
     private String fileExtension;
 
@@ -115,9 +124,17 @@ public class EMFOFile extends BaseEntity
     @Column(name = "file_is_executable", columnDefinition = "TINYINT(1)")
     private Integer fileIsExecutable;
 
-    @Column(name = "file_is_zip", columnDefinition = "TINYINT default '0'")
+    @Column(name = "file_is_zip", columnDefinition = "TINYINT(1) default '0'")
     @NotNull
     private Integer fileIsZip=0;
+
+    @Column(name = "file_search_status", columnDefinition = "TINYINT(1) default '0'")
+    @NotNull
+    private Integer fileSearchStatus=0;
+
+    @Column(name = "file_drive_code", columnDefinition = "SMALLINT default '0'")
+    @NotNull
+    private Integer fileDriveCode=0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="directory_id", columnDefinition = "BINARY(16)")
@@ -165,6 +182,12 @@ public class EMFOFile extends BaseEntity
     )
     private Collection<EMFOFile> subZipFiles = new ArrayList();
 
+    @OneToMany(
+            mappedBy = "fileZip",
+            cascade = CascadeType.PERSIST
+    )
+    private Collection<EMFODirectory> subZipDirectories = new ArrayList();
+
     @PreRemove
     private void preRemove(){
         filePropertyData.forEach(fileProperty -> fileProperty.setFile(null));
@@ -172,5 +195,6 @@ public class EMFOFile extends BaseEntity
         audioFileData.forEach(audioFile -> audioFile.setFile(null));
         zipDirectoryFile.forEach(zipDirFile -> zipDirFile.setFile(null));
         subZipFiles.forEach(file -> file.setFileZipParent(null));
+        subZipDirectories.forEach(zipDir -> zipDir.setFileZip(null));
     }
 }

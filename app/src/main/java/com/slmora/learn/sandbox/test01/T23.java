@@ -3,12 +3,13 @@
  * Language: Java
  * Property of Umesh Gunasekara
  * @Author: SLMORA
- * @DateTime: 6/22/2023 10:46 PM
+ * @DateTime: 7/9/2023 10:40 AM
  */
 package com.slmora.learn.sandbox.test01;
 
 import com.slmora.learn.controller.MFODirectoryController;
 import com.slmora.learn.controller.MFOFileController;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
@@ -20,6 +21,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *  This Class created for
@@ -32,12 +35,14 @@ import java.util.HashSet;
  * <blockquote><pre>
  * <br>Version      Date            Editor              Note
  * <br>-------------------------------------------------------
- * <br>1.0          6/22/2023      SLMORA                Initial Code
+ * <br>1.0          7/9/2023      SLMORA                Initial Code
  * </pre></blockquote>
  */
-public class T07 {
+public class T23 {
     public static void main(String[] args)
     {
+//        Path p = Paths.get("D:\\Prison Break");
+
         String sourcePath = "D:\\MORA_TEMP\\T";
 
         try{
@@ -52,9 +57,6 @@ public class T07 {
                         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                         {
                             System.out.printf("Visiting file %s\n", file);
-//                            LOGGER.info("Visiting file "+file+"\n");
-                            MFOFileController fileController =  new MFOFileController();
-                            fileController.addFile(file, 0, null, null, 1);
                             return FileVisitResult.CONTINUE;
                         }
 
@@ -62,7 +64,6 @@ public class T07 {
                         public FileVisitResult visitFileFailed(Path file, IOException e)
                         {
                             System.err.printf("Visiting failed for %s\n", file);
-//                            LOGGER.info("Visiting failed for "+file+"\n");
                             return FileVisitResult.SKIP_SUBTREE;
                         }
 
@@ -71,9 +72,7 @@ public class T07 {
                                                                  BasicFileAttributes attrs)
                         {
                             System.out.printf("About to visit directory %s\n", dir);
-//                            LOGGER.info("About to visit directory "+dir+"\n");
-                            MFODirectoryController directoryController = new MFODirectoryController();
-                            directoryController.addDirectory(dir,0,null, null, 1);
+                            T23.getDirectoryLevel(dir);
                             return FileVisitResult.CONTINUE;
                         }
 
@@ -84,8 +83,25 @@ public class T07 {
                         }
                     });
         } catch (IOException e) {
-//            LOGGER.error(ExceptionUtils.getStackTrace(e));
             e.printStackTrace();
         }
+
     }
+
+    public static void getDirectoryLevel(Path path){
+        String sPath = path.toAbsolutePath().toString();
+        Pattern pattern = Pattern.compile("\\\\");
+        Matcher matcher = pattern.matcher(sPath);
+        System.out.println("===============================================================================");
+        System.out.println("Directory Level is : "+ StringUtils.countMatches(sPath,"\\"));
+        while (matcher.find()) {
+            String group = matcher.group();
+            int start = matcher.start();
+            int end = matcher.end();
+            System.out.println(group + " " + start + " " + end);
+        }
+        System.out.println("*******************************************************************************");
+    }
+
+
 }

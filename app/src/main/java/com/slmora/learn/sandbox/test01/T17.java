@@ -28,9 +28,9 @@ import java.nio.file.Paths;
 public class T17 {
     public static void main(String[] args)
     {
-//        String sourcePath = "D:\\MORA_TEMP\\T";
-        String sourcePath = "D:\\MORA\\Video";
+        String sourcePath = "D:\\MORA\\Video\\TM";
+//        String sourcePath = "F:\\";
         MoraFileOrganizerWalkingController walkingController = new MoraFileOrganizerWalkingController();
-        walkingController.sourcePathWalk(Paths.get(sourcePath), 0);
+        walkingController.sourcePathWalk(Paths.get(sourcePath), 0, 1);
     }
 }

@@ -9,6 +9,7 @@ package com.slmora.learn.common.file.util;
 
 import com.slmora.learn.system.property.SingleSystemProperty;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -130,5 +131,17 @@ public class MoraFileWriteAccessUtilities {
         }
 
         return false;
+    }
+
+    public String getNonWindowsPathPatternByPath(Path path){
+        if(!path.getFileSystem().getSeparator().equals("/")&&path.toAbsolutePath().toString().contains("\\")){
+            return path.toAbsolutePath().toString().replace(path.getRoot().toAbsolutePath().toString(),"/").replace("\\","/");
+        }
+        return path.toAbsolutePath().toString();
+    }
+
+    public Integer getDirectoryLevel(Path path){
+        String sPath = path.toAbsolutePath().toString();
+        return StringUtils.countMatches(sPath,path.getFileSystem().getSeparator());
     }
 }

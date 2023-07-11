@@ -50,7 +50,7 @@ public class MFOZipDirectoryFileController {
 
         UUID uuid = uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eZipDirectoryFile.getId());
         LOGGER.info("For Zip File "+zipFile.getFileFullPath()+" Added Zip Directory " + zipDir.getDirectoryFullPath() + " with UUID : " + uuid.toString());
-        System.out.println("For Zip File "+zipFile.getFileFullPath()+" Added Zip Directory " + zipDir.getDirectoryFullPath() + " with UUID : " + uuid.toString());
+//        System.out.println("For Zip File "+zipFile.getFileFullPath()+" Added Zip Directory " + zipDir.getDirectoryFullPath() + " with UUID : " + uuid.toString());
 
     }
 }

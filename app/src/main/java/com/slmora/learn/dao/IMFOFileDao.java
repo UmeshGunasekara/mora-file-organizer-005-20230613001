@@ -47,5 +47,14 @@ public interface IMFOFileDao extends IGenericDao<byte[], EMFOFile>
 
     public EMFOFile persistMFOFile(EMFOFile file);
 
-    public Optional<EMFOFile> getMFOFileByFileFullPathSha256(String fileFullPathSha256);
+    public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathSha256(String fileFullPathSha256);
+
+    public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathSha256AndZipLevel(String fileFullPathSha256, Integer zipLevel);
+
+    public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathSha256AndZipLevelDrive(String fileFullPathSha256, Integer zipLevel, Integer fileDriveCode);
+
+    public Optional<EMFOFile> getMFOFileByFileFullPathSha256AndZipLevelZipFileDrive(String fileFullPathSha256, Integer zipLevel, EMFOFile zipFile, Integer fileDriveCode);
+
+    Optional<EMFOFile> getMFOFileBySearchPathModelDrive(String fileFullPathSha256, Integer zipLevel, String zipFileFullPathSha256, Integer fileZipLevel, Integer fileDriveCode);
+
 }

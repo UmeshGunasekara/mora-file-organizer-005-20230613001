@@ -11,11 +11,11 @@ import com.slmora.learn.common.cryptography.hmac.util.EHmacAlgorithm;
 import com.slmora.learn.common.cryptography.hmac.util.MoraHMACUtilities;
 import com.slmora.learn.common.dao.IGenericDao;
 import com.slmora.learn.common.service.impl.GenericServiceImpl;
-import com.slmora.learn.dao.IMFODirectoryDao;
 import com.slmora.learn.dao.IMFOFileDao;
 import com.slmora.learn.dto.FileDto;
 import com.slmora.learn.jpa.entity.EMFODirectory;
 import com.slmora.learn.jpa.entity.EMFOFile;
+import com.slmora.learn.model.SearchPathModel;
 import com.slmora.learn.service.IMFOFileService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -117,22 +117,126 @@ public class MFOFileServiceImpl extends GenericServiceImpl<byte[], EMFOFile> imp
     }
 
     @Override
-    public Optional<EMFOFile> getMFOFileByFileFullPathSha256(String fileFullPathSha256)
+    public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathSha256(String fileFullPathSha256)
     {
-        return fileDao.getMFOFileByFileFullPathSha256(fileFullPathSha256);
+        return fileDao.getAllMFOFileByFileFullPathSha256(fileFullPathSha256);
     }
 
     @Override
-    public Optional<EMFOFile> getMFOFileByFileFullPath(String fileFullPath) throws
+    public Optional<List<EMFOFile>> getAllMFOFileByFileFullPath(String fileFullPath) throws
             NoSuchAlgorithmException,
             InvalidKeyException
     {
         MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
         Path file = Paths.get(fileFullPath);
         String fileName = file.getFileName().toString();
-        return getMFOFileByFileFullPathSha256(
+        return getAllMFOFileByFileFullPathSha256(
                 hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
                         EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
                         fileFullPath, fileName));
+    }
+
+    @Override
+    public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathSha256AndZipLevel(String fileFullPathSha256,
+                                                                                 Integer zipLevel)
+    {
+        return fileDao.getAllMFOFileByFileFullPathSha256AndZipLevel(fileFullPathSha256,zipLevel);
+    }
+
+    @Override
+    public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathSha256AndZipLevelDrive(String fileFullPathSha256,
+                                                                                      Integer zipLevel,
+                                                                                      Integer fileDriveCode)
+    {
+        return fileDao.getAllMFOFileByFileFullPathSha256AndZipLevelDrive(fileFullPathSha256,zipLevel,fileDriveCode);
+    }
+
+    @Override
+    public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathAndZipLevel(String fileFullPath, Integer zipLevel) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException
+    {
+        MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
+        Path file = Paths.get(fileFullPath);
+        String fileName = file.getFileName().toString();
+        return getAllMFOFileByFileFullPathSha256AndZipLevel(
+                hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+                        EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+                        fileFullPath, fileName), zipLevel);
+    }
+
+    @Override
+    public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathAndZipLevelDrive(String fileFullPath,
+                                                                                Integer zipLevel,
+                                                                                Integer fileDriveCode) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException
+    {
+        MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
+        Path file = Paths.get(fileFullPath);
+        String fileName = file.getFileName().toString();
+        return getAllMFOFileByFileFullPathSha256AndZipLevelDrive(
+                hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+                        EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+                        fileFullPath, fileName), zipLevel,fileDriveCode);
+    }
+
+    @Override
+    public Optional<EMFOFile> getMFOFileByFileFullPathSha256AndZipLevelZipFileDrive(String fileFullPathSha256,
+                                                                                    Integer zipLevel,
+                                                                                    EMFOFile zipFile,
+                                                                                    Integer fileDriveCode)
+    {
+        return fileDao.getMFOFileByFileFullPathSha256AndZipLevelZipFileDrive(fileFullPathSha256,zipLevel,zipFile,fileDriveCode);
+    }
+
+    @Override
+    public Optional<EMFOFile> getMFOFileByFileFullPathAndZipLevelZipFileDrive(String fileFullPath,
+                                                                              Integer zipLevel,
+                                                                              EMFOFile zipFile,
+                                                                              Integer fileDriveCode) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException
+    {
+        MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
+        Path file = Paths.get(fileFullPath);
+        String fileName = file.getFileName().toString();
+        return getMFOFileByFileFullPathSha256AndZipLevelZipFileDrive(
+                hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+                        EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+                        fileFullPath, fileName), zipLevel, zipFile,fileDriveCode);
+    }
+
+    @Override
+    public Optional<EMFOFile> getMFOFileBySearchPathModelDrive(SearchPathModel pathModel,
+                                                                    Integer fileDriveCode) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException
+    {
+        if(pathModel.getZipParentFile()==null) {
+            Optional<List<EMFOFile>> opListFile = getAllMFOFileByFileFullPathAndZipLevelDrive(pathModel.getPath().toAbsolutePath().toString(), pathModel.getZipLevel(),fileDriveCode);
+            if(opListFile.isPresent()){
+                if(opListFile.get().size()==1){
+                    return Optional.of(opListFile.get().get(0));
+                }else {
+                    return Optional.empty();
+                }
+            }else {
+                return Optional.empty();
+            }
+        }else {
+            MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
+            Path file = pathModel.getPath();
+            String fileName = file.getFileName().toString();
+
+            Path zipFile = pathModel.getZipParentFile();
+            return fileDao.getMFOFileBySearchPathModelDrive(
+                    hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+                            EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+                            file.toAbsolutePath().toString(), fileName), pathModel.getZipLevel(),
+                    hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+                            EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+                            zipFile.toAbsolutePath().toString(), zipFile.getFileName().toString()), pathModel.getZipParentFileLevel(),fileDriveCode);
+        }
     }
 }

@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS MFO_AUDIO_FILE_DATA;
 DROP TABLE IF EXISTS MFO_VIDEO_FILE_DATA;
 DROP TABLE IF EXISTS MFO_FILE_PROPERTY_DATA;
 DROP TABLE IF EXISTS MFO_ZIP_DIRECTORY_FILE;
+ALTER TABLE MFO_DIRECTORY DROP FOREIGN KEY FRK_DIRECTORY_A_FILE_ZIP;
 DROP TABLE IF EXISTS MFO_FILE;
 DROP TABLE IF EXISTS MFO_DIRECTORY;
 DROP TABLE IF EXISTS MFO_FILE_FORMAT_PROPERTY;
@@ -60,8 +61,13 @@ CREATE TABLE MFO_DIRECTORY
     directory_name Varchar(150) NOT NULL,
     directory_full_path  Text NOT NULL,
     directory_full_path_sha_256 Varchar(150) NOT NULL,
+    directory_text_path  Text NOT NULL,
+    directory_text_path_sha_256 Varchar(150) NOT NULL,
+    directory_is_zip Tinyint(1) NOT NULL DEFAULT '0',
+    directory_level Int NOT NULL DEFAULT '0',
+    directory_search_status Tinyint(1) NOT NULL DEFAULT '0',
+    directory_drive_code Smallint NOT NULL DEFAULT '0',
     note Text,
-    directory_is_zip Tinyint NOT NULL DEFAULT '0',
     raw_create_user_account_id Int NOT NULL DEFAULT '0',
     raw_last_update_user_account_id Int NOT NULL DEFAULT '0',
     raw_create_date_time Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -75,22 +81,29 @@ CREATE TABLE MFO_DIRECTORY
     extra_02 Text,
     extra_03 Text,
     directory_parent_id BINARY(16),
+    file_zip_id BINARY(16),
     PRIMARY KEY (id)
 );
 
 CREATE INDEX IX_DIRECTORY_A_DIRECTORY ON MFO_DIRECTORY (directory_parent_id);
 
-CREATE INDEX IX_DIRECTORY_A_DIRECTORY_FULL_PATH_SHA_256_IS_ZIP ON MFO_DIRECTORY (directory_full_path_sha_256, directory_is_zip);
+CREATE INDEX IX_DIRECTORY_A_FILE_ZIP ON MFO_DIRECTORY (file_zip_id);
+
+CREATE INDEX IX_DIR_A_DIR_FULL_PATH_SHA_256_A_IS_ZIP_A_ZIP_PARENT_DRIVE ON MFO_DIRECTORY (directory_full_path_sha_256, directory_is_zip, file_zip_id, directory_drive_code);
 
 -- ALTER TABLE MFO_DIRECTORY ADD CONSTRAINT UNK_DIRECTORY_A_DIRECTORY_FULL_PATH
 --    UNIQUE (directory_full_path);
 
-ALTER TABLE MFO_DIRECTORY ADD CONSTRAINT UNK_DIRECTORY_A_DIRECTORY_FULL_PATH_SHA_256_IS_ZIP
-    UNIQUE (directory_full_path_sha_256, directory_is_zip);
+ ALTER TABLE MFO_DIRECTORY ADD CONSTRAINT UNK_DIR_A_DIR_FULL_PATH_SHA_256_A_IS_ZIP_A_ZIP_PARENT_DRIVE
+     UNIQUE (directory_full_path_sha_256, directory_is_zip, file_zip_id, directory_drive_code);
 
 ALTER TABLE MFO_DIRECTORY ADD CONSTRAINT FRK_DIRECTORY_A_DIRECTORY
     FOREIGN KEY (directory_parent_id) REFERENCES MFO_DIRECTORY (id)
         ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- ALTER TABLE MFO_DIRECTORY ADD CONSTRAINT FRK_DIRECTORY_A_FILE_ZIP
+--     FOREIGN KEY (file_zip_id) REFERENCES MFO_FILE (id)
+--         ON DELETE SET NULL ON UPDATE CASCADE;
 
 DROP TABLE IF EXISTS MFO_FILE_CATEGORY;
 CREATE TABLE MFO_FILE_CATEGORY
@@ -540,6 +553,20 @@ INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, fi
 INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'libx264', 'Video encoders', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Video'));
 INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'libxvid', 'Video encoders', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Video'));
 INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'ljpeg', 'Video encoders', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Video'));
+INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'apk', 'Android App', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Setup'));
+INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'css', 'Cascading Style Sheets', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Programming'));
+INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'yaml', 'yet another markup language', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Programming'));
+INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'xaml', 'Markup extensions xml', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Programming'));
+INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'project', 'Eclipse Project Settings File', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Programming'));
+INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'cfg', 'Configuration File', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Programming'));
+INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'classpath', 'Eclipse IDE JAVA Project File', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Programming'));
+INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'ico', 'computer icon images', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Image'));
+INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'jsp', 'Java Server Pages', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Programming'));
+INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'php', 'PHP script', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Programming'));
+INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'py', 'Python File', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Programming'));
+INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'ear', 'enterprise archive file', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Programming'));
+INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'war', 'Web archive file', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Programming'));
+INSERT INTO mora_file_organizer_db_v003.mfo_file_format(id, file_format_name, file_format_description, raw_create_user_account_id, raw_last_update_user_account_id, raw_create_date_time, raw_last_update_date_time, raw_last_update_log_id, raw_show_status, raw_update_status, raw_delete_status, raw_active_status, extra_01, extra_02, extra_03, file_category_id) VALUES(FN_UUID_TO_BIN(uuid()), 'tgz', 'compressed archive created using GZIP', 0, 0, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 0, 0, 0, 0, 0, NULL, NULL, NULL, (SELECT id FROM MFO_FILE_CATEGORY WHERE file_category_name = 'Compressed'));
 
 
 DROP TABLE IF EXISTS MFO_FILE_PROPERTY;
@@ -611,7 +638,9 @@ CREATE TABLE MFO_FILE
     file_name Varchar(150) NOT NULL,
     file_full_path  Text NOT NULL,
     file_full_path_sha_256 Varchar(150) NOT NULL,
-    file_extension Varchar(20),
+    file_text_path  Text NOT NULL,
+    file_text_path_sha_256 Varchar(150) NOT NULL,
+    file_extension Varchar(100),
     file_size_in_bytes Decimal(25,2),
     file_created_date_time Datetime,
     file_last_modified_date_time Datetime,
@@ -623,7 +652,9 @@ CREATE TABLE MFO_FILE
     file_is_readable Tinyint(1),
     file_is_writable Tinyint(1),
     file_is_executable Tinyint(1),
-    file_is_zip Tinyint NOT NULL DEFAULT '0',
+    file_is_zip Tinyint(1) NOT NULL DEFAULT '0',
+    file_search_status TINYINT(1) NOT NULL DEFAULT '0',
+    file_drive_code Smallint NOT NULL DEFAULT '0',
     note Text,
     raw_create_user_account_id Int NOT NULL DEFAULT '0',
     raw_last_update_user_account_id Int NOT NULL DEFAULT '0',
@@ -649,13 +680,13 @@ CREATE INDEX IX_FILE_A_FILE_CATEGORY ON MFO_FILE (file_category_id);
 
 CREATE INDEX IX_FILE_A_FILE_ZIP ON MFO_FILE (file_zip_parent_id);
 
-CREATE INDEX IX_FILE_A_FILE_FULL_PATH_SHA_256_IS_ZIP ON MFO_FILE (file_full_path_sha_256, file_is_zip);
+CREATE INDEX IX_FILE_A_FILE_FULL_PATH_SHA_256_A_IS_ZIP_A_ZIP_PARENT_DRIVE ON MFO_FILE (file_full_path_sha_256, file_is_zip, file_zip_parent_id, file_drive_code);
 
 -- ALTER TABLE MFO_FILE ADD CONSTRAINT UNK_FILE_A_FILE_FULL_PATH
 --    UNIQUE (file_full_path);
 
-ALTER TABLE MFO_FILE ADD CONSTRAINT UNK_FILE_A_FILE_FULL_PATH_SHA_256_IS_ZIP
-    UNIQUE (file_full_path_sha_256, file_is_zip);
+ALTER TABLE MFO_FILE ADD CONSTRAINT UNK_FILE_A_FILE_FULL_PATH_SHA_A_IS_ZIP_A_ZIP_PARENT_DRIVE
+    UNIQUE (file_full_path_sha_256, file_is_zip, file_zip_parent_id, file_drive_code);
 
 ALTER TABLE MFO_FILE ADD CONSTRAINT FRK_FILE_A_DIRECTORY
     FOREIGN KEY (directory_id) REFERENCES MFO_DIRECTORY (id)
@@ -667,6 +698,10 @@ ALTER TABLE MFO_FILE ADD CONSTRAINT FRK_FILE_A_FILE_CATEGORY
 
 ALTER TABLE MFO_FILE ADD CONSTRAINT FRK_FILE_A_FILE_ZIP
     FOREIGN KEY (file_zip_parent_id) REFERENCES MFO_FILE (id)
+        ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE MFO_DIRECTORY ADD CONSTRAINT FRK_DIRECTORY_A_FILE_ZIP
+    FOREIGN KEY (file_zip_id) REFERENCES MFO_FILE (id)
         ON DELETE SET NULL ON UPDATE CASCADE;
 
 DROP TABLE IF EXISTS MFO_ZIP_DIRECTORY_FILE;

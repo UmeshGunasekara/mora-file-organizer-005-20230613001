@@ -71,15 +71,17 @@ public class MFOAudioFileDataController {
 
         try {
             MultimediaInfo info = encoder.getInfo(source);
-            AudioInfo vInfo = info.getAudio();
+            AudioInfo aInfo = info.getAudio();
 
             AudioFileDataDto fileDataDto = new AudioFileDataDto();
 
-            fileDataDto.setAudioBitRateKbps(info.getAudio().getBitRate());
             Long aDuration = info.getDuration();
             fileDataDto.setAudioDurationSeconds(aDuration.intValue());
-            fileDataDto.setAudioChannels(info.getAudio().getChannels());
-            fileDataDto.setAudioSamplingRateHz(info.getAudio().getSamplingRate());
+            if(aInfo!=null) {
+                fileDataDto.setAudioBitRateKbps(aInfo.getBitRate());
+                fileDataDto.setAudioChannels(aInfo.getChannels());
+                fileDataDto.setAudioSamplingRateHz(aInfo.getSamplingRate());
+            }
 
             EMFOAudioFileData eAudioFileData = fileDataDto.getEntity();
 
@@ -89,7 +91,7 @@ public class MFOAudioFileDataController {
 
             UUID uuid = uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eAudioFileData.getId());
             LOGGER.info("Added Audio File " + fileDto.getFilePath() + " with UUID : " + uuid.toString());
-            System.out.println("Added Audio File " + fileDto.getFilePath() + " with UUID : " + uuid.toString());
+//            System.out.println("Added Audio File " + fileDto.getFilePath() + " with UUID : " + uuid.toString());
 
         } catch (InputFormatException e) {
             LOGGER.error("Error with source : "+source);

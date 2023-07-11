@@ -119,7 +119,10 @@ public class VideoFileDataDto extends BaseDto implements IDto<EMFOVideoFileData>
         jpaEntityVideoFileData.setExtra02(this.getExtra02());
         jpaEntityVideoFileData.setExtra03(this.getExtra03());
 
-        jpaEntityVideoFileData.setVideoFrameRatePerSecond(new BigDecimal(this.getVideoFrameRatePerSecond(), MathContext.DECIMAL64));
+        if(this.getVideoFrameRatePerSecond()!=null) {
+            jpaEntityVideoFileData.setVideoFrameRatePerSecond(new BigDecimal(this.getVideoFrameRatePerSecond(),
+                    MathContext.DECIMAL64));
+        }
         jpaEntityVideoFileData.setAudioBitRateKbps(this.getAudioBitRateKbps());
         jpaEntityVideoFileData.setVideoDurationSeconds(this.getVideoDurationSeconds());
         jpaEntityVideoFileData.setAudioChannels(this.getAudioChannels());

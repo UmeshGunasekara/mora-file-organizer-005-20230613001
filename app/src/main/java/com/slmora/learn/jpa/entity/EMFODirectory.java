@@ -87,9 +87,30 @@ public class EMFODirectory extends BaseEntity
     @NotNull
     private String directoryFullPathSha256;
 
-    @Column(name = "directory_is_zip", columnDefinition = "TINYINT default '0'")
+    @Column(name = "directory_text_path")
+    @NotNull
+    private String directoryTextPath;
+
+    @Column(name = "directory_text_path_sha_256")
+    @Size(max = 150)
+    @NotNull
+    private String directoryTextPathSha256;
+
+    @Column(name = "directory_is_zip", columnDefinition = "TINYINT(1) default '0'")
     @NotNull
     private Integer directoryIsZip=0;
+
+    @Column(name = "directory_level", columnDefinition = "int default '0'")
+    @NotNull
+    private Integer directoryLevel=0;
+
+    @Column(name = "directory_search_status", columnDefinition = "TINYINT(1) default '0'")
+    @NotNull
+    private Integer directorySearchStatus=0;
+
+    @Column(name = "directory_drive_code", columnDefinition = "SMALLINT default '0'")
+    @NotNull
+    private Integer directoryDriveCode=0;
 
 //    @Column(name = "directory_note")
 //    private String directoryNote;
@@ -144,6 +165,10 @@ public class EMFODirectory extends BaseEntity
     @ManyToOne
     @JoinColumn(name="directory_parent_id", columnDefinition = "BINARY(16)")
     private EMFODirectory directoryParent;
+
+    @ManyToOne
+    @JoinColumn(name="file_zip_id", columnDefinition = "BINARY(16)")
+    private EMFOFile fileZip;
 
     @OneToMany(
             mappedBy = "directoryParent",

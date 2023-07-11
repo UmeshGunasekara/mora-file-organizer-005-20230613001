@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 
 /**
@@ -96,10 +97,13 @@ public class MoraFileZipUtilities {
             }
 
             zipInputStream.closeEntry();
-        } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
-            throw new RuntimeException(e);
         }
+//        catch (ZipException ze){
+//            LOGGER.error(ExceptionUtils.getStackTrace(ze));
+//        }catch (IOException e) {
+//            LOGGER.error(ExceptionUtils.getStackTrace(e));
+////            throw new RuntimeException(e);
+//        }
         Path destinationPath = Path.of(destinationPathString);
         return writeAccessUtilities.isEmpty(destinationPath)?Optional.empty():Optional.of(destinationPath);
     }

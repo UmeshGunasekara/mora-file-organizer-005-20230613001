@@ -16,6 +16,8 @@ import com.slmora.learn.dao.impl.MFOFileDaoImpl;
 import com.slmora.learn.dto.DirectoryDto;
 import com.slmora.learn.dto.FileDto;
 import com.slmora.learn.jpa.entity.EMFODirectory;
+import com.slmora.learn.jpa.entity.EMFOFile;
+import com.slmora.learn.model.SearchPathModel;
 import com.slmora.learn.service.IMFODirectoryService;
 import com.slmora.learn.service.IMFOFileService;
 import org.apache.logging.log4j.LogManager;
@@ -63,7 +65,7 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
      */
     @Override
     public Optional<byte[]> addMFODirectory(EMFODirectory directory) {
-        System.out.println("com.slmora.learn.service.impl.MFODirectoryServiceImpl.addMFODirectory()");
+//        System.out.println("com.slmora.learn.service.impl.MFODirectoryServiceImpl.addMFODirectory()");
         return directoryDao.addMFODirectory(directory);
     }
 
@@ -74,7 +76,7 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
      */
     @Override
     public Optional<EMFODirectory> getMFODirectoryById(byte[] id) {
-        System.out.println("com.slmora.learn.service.impl.MFODirectoryServiceImpl.getMFODirectoryById()");
+//        System.out.println("com.slmora.learn.service.impl.MFODirectoryServiceImpl.getMFODirectoryById()");
         return directoryDao.getMFODirectoryById(id);
     }
 
@@ -90,7 +92,7 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
      */
     @Override
     public void deleteMFODirectory(EMFODirectory directory) {
-        System.out.println("com.slmora.learn.service.impl.MFODirectoryServiceImpl.deleteMFODirectory()");
+//        System.out.println("com.slmora.learn.service.impl.MFODirectoryServiceImpl.deleteMFODirectory()");
         directoryDao.deleteMFODirectory(directory);
     }
 
@@ -99,7 +101,7 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
      */
     @Override
     public List<EMFODirectory> getAllMFODirectories() {
-        System.out.println("com.slmora.learn.service.impll.MFODirectoryServiceImpl.getAllMFODirectories()");
+//        System.out.println("com.slmora.learn.service.impll.MFODirectoryServiceImpl.getAllMFODirectories()");
         return directoryDao.getAllMFODirectories();
     }
 
@@ -134,13 +136,21 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
     }
 
     @Override
-    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256AndZipLevel(String directoryFullPathSha256, Integer zipLevel)
+    public Optional<List<EMFODirectory>> getMFODirectoryByDirectoryFullPathSha256AndZipLevel(String directoryFullPathSha256, Integer zipLevel)
     {
-        return directoryDao.getMFODirectoryByDirectoryFullPathSha256AndZipLevel(directoryFullPathSha256, zipLevel);
+        return directoryDao.getAllMFODirectoryByDirectoryFullPathSha256AndZipLevel(directoryFullPathSha256, zipLevel);
     }
 
     @Override
-    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathAndZipLevel(String directoryFullPath, Integer zipLevel) throws
+    public Optional<List<EMFODirectory>> getMFODirectoryByDirectoryFullPathSha256AndZipLevelDrive(String directoryFullPathSha256,
+                                                                                                  Integer zipLevel,
+                                                                                                  Integer directoryDriveCode)
+    {
+        return directoryDao.getAllMFODirectoryByDirectoryFullPathSha256AndZipLevelDrive(directoryFullPathSha256, zipLevel,directoryDriveCode);
+    }
+
+    @Override
+    public Optional<List<EMFODirectory>> getAllMFODirectoryByDirectoryFullPathAndZipLevel(String directoryFullPath, Integer zipLevel) throws
             NoSuchAlgorithmException,
             InvalidKeyException
     {
@@ -154,6 +164,87 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
                 hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
                         EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
                         directoryFullPath, dirName), zipLevel);
+    }
+
+    @Override
+    public Optional<List<EMFODirectory>> getAllMFODirectoryByDirectoryFullPathAndZipLevelDrive(String directoryFullPath,
+                                                                                               Integer zipLevel,
+                                                                                               Integer directoryDriveCode) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException
+    {
+        MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
+        Path dir = Paths.get(directoryFullPath);
+        String dirName = dir.toString();
+        if(!dir.toString().equals(dir.getRoot().toString())){
+            dirName = dir.getFileName().toString();
+        }
+        return getMFODirectoryByDirectoryFullPathSha256AndZipLevelDrive(
+                hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+                        EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+                        directoryFullPath, dirName), zipLevel,directoryDriveCode);
+    }
+
+    @Override
+    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256AndZipLevelZipFileDrive(String directoryFullPathSha256,
+                                                                                                   Integer zipLevel,
+                                                                                                   EMFOFile zipFile, Integer directoryDriveCode)
+    {
+        return directoryDao.getMFODirectoryByDirectoryFullPathSha256AndZipLevelZipFileDrive(directoryFullPathSha256,zipLevel,zipFile,directoryDriveCode);
+    }
+
+    @Override
+    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathAndZipLevelZipFileDrive(String directoryFullPath,
+                                                                                             Integer zipLevel,
+                                                                                             EMFOFile zipFile, Integer directoryDriveCode) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException
+    {
+        MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
+        Path dir = Paths.get(directoryFullPath);
+        String dirName = dir.toString();
+        if(!dir.toString().equals(dir.getRoot().toString())){
+            dirName = dir.getFileName().toString();
+        }
+        return getMFODirectoryByDirectoryFullPathSha256AndZipLevelZipFileDrive(
+                hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+                        EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+                        directoryFullPath, dirName), zipLevel, zipFile,directoryDriveCode);
+    }
+
+    @Override
+    public Optional<EMFODirectory> getMFODirectoryBySearchPathModelDrive(SearchPathModel pathModel, Integer directoryDriveCode) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException
+    {
+        if(pathModel.getZipParentFile()==null) {
+            Optional<List<EMFODirectory>> opListDir = getAllMFODirectoryByDirectoryFullPathAndZipLevelDrive(pathModel.getPath().toAbsolutePath().toString(), pathModel.getZipLevel(),directoryDriveCode);
+            if(opListDir.isPresent()){
+                if(!opListDir.get().isEmpty()){
+                    return Optional.of(opListDir.get().get(0));
+                }else {
+                    return Optional.empty();
+                }
+            }else {
+                return Optional.empty();
+            }
+        }else {
+            MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
+            Path dir = pathModel.getPath();
+            String dirName = dir.toString();
+            if(!dir.toString().equals(dir.getRoot().toString())){
+                dirName = dir.getFileName().toString();
+            }
+
+            Path zipFile = pathModel.getZipParentFile();
+            return directoryDao.getMFODirectoryBySearchPathModelDrive(
+                    hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+                            EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+                            dir.toAbsolutePath().toString(), dirName), pathModel.getZipLevel(),
+                    hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+                            EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+                            zipFile.toAbsolutePath().toString(), zipFile.getFileName().toString()), pathModel.getZipParentFileLevel(),directoryDriveCode);
+        }
     }
 
 }

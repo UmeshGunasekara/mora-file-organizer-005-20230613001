@@ -16,11 +16,13 @@ import com.slmora.learn.jpa.entity.EMFOVideoFileData;
 import com.slmora.learn.service.IMFOVideoFileDataService;
 import com.slmora.learn.service.impl.MFOVideoFileDataServiceImpl;
 import com.slmora.learn.util.EMVideoResolutionType;
+import it.sauronsoftware.jave.AudioInfo;
 import it.sauronsoftware.jave.Encoder;
 import it.sauronsoftware.jave.EncoderException;
 import it.sauronsoftware.jave.InputFormatException;
 import it.sauronsoftware.jave.MultimediaInfo;
 import it.sauronsoftware.jave.VideoInfo;
+import it.sauronsoftware.jave.VideoSize;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -68,26 +70,39 @@ public class MFOVideoFileDataController {
         try {
             MultimediaInfo info = encoder.getInfo(source);
             VideoInfo vInfo = info.getVideo();
+            AudioInfo aInfo = info.getAudio();
 
             VideoFileDataDto fileDataDto = new VideoFileDataDto();
 
-            fileDataDto.setAudioBitRateKbps(info.getAudio().getBitRate());
-            Float vFrameRate = vInfo.getFrameRate();
-            fileDataDto.setVideoFrameRatePerSecond(vFrameRate.doubleValue());
-            fileDataDto.setVideoResolutionWidth(vInfo.getSize().getWidth());
-            fileDataDto.setVideoResolutionHeight(vInfo.getSize().getHeight());
-            Optional<EMVideoResolutionType> opResolutionType = EMVideoResolutionType.stream()
-                    .filter(i->fileDataDto.getVideoResolutionHeight().equals(i.getResolutionHeight())&&fileDataDto.getVideoResolutionWidth().equals(i.getResolutionWidth()))
-                    .findFirst();
+            if (aInfo!=null) {
+                fileDataDto.setAudioBitRateKbps(aInfo.getBitRate());
+                fileDataDto.setAudioChannels(aInfo.getChannels());
+                fileDataDto.setAudioSamplingRateHz(aInfo.getSamplingRate());
+            }
+            Optional<EMVideoResolutionType> opResolutionType = Optional.empty();
+            if(vInfo!=null) {
+                Float vFrameRate = vInfo.getFrameRate();
+                if(vFrameRate!=null){
+                    fileDataDto.setVideoFrameRatePerSecond(vFrameRate.doubleValue());
+                }
+                VideoSize vSize = vInfo.getSize();
+                if(vSize!=null) {
+                    fileDataDto.setVideoResolutionWidth(vSize.getWidth());
+                    fileDataDto.setVideoResolutionHeight(vSize.getHeight());
+                    opResolutionType = EMVideoResolutionType.stream()
+                            .filter(i->fileDataDto.getVideoResolutionHeight().equals(i.getResolutionHeight())&&fileDataDto.getVideoResolutionWidth().equals(i.getResolutionWidth()))
+                            .findFirst();
+                }
+            }
             if(opResolutionType.isPresent()){
                 fileDataDto.setVideoResolutionType(opResolutionType.get().getResolutionCommonName());
             }else {
                 fileDataDto.setVideoResolutionType(EMVideoResolutionType.ILE_RES_OTHER.getResolutionCommonName());
             }
             Long vDuration = info.getDuration();
-            fileDataDto.setVideoDurationSeconds(vDuration.intValue());
-            fileDataDto.setAudioChannels(info.getAudio().getChannels());
-            fileDataDto.setAudioSamplingRateHz(info.getAudio().getSamplingRate());
+            if(vDuration!=null){
+                fileDataDto.setVideoDurationSeconds(vDuration.intValue());
+            }
 
             EMFOVideoFileData eVideoFileData = fileDataDto.getEntity();
 

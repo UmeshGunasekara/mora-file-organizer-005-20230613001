@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,15 +40,15 @@ public class T09 {
         Path dir = Paths.get("D:\\MORA\\Video");
         MFODirectoryServiceImpl dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
         MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-        Optional<EMFODirectory> opEntityDir = null;
+        Optional<List<EMFODirectory>> opEntityDir = null;
         try {
-            opEntityDir = dirService.getMFODirectoryByDirectoryFullPathAndZipLevel(dir.toAbsolutePath().toString(),0);
+            opEntityDir = dirService.getAllMFODirectoryByDirectoryFullPathAndZipLevel(dir.toAbsolutePath().toString(),0);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         } catch (InvalidKeyException e) {
             throw new RuntimeException(e);
         }
-        UUID uuid = uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(opEntityDir.get().getId());
+        UUID uuid = uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(opEntityDir.get().get(0).getId());
         System.out.println(uuid.toString());
         dirService.close();
     }

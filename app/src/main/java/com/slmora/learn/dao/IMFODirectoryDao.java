@@ -9,6 +9,7 @@ package com.slmora.learn.dao;
 
 import com.slmora.learn.common.dao.IGenericDao;
 import com.slmora.learn.jpa.entity.EMFODirectory;
+import com.slmora.learn.jpa.entity.EMFOFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,5 +47,11 @@ public interface IMFODirectoryDao extends IGenericDao<byte[], EMFODirectory>
 
     public EMFODirectory persistMFODirectory(EMFODirectory directory);
 
-    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256AndZipLevel(String directoryFullPathSha256, Integer zipLevel);
+    public Optional<List<EMFODirectory>> getAllMFODirectoryByDirectoryFullPathSha256AndZipLevel(String directoryFullPathSha256, Integer zipLevel);
+
+    public Optional<List<EMFODirectory>> getAllMFODirectoryByDirectoryFullPathSha256AndZipLevelDrive(String directoryFullPathSha256, Integer zipLevel, Integer directoryDriveCode);
+
+    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256AndZipLevelZipFileDrive(String directoryFullPathSha256, Integer zipLevel, EMFOFile zipFile, Integer directoryDriveCode);
+
+    Optional<EMFODirectory> getMFODirectoryBySearchPathModelDrive(String directoryFullPathSha256, Integer directoryZipLevel, String zipFileFullPathSha256, Integer fileZipLevel, Integer directoryDriveCode);
 }

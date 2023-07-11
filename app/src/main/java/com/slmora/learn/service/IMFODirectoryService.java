@@ -10,6 +10,8 @@ package com.slmora.learn.service;
 import com.slmora.learn.common.service.IGenericService;
 import com.slmora.learn.dto.DirectoryDto;
 import com.slmora.learn.jpa.entity.EMFODirectory;
+import com.slmora.learn.jpa.entity.EMFOFile;
+import com.slmora.learn.model.SearchPathModel;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -69,9 +71,25 @@ public interface IMFODirectoryService extends IGenericService<byte[], EMFODirect
 
     public Optional<byte[]> persistMFODirectory(DirectoryDto directoryDto);
 
-    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256AndZipLevel(String directoryFullPathSha256, Integer zipLevel);
+    public Optional<List<EMFODirectory>> getMFODirectoryByDirectoryFullPathSha256AndZipLevel(String directoryFullPathSha256, Integer zipLevel);
 
-    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathAndZipLevel(String directoryFullPath, Integer zipLevel) throws
+    public Optional<List<EMFODirectory>> getMFODirectoryByDirectoryFullPathSha256AndZipLevelDrive(String directoryFullPathSha256, Integer zipLevel, Integer directoryDriveCode);
+
+    public Optional<List<EMFODirectory>> getAllMFODirectoryByDirectoryFullPathAndZipLevel(String directoryFullPath, Integer zipLevel) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException;
+
+    public Optional<List<EMFODirectory>> getAllMFODirectoryByDirectoryFullPathAndZipLevelDrive(String directoryFullPath, Integer zipLevel, Integer directoryDriveCode) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException;
+
+    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256AndZipLevelZipFileDrive(String directoryFullPathSha256, Integer zipLevel, EMFOFile zipFile, Integer directoryDriveCode);
+
+    public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathAndZipLevelZipFileDrive(String directoryFullPath, Integer zipLevel, EMFOFile zipFile, Integer directoryDriveCode) throws
+            NoSuchAlgorithmException,
+            InvalidKeyException;
+
+    Optional<EMFODirectory> getMFODirectoryBySearchPathModelDrive(SearchPathModel pathModel, Integer directoryDriveCode) throws
             NoSuchAlgorithmException,
             InvalidKeyException;
 

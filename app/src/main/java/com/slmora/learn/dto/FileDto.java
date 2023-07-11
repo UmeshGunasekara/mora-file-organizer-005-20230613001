@@ -9,6 +9,7 @@ package com.slmora.learn.dto;
 
 import com.slmora.learn.common.cryptography.hmac.util.EHmacAlgorithm;
 import com.slmora.learn.common.cryptography.hmac.util.MoraHMACUtilities;
+import com.slmora.learn.common.file.util.MoraFileWriteAccessUtilities;
 import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dto.base.BaseDto;
 import com.slmora.learn.dto.base.IDto;
@@ -62,6 +63,8 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
     private String fileName;
     private String fileFullPath;
     private String fileFullPathSha256;
+    private String fileTextPath;
+    private String fileTextPathSha256;
     private String fileExtension;
     private Double fileSizeInBytes;
     private LocalDateTime fileCreatedDateTime;
@@ -75,8 +78,11 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
     private Integer fileIsWritable;
     private Integer fileIsExecutable;
     private Integer fileIsZip=0;
+    private Integer fileSearchStatus=0;
+    private Integer fileDriveCode=0;
     private DirectoryDto directory;
     private FileCategoryDto fileCategory;
+    private FileDto fileZipParent;
     private Path filePath;
 
     private List<FilePropertyDataDto> filePropertyData;
@@ -97,6 +103,7 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
         setBasicFileAttributes(file);
         setDosFileAttributes(file);
         setFileAccessAttributes(file);
+        setFileTextPathAndSha256(file);
 
     }
 
@@ -112,6 +119,7 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
         setBasicFileAttributes(file);
         setDosFileAttributes(file);
         setFileAccessAttributes(file);
+        setFileTextPathAndSha256(dbFile);
 
     }
 
@@ -148,6 +156,8 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
         this.setFileName(jpaEntityFile.getFileName());
         this.setFileFullPath(jpaEntityFile.getFileFullPath());
         this.setFileFullPathSha256(jpaEntityFile.getFileFullPathSha256());
+        this.setFileTextPath(jpaEntityFile.getFileTextPath());
+        this.setFileTextPathSha256(jpaEntityFile.getFileTextPathSha256());
         this.setFileExtension(jpaEntityFile.getFileExtension());
         this.setFileSizeInBytes(jpaEntityFile.getFileSizeInBytes().doubleValue());
         if(jpaEntityFile.getFileCreatedDateTime()!=null) {
@@ -167,8 +177,15 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
         this.setFileIsWritable(jpaEntityFile.getFileIsWritable());
         this.setFileIsExecutable(jpaEntityFile.getFileIsExecutable());
         this.setFileIsZip(jpaEntityFile.getFileIsZip());
-        this.setDirectory(new DirectoryDto(jpaEntityFile.getDirectory()));
-        this.setFileCategory(new FileCategoryDto(jpaEntityFile.getFileCategory()));
+        this.setFileSearchStatus(jpaEntityFile.getFileSearchStatus());
+        this.setFileDriveCode(jpaEntityFile.getFileDriveCode());
+        if(jpaEntityFile.getDirectory()!=null){
+            this.setDirectory(new DirectoryDto(jpaEntityFile.getDirectory()));
+        }
+        if(jpaEntityFile.getFileCategory()!=null){
+            this.setFileCategory(new FileCategoryDto(jpaEntityFile.getFileCategory()));
+        }
+
     }
 
     @Override
@@ -214,6 +231,19 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
         }else{
             jpaEntityFile.setFileFullPathSha256(this.getFileFullPathSha256());
         }
+        jpaEntityFile.setFileTextPath(this.getFileTextPath());
+        if(this.getFileTextPathSha256()==null){
+            try {
+                this.setFileTextPathSha256BytFileTextPath();
+            } catch (NoSuchAlgorithmException e) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            } catch (InvalidKeyException e) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            }
+            jpaEntityFile.setFileTextPathSha256(this.getFileTextPathSha256());
+        }else{
+            jpaEntityFile.setFileTextPathSha256(this.getFileTextPathSha256());
+        }
         jpaEntityFile.setFileExtension(this.getFileExtension());
         jpaEntityFile.setFileSizeInBytes(new BigDecimal(this.getFileSizeInBytes(), MathContext.DECIMAL64));
         if(this.getFileCreatedDateTime()!=null) {
@@ -233,6 +263,8 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
         jpaEntityFile.setFileIsWritable(this.getFileIsWritable());
         jpaEntityFile.setFileIsExecutable(this.getFileIsExecutable());
         jpaEntityFile.setFileIsZip(this.getFileIsZip());
+        jpaEntityFile.setFileSearchStatus(this.getFileSearchStatus());
+        jpaEntityFile.setFileDriveCode(this.getFileDriveCode());
         if(this.getDirectory()!=null){
             jpaEntityFile.setDirectory(this.getDirectory().getEntity());
         }
@@ -249,7 +281,13 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
         this.setFileFullPathSha256(hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(), this.getFileFullPath(), this.getFileName()));
     }
 
-    private void setDosFileAttributes(Path file) throws IOException
+    public void setFileTextPathSha256BytFileTextPath() throws NoSuchAlgorithmException, InvalidKeyException
+    {
+        MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
+        this.setFileTextPathSha256(hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(), this.getFileTextPath(), this.getFileName()));
+    }
+
+    public void setDosFileAttributes(Path file) throws IOException
     {
         DosFileAttributes dosAttr = Files.readAttributes(file, DosFileAttributes.class);
         this.setFileIsReadOnly(dosAttr.isReadOnly() ? 1 : 0);
@@ -258,7 +296,7 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
         this.setFileIsSystem(dosAttr.isSystem() ? 1 : 0);
     }
 
-    private void setBasicFileAttributes(Path file) throws IOException
+    public void setBasicFileAttributes(Path file) throws IOException
     {
         //https://docs.oracle.com/javase/tutorial/essential/io/fileAttr.html
         BasicFileAttributes basicAttr = Files.readAttributes(file, BasicFileAttributes.class);
@@ -272,10 +310,18 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
                 ZoneId.systemDefault()));
     }
 
-    private void setFileAccessAttributes(Path file) throws IOException
+    public void setFileAccessAttributes(Path file) throws IOException
     {
         this.setFileIsReadable(Files.isReadable(file) ? 1 : 0);
         this.setFileIsWritable(Files.isWritable(file) ? 1 : 0);
         this.setFileIsExecutable(Files.isExecutable(file) ? 1 : 0);
+    }
+
+    public void setFileTextPathAndSha256(Path path) throws NoSuchAlgorithmException, InvalidKeyException
+    {
+        MoraFileWriteAccessUtilities writeAccessUtilities = new MoraFileWriteAccessUtilities();
+        MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
+        this.setFileTextPath(writeAccessUtilities.getNonWindowsPathPatternByPath(path));
+        this.setFileTextPathSha256(hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(), this.getFileTextPath(), this.getFileName()));
     }
 }
