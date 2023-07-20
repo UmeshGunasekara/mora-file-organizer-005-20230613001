@@ -74,7 +74,7 @@ public class EMFODirectory extends BaseEntity
 //    private Integer directoryCode;
 
     @Column(name = "directory_name")
-    @Size(max = 150)
+    @Size(max = 255)
     @NotNull
     private String directoryName;
 
@@ -83,7 +83,7 @@ public class EMFODirectory extends BaseEntity
     private String directoryFullPath;
 
     @Column(name = "directory_full_path_sha_256")
-    @Size(max = 150)
+    @Size(max = 255)
     @NotNull
     private String directoryFullPathSha256;
 
@@ -92,7 +92,7 @@ public class EMFODirectory extends BaseEntity
     private String directoryTextPath;
 
     @Column(name = "directory_text_path_sha_256")
-    @Size(max = 150)
+    @Size(max = 255)
     @NotNull
     private String directoryTextPathSha256;
 

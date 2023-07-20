@@ -57,9 +57,10 @@ public class VideoFileDataDto extends BaseDto implements IDto<EMFOVideoFileData>
     private FileDto file;
 
     public VideoFileDataDto(EMFOVideoFileData jpaEntityVideoFileData){
+        this.setId(jpaEntityVideoFileData.getId());
         if(jpaEntityVideoFileData.getId()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            this.setId(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityVideoFileData.getId()));
+            this.setUuid(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityVideoFileData.getId()));
         }
         this.setCode(jpaEntityVideoFileData.getCode());
         this.setNote(jpaEntityVideoFileData.getNote());
@@ -97,8 +98,10 @@ public class VideoFileDataDto extends BaseDto implements IDto<EMFOVideoFileData>
         EMFOVideoFileData jpaEntityVideoFileData = new EMFOVideoFileData();
 
         if(this.getId()!=null){
+            jpaEntityVideoFileData.setId(this.getId());
+        }else if(this.getUuid()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            jpaEntityVideoFileData.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getId()));
+            jpaEntityVideoFileData.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getUuid()));
         }
         jpaEntityVideoFileData.setCode(this.getCode());
         jpaEntityVideoFileData.setNote(this.getNote());

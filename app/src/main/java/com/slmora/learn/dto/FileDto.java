@@ -78,7 +78,7 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
     private Integer fileIsWritable;
     private Integer fileIsExecutable;
     private Integer fileIsZip=0;
-    private Integer fileSearchStatus=0;
+    private Integer fileSearchStatus=1;
     private Integer fileDriveCode=0;
     private DirectoryDto directory;
     private FileCategoryDto fileCategory;
@@ -129,9 +129,10 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
     }
 
     public FileDto(EMFOFile jpaEntityFile){
+        this.setId(jpaEntityFile.getId());
         if(jpaEntityFile.getId()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            this.setId(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityFile.getId()));
+            this.setUuid(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityFile.getId()));
         }
         this.setFilePath(Paths.get(jpaEntityFile.getFileFullPath()));
         this.setCode(jpaEntityFile.getCode());
@@ -194,8 +195,10 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
         EMFOFile jpaEntityFile = new EMFOFile();
 
         if(this.getId()!=null){
+            jpaEntityFile.setId(this.getId());
+        }else if(this.getUuid()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            jpaEntityFile.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getId()));
+            jpaEntityFile.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getUuid()));
         }
         jpaEntityFile.setCode(this.getCode());
         jpaEntityFile.setNote(this.getNote());

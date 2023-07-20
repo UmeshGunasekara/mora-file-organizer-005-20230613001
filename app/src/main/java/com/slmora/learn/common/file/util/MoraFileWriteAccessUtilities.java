@@ -14,14 +14,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -143,5 +138,56 @@ public class MoraFileWriteAccessUtilities {
     public Integer getDirectoryLevel(Path path){
         String sPath = path.toAbsolutePath().toString();
         return StringUtils.countMatches(sPath,path.getFileSystem().getSeparator());
+    }
+
+    public List<Path> getImmidiateFilesAndDirectoryList(Path sourcePath){
+        int baseDirectoryLevel = getDirectoryLevel(sourcePath);
+        List<Path> resultList = new ArrayList<>();
+        try{
+            Files.walkFileTree(sourcePath,
+                    new HashSet<FileVisitOption>(Arrays.asList(FileVisitOption.FOLLOW_LINKS)),
+                    Integer.MAX_VALUE,
+                    new SimpleFileVisitor<Path>()
+                    {
+                        @Override
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                        {
+                            int dirLevel = getDirectoryLevel(file);
+                            if(dirLevel>baseDirectoryLevel){
+                                return FileVisitResult.SKIP_SIBLINGS;
+                            }
+                            resultList.add(file);
+                            return FileVisitResult.CONTINUE;
+                        }
+
+                        @Override
+                        public FileVisitResult visitFileFailed(Path file, IOException e)
+                        {
+                            return FileVisitResult.CONTINUE;
+                        }
+
+                        @Override
+                        public FileVisitResult preVisitDirectory(Path dir,
+                                                                 BasicFileAttributes attrs)
+                        {
+                            int dirLevel = getDirectoryLevel(dir);
+                            if(dirLevel>baseDirectoryLevel){
+                                return FileVisitResult.SKIP_SUBTREE;
+                            }else {
+                                resultList.add(dir);
+                            }
+                            return FileVisitResult.CONTINUE;
+                        }
+
+                        @Override
+                        public FileVisitResult postVisitDirectory(Path dir, IOException exc){
+                            return FileVisitResult.CONTINUE;
+                        }
+                    });
+        } catch (IOException e) {
+//            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            e.printStackTrace();
+        }
+        return resultList;
     }
 }

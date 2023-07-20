@@ -64,7 +64,7 @@ public class MoraFileZipUtilities {
                 if (zipEntry.isDirectory()) {
                     if (!extractedDestination.isDirectory() && !extractedDestination.mkdirs()) {
                         LOGGER.error("Failed to create directory " + extractedDestination);
-                        throw new IOException("Failed to create directory " + extractedDestination);
+//                        throw new IOException("Failed to create directory " + extractedDestination);
                     }else {
                         if(extractedDestination.getAbsolutePath().endsWith(zipFileName)){
                             destinationPathString = extractedDestination.getAbsolutePath();
@@ -77,7 +77,7 @@ public class MoraFileZipUtilities {
                     File parent = extractedDestination.getParentFile();
                     if (!parent.isDirectory() && !parent.mkdirs()) {
                         LOGGER.error("Failed to create directory " + parent);
-                        throw new IOException("Failed to create directory " + parent);
+//                        throw new IOException("Failed to create directory " + parent);
                     }else {
                         if (!parent.getAbsolutePath().contains(zipFileName)) {
                             destinationPathString = targetFolderPath;
@@ -117,7 +117,7 @@ public class MoraFileZipUtilities {
 
         if (!destinationFilePathString.startsWith(destinationDirectoryPathString + File.separator)) {
             LOGGER.error("Entry is outside of the target dir: " + zipEntry.getName());
-            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
+//            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
         }
 
         return destFile;

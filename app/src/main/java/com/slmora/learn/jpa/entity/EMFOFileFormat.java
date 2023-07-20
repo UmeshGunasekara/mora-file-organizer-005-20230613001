@@ -58,7 +58,7 @@ public class EMFOFileFormat extends BaseEntity
     private static final long serialVersionUID = -980164999832436355L;
 
     @Column(name = "file_format_name")
-    @Size(max = 10)
+    @Size(max = 100)
     @NotNull
     private String fileFormatName;
 

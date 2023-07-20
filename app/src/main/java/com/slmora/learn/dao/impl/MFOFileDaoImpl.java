@@ -173,7 +173,7 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("No record found for the file full path SHA 256 :"+fileFullPathSha256);
+            LOGGER.error("getAllMFOFileByFileFullPathSha256AndZipLevel No record found for the file full path SHA 256 :"+fileFullPathSha256+", zipLevel : "+zipLevel);
             return Optional.empty();
         }catch (Throwable throwable) {
             LOGGER.error(ExceptionUtils.getStackTrace(throwable));
@@ -219,7 +219,7 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("No record found for the file full path SHA 256 :"+fileFullPathSha256);
+            LOGGER.error("getAllMFOFileByFileFullPathSha256AndZipLevelDrive No record found for the file full path SHA 256 :"+fileFullPathSha256+", zipLevel : "+zipLevel+", fileDriveCode : "+fileDriveCode);
             return Optional.empty();
         }catch (Throwable throwable) {
             LOGGER.error(ExceptionUtils.getStackTrace(throwable));
@@ -267,7 +267,7 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("No record found for the file full path SHA 256 :"+fileFullPathSha256);
+            LOGGER.error("getMFOFileByFileFullPathSha256AndZipLevelZipFileDrive No record found for the file full path SHA 256 :"+fileFullPathSha256+", zipLevel : "+zipLevel+", fileDriveCode : "+fileDriveCode);
             return Optional.empty();
         }catch (Throwable throwable) {
             LOGGER.error(ExceptionUtils.getStackTrace(throwable));
@@ -282,12 +282,10 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
 
     @Override
     public Optional<EMFOFile> getMFOFileBySearchPathModelDrive(String fileFullPathSha256,
-                                                               Integer zipLevel,
-                                                               String zipFileFullPathSha256,
-                                                               Integer fileZipLevel,
+                                                               Integer zipLevel, byte[] zipFileId,
                                                                Integer fileDriveCode)
     {
-        LOGGER.info("fileFullPathSha256 : "+fileFullPathSha256+" , zipLevel : "+zipLevel+" , zipFileFullPathSha256 : "+zipFileFullPathSha256+" , fileZipLevel : "+fileZipLevel+" , fileDriveCode : "+fileDriveCode);
+        LOGGER.info("fileFullPathSha256 : "+fileFullPathSha256+" , zipLevel : "+zipLevel+" , zipFileFullPathSha256 : "+" , fileDriveCode : "+fileDriveCode);
         Transaction transaction = null;
         try{
             Session session = getSession();
@@ -303,13 +301,15 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
             Predicate fileFullPathSha256Predicate = criteriaBuilder.equal(root.get("fileFullPathSha256"), fileFullPathSha256);
             Predicate fileZipLevelPredicate = criteriaBuilder.equal(root.get("fileIsZip"), zipLevel);
             Predicate fileDrivePredicate = criteriaBuilder.equal(root.get("fileDriveCode"), fileDriveCode);
-            Predicate zipFileFullPathSha256Predicate = criteriaBuilder.equal(fileZip.get("fileFullPathSha256"), zipFileFullPathSha256);
-            Predicate zipFileZipLevelPredicate = criteriaBuilder.equal(fileZip.get("fileIsZip"), fileZipLevel);
+//            Predicate zipFileFullPathSha256Predicate = criteriaBuilder.equal(fileZip.get("fileFullPathSha256"), zipFileFullPathSha256);
+//            Predicate zipFileZipLevelPredicate = criteriaBuilder.equal(fileZip.get("fileIsZip"), fileZipLevel);
+            Predicate zipFileidPredicate = criteriaBuilder.equal(fileZip.get("id"), zipFileId);
             Predicate zipFileDrivePredicate = criteriaBuilder.equal(fileZip.get("fileDriveCode"), fileDriveCode);
             Predicate fileSha256ZipLevelPredicate = criteriaBuilder.and(fileFullPathSha256Predicate,fileZipLevelPredicate);
             Predicate filePredicate = criteriaBuilder.and(fileSha256ZipLevelPredicate,fileDrivePredicate);
-            Predicate zipFileSha256ZipLevelPredicate = criteriaBuilder.and(zipFileFullPathSha256Predicate,zipFileZipLevelPredicate);
-            Predicate zipFilePredicate = criteriaBuilder.and(zipFileSha256ZipLevelPredicate,zipFileDrivePredicate);
+//            Predicate zipFileSha256ZipLevelPredicate = criteriaBuilder.and(zipFileFullPathSha256Predicate,zipFileZipLevelPredicate);
+//            Predicate zipFilePredicate = criteriaBuilder.and(zipFileSha256ZipLevelPredicate,zipFileDrivePredicate);
+            Predicate zipFilePredicate = criteriaBuilder.and(zipFileidPredicate,zipFileDrivePredicate);
             Predicate finalPredicate = criteriaBuilder.and(filePredicate,zipFilePredicate);
             criteriaQuery.where(finalPredicate);
 
@@ -323,7 +323,72 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("No record found for the file full path SHA 256 :"+fileFullPathSha256);
+            LOGGER.error("getMFOFileBySearchPathModelDrive No record found for the file full path SHA 256 :"+fileFullPathSha256+" , zipLevel : "+zipLevel+" , fileDriveCode : "+fileDriveCode);
+            return Optional.empty();
+        }catch (Throwable throwable) {
+//            if (transaction != null) {
+//                transaction.rollback();
+//            }
+            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
+            throwable.printStackTrace();
+            return Optional.empty();
+        }finally {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+        }
+    }
+
+    @Override
+    public Optional<EMFOFile> getMFOFileBySearchPathModelDrive(String fileFullPathSha256,
+                                                               Integer fileZipLevel,
+                                                               String zipFileFullPathSha256,
+                                                               Integer zipFileZipLevel,
+                                                               Integer driveCode)
+    {
+        LOGGER.info("fileFullPathSha256 : "+fileFullPathSha256+" , zipLevel : "+fileZipLevel+" , zipFileFullPathSha256 : "+zipFileFullPathSha256+" , zipFileZipLevel : "+zipFileZipLevel+" , driveCode : "+driveCode);
+        Transaction transaction = null;
+        try{
+            Session session = getSession();
+            transaction=session.beginTransaction();
+
+            CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+            CriteriaQuery<EMFOFile> criteriaQuery = criteriaBuilder.createQuery(EMFOFile.class);
+            Root<EMFOFile> root = criteriaQuery.from(EMFOFile.class);
+            Join<Object, Object> fileZip = root.join("fileZipParent");
+            criteriaQuery.select(root);
+
+//            ParameterExpression<String> pTitle = criteriaBuilder.parameter(String.class);
+            Predicate fileFullPathSha256Predicate = criteriaBuilder.equal(root.get("fileFullPathSha256"), fileFullPathSha256);
+            Predicate fileZipLevelPredicate = criteriaBuilder.equal(root.get("fileIsZip"), fileZipLevel);
+            Predicate fileDrivePredicate = criteriaBuilder.equal(root.get("fileDriveCode"), driveCode);
+
+            Predicate zipFileFullPathSha256Predicate = criteriaBuilder.equal(fileZip.get("fileFullPathSha256"), zipFileFullPathSha256);
+            Predicate zipFileZipLevelPredicate = criteriaBuilder.equal(fileZip.get("fileIsZip"), fileZipLevel);
+//            Predicate zipFileidPredicate = criteriaBuilder.equal(fileZip.get("id"), zipFileId);
+            Predicate zipFileDrivePredicate = criteriaBuilder.equal(fileZip.get("fileDriveCode"), driveCode);
+
+            Predicate fileSha256ZipLevelPredicate = criteriaBuilder.and(fileFullPathSha256Predicate,fileZipLevelPredicate);
+            Predicate filePredicate = criteriaBuilder.and(fileSha256ZipLevelPredicate,fileDrivePredicate);
+
+            Predicate zipFileSha256ZipLevelPredicate = criteriaBuilder.and(zipFileFullPathSha256Predicate,zipFileZipLevelPredicate);
+            Predicate zipFilePredicate = criteriaBuilder.and(zipFileSha256ZipLevelPredicate,zipFileDrivePredicate);
+
+//            Predicate zipFilePredicate = criteriaBuilder.and(zipFileidPredicate,zipFileDrivePredicate);
+            Predicate finalPredicate = criteriaBuilder.and(filePredicate,zipFilePredicate);
+            criteriaQuery.where(finalPredicate);
+
+            TypedQuery<EMFOFile> typedQuery = session.createQuery(criteriaQuery);
+            EMFOFile file = typedQuery.getSingleResult();
+//            transaction=getSession().beginTransaction();
+//            T t= (T) session.get(daoType, key);
+            transaction.commit();
+            return Optional.of(file);
+
+//            Session session = getSession();
+//            session.createNamedQuery("")
+        }catch (NoResultException ex){
+            LOGGER.error("getMFOFileBySearchPathModelDrive No record found for the file full path SHA 256 :"+fileFullPathSha256+" , zipLevel : "+fileZipLevel+" , zipFileFullPathSha256 : "+zipFileFullPathSha256+" , zipFileZipLevel : "+zipFileZipLevel+" , driveCode : "+driveCode);
             return Optional.empty();
         }catch (Throwable throwable) {
 //            if (transaction != null) {

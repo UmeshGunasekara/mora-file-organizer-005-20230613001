@@ -17,6 +17,7 @@ import com.slmora.learn.model.SearchPathModel;
 import com.slmora.learn.service.IMFODirectoryService;
 import com.slmora.learn.service.impl.MFODirectoryServiceImpl;
 import com.slmora.learn.system.property.SingleSystemProperty;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,6 +47,7 @@ import java.util.UUID;
 public class MFODirectoryController {
     final static Logger LOGGER = LogManager.getLogger(MFODirectoryController.class);
     public void addDirectory(Path dir, Integer zipFileLevel, Integer driveCode){
+        LOGGER.info("addDirectory dir : "+dir.toAbsolutePath().toString()+", zipFileLevel"+zipFileLevel+", driveCode : "+driveCode);
         if(dir != null && dir.toFile().isDirectory()){
             IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
@@ -66,6 +68,7 @@ public class MFODirectoryController {
 
                     Path parentDir = dir.getParent();
                     if(parentDir != null && parentDir.toFile().isDirectory()){
+                        LOGGER.info("addDirectory parentDir : "+parentDir.toAbsolutePath().toString()+", zipFileLevel"+zipFileLevel+", driveCode : "+driveCode);
                         Optional<List<EMFODirectory>> opListEntityDir = dirService.getAllMFODirectoryByDirectoryFullPathAndZipLevelDrive(parentDir.toAbsolutePath().toString(), zipFileLevel,driveCode);
 
                         if (opListEntityDir.isPresent()&&opListEntityDir.get().size()==1) {
@@ -103,7 +106,7 @@ public class MFODirectoryController {
                         }
                     }
                 }
-                SingleSystemProperty.SEARCH_DIR_STACK.push(SearchPathModel.of(dir,zipFileLevel,null,null));
+                SingleSystemProperty.SEARCH_DIR_STACK.push(SearchPathModel.of(dir,zipFileLevel,null,null,null));
 
                 UUID uuid = uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eDir.getId());
                 LOGGER.info("Added Directory " + dir.toAbsolutePath()
@@ -121,6 +124,7 @@ public class MFODirectoryController {
     }
 
     public void addDirectory(Path dir, Integer zipFileLevel, EMFOFile zipFile, Path zipParent, Integer driveCode){
+        LOGGER.info("addDirectory2 dir : "+dir.toAbsolutePath().toString()+", zipFileLevel"+zipFileLevel+", zipFile : "+zipFile.getFileFullPath()+", zipParent"+zipParent.toAbsolutePath().toString()+", driveCode : "+driveCode);
         if(dir != null && dir.toFile().isDirectory()){
             IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
@@ -129,7 +133,9 @@ public class MFODirectoryController {
 
             String zipExtractionDestination = SingleSystemProperty.PROP_MFO_ZIP_EXTRACT_DESTINATION+"_"+zipFileLevel;
 
-            String dbDirString = dir.toAbsolutePath().toString().replace(zipExtractionDestination, zipParent.toAbsolutePath().toString());
+//            String dbDirString = dir.toAbsolutePath().toString().replace(zipExtractionDestination, zipParent.toAbsolutePath().toString());
+//            String dbDirString = dir.toAbsolutePath().toString().replace(zipExtractionDestination, getGeneratedZipParent(zipParent,zipFile.getFileName()));
+            String dbDirString = dir.toAbsolutePath().toString().replace(zipExtractionDestination, zipFile.getFileFullPath());
             Path dbDir = Paths.get(dbDirString);
 
             try {
@@ -146,6 +152,7 @@ public class MFODirectoryController {
 
                     Path parentDir = dbDir.getParent();
                     if(parentDir != null && parentDir.toFile().isDirectory()){
+                        LOGGER.info("addDirectory2 parentDir : "+parentDir.toAbsolutePath().toString()+", zipFileLevel"+zipFileLevel+", zipFile : "+zipFile.getFileFullPath()+", driveCode : "+driveCode);
                         Optional<EMFODirectory> opEntityDir = dirService.getMFODirectoryByDirectoryFullPathAndZipLevelZipFileDrive(parentDir.toAbsolutePath().toString(), zipFileLevel,zipFile,driveCode);
 
                         if(opEntityDir.isPresent()){
@@ -179,7 +186,7 @@ public class MFODirectoryController {
                         }
                     }
                 }
-                SingleSystemProperty.SEARCH_DIR_STACK.push(SearchPathModel.of(dbDir,zipFileLevel,Paths.get(zipFile.getFileFullPath()),zipFile.getFileIsZip()));
+                SingleSystemProperty.SEARCH_DIR_STACK.push(SearchPathModel.of(dbDir,zipFileLevel,Paths.get(zipFile.getFileFullPath()),zipFile.getFileIsZip(),zipFile.getId()));
 
                 MFOZipDirectoryFileController zipDirectoryFileController = new MFOZipDirectoryFileController();
                 zipDirectoryFileController.addZipDirectory(zipFile, eDir);
@@ -206,5 +213,20 @@ public class MFODirectoryController {
             return path.toAbsolutePath().toString().equals(searchPath)|| path.toAbsolutePath().toString().contains(searchPath.toAbsolutePath().toString()+path.getFileSystem().getSeparator());
         }
 
+    }
+
+    private String getGeneratedZipParent(Path zipParent, String zipFileName){
+        String generatedZipParent = zipParent.toAbsolutePath().toString()+zipParent.getFileSystem().getSeparator()+removeExtension(zipFileName);
+//        String generatedZipParent = zipParent.toAbsolutePath().toString()+zipParent.getFileSystem().getSeparator()+zipFileName;
+        return generatedZipParent;
+    }
+
+    private String removeExtension(final String filename) {
+        final int index = FilenameUtils.indexOfExtension(filename); //used the String.lastIndexOf() method
+        if (index == -1) {
+            return filename;
+        } else {
+            return filename.substring(0, index);
+        }
     }
 }

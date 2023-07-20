@@ -49,9 +49,10 @@ public class FileFormatDto extends BaseDto implements IDto<EMFOFileFormat>
     private List<FileFormatPropertyDto> fileFormatProperties;
 
     public FileFormatDto(EMFOFileFormat jpaEntityFileFormat){
+        this.setId(jpaEntityFileFormat.getId());
         if(jpaEntityFileFormat.getId()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            this.setId(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityFileFormat.getId()));
+            this.setUuid(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityFileFormat.getId()));
         }
         this.setCode(jpaEntityFileFormat.getCode());
         this.setNote(jpaEntityFileFormat.getNote());
@@ -83,8 +84,10 @@ public class FileFormatDto extends BaseDto implements IDto<EMFOFileFormat>
         EMFOFileFormat jpaEntityFileFormat = new EMFOFileFormat();
 
         if(this.getId()!=null){
+            jpaEntityFileFormat.setId(this.getId());
+        }else if(this.getUuid()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            jpaEntityFileFormat.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getId()));
+            jpaEntityFileFormat.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getUuid()));
         }
         jpaEntityFileFormat.setCode(this.getCode());
         jpaEntityFileFormat.setNote(this.getNote());

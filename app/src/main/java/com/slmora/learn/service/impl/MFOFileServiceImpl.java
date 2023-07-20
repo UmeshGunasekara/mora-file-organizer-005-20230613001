@@ -213,7 +213,18 @@ public class MFOFileServiceImpl extends GenericServiceImpl<byte[], EMFOFile> imp
             NoSuchAlgorithmException,
             InvalidKeyException
     {
-        if(pathModel.getZipParentFile()==null) {
+        MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
+        Path file = pathModel.getPath();
+        String fileName = file.getFileName().toString();
+
+        Path zipFile = null;
+        String zipFileName = null;
+        if(pathModel.getZipParentFilePath()!=null) {
+            zipFile = pathModel.getZipParentFilePath();
+            zipFileName = zipFile.getFileName().toString();
+        }
+
+        if(pathModel.getZipParentFilePath()==null) {
             Optional<List<EMFOFile>> opListFile = getAllMFOFileByFileFullPathAndZipLevelDrive(pathModel.getPath().toAbsolutePath().toString(), pathModel.getZipLevel(),fileDriveCode);
             if(opListFile.isPresent()){
                 if(opListFile.get().size()==1){
@@ -224,19 +235,31 @@ public class MFOFileServiceImpl extends GenericServiceImpl<byte[], EMFOFile> imp
             }else {
                 return Optional.empty();
             }
-        }else {
-            MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
-            Path file = pathModel.getPath();
-            String fileName = file.getFileName().toString();
+        } else if (pathModel.getZipParentFileId()==null) {
+            return fileDao.getMFOFileBySearchPathModelDrive(
+                    hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+                            EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+                            file.toAbsolutePath().toString(), fileName),
+                    pathModel.getZipLevel(),
+                    hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+                            EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+                            zipFile.toAbsolutePath().toString(), zipFileName),
+                    pathModel.getZipLevel(),
+                    fileDriveCode);
+        } else {
 
-            Path zipFile = pathModel.getZipParentFile();
+//            return fileDao.getMFOFileBySearchPathModelDrive(
+//                    hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+//                            EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+//                            file.toAbsolutePath().toString(), fileName), pathModel.getZipLevel(),
+//                    hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+//                            EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+//                            zipFile.toAbsolutePath().toString(), zipFile.getFileName().toString()), pathModel.getZipParentFileLevel(),fileDriveCode);
             return fileDao.getMFOFileBySearchPathModelDrive(
                     hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
                             EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
                             file.toAbsolutePath().toString(), fileName), pathModel.getZipLevel(),
-                    hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
-                            EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
-                            zipFile.toAbsolutePath().toString(), zipFile.getFileName().toString()), pathModel.getZipParentFileLevel(),fileDriveCode);
+                    pathModel.getZipParentFileId(), fileDriveCode);
         }
     }
 }

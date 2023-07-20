@@ -32,7 +32,8 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 public abstract class BaseDto {
-    private UUID id;
+    private byte[] id;
+    private UUID uuid;
     private Integer code;
     private String note;
     private int rawCreateUserAccountId;

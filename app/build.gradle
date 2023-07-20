@@ -161,7 +161,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = 'com.slmora.learn.App'
+    mainClass = 'com.slmora.learn.app.App'
 }
 
 tasks.named('test') {
@@ -198,6 +198,8 @@ sourceSets {
 }
 
 //Added
+//https://stackoverflow.com/questions/34855649/invalid-signature-file-digest-for-manifest-main-attributes-exception-while-tryin
+//https://stackoverflow.com/questions/37848553/error-in-executing-the-generated-jar-file
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest{
@@ -208,6 +210,7 @@ jar {
                 'Build-Jdk': "${builtJDK}",
                 'Main-Class': "${mainClassName}"
     }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
     archiveBaseName.set('mora-file-organizer-005-20230613001')
     from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 }

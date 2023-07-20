@@ -51,9 +51,10 @@ public class FileCategoryDto extends BaseDto implements IDto<EMFOFileCategory>
     private List<FileDto> fileFormats;
 
     public FileCategoryDto(EMFOFileCategory jpaEntityFileCategory){
+        this.setId(jpaEntityFileCategory.getId());
         if(jpaEntityFileCategory.getId()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            this.setId(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityFileCategory.getId()));
+            this.setUuid(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityFileCategory.getId()));
         }
         this.setCode(jpaEntityFileCategory.getCode());
         this.setNote(jpaEntityFileCategory.getNote());
@@ -84,8 +85,10 @@ public class FileCategoryDto extends BaseDto implements IDto<EMFOFileCategory>
         EMFOFileCategory jpaEntityFileCategory = new EMFOFileCategory();
 
         if(this.getId()!=null){
+            jpaEntityFileCategory.setId(this.getId());
+        }else if(this.getUuid()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            jpaEntityFileCategory.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getId()));
+            jpaEntityFileCategory.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getUuid()));
         }
         jpaEntityFileCategory.setCode(this.getCode());
         jpaEntityFileCategory.setNote(this.getNote());

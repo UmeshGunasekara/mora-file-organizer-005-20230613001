@@ -41,7 +41,7 @@ public class T24 {
         SearchPathModel model = new SearchPathModel();
 
         model.setPath(Paths.get("D:\\MORA\\Video\\TM\\ABC\\AA\\ABC\\AA"));
-        model.setZipParentFile(Paths.get("D:\\MORA\\Video\\TM\\ABC\\AA\\ABC.zip"));
+        model.setZipParentFilePath(Paths.get("D:\\MORA\\Video\\TM\\ABC\\AA\\ABC.zip"));
         model.setZipLevel(1);
         model.setZipParentFileLevel(0);
 
@@ -49,7 +49,7 @@ public class T24 {
 
         System.out.println(hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
                 EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
-                model.getZipParentFile().toAbsolutePath().toString(), model.getZipParentFile().getFileName().toString()));
+                model.getZipParentFilePath().toAbsolutePath().toString(), model.getZipParentFilePath().getFileName().toString()));
 
         Optional<EMFODirectory> eDir = directoryService.getMFODirectoryBySearchPathModelDrive(model, 1);
         System.out.println(eDir.get().getDirectoryFullPath());

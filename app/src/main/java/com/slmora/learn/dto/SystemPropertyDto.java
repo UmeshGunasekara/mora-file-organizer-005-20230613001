@@ -49,9 +49,10 @@ public class SystemPropertyDto extends BaseDto implements IDto<EMFOSystemPropert
     private Character systemPropValueSeparator;
 
     public SystemPropertyDto(EMFOSystemProperty jpaEntitySystemProperty){
+        this.setId(jpaEntitySystemProperty.getId());
         if(jpaEntitySystemProperty.getId()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            this.setId(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntitySystemProperty.getId()));
+            this.setUuid(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntitySystemProperty.getId()));
         }
         this.setCode(jpaEntitySystemProperty.getCode());
         this.setNote(jpaEntitySystemProperty.getNote());
@@ -84,8 +85,10 @@ public class SystemPropertyDto extends BaseDto implements IDto<EMFOSystemPropert
         EMFOSystemProperty jpaEntitySystemProperty = new EMFOSystemProperty();
 
         if(this.getId()!=null){
+            jpaEntitySystemProperty.setId(this.getId());
+        }else if(this.getUuid()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            jpaEntitySystemProperty.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getId()));
+            jpaEntitySystemProperty.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getUuid()));
         }
         jpaEntitySystemProperty.setCode(this.getCode());
         jpaEntitySystemProperty.setNote(this.getNote());

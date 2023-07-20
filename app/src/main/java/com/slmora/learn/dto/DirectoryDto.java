@@ -73,9 +73,10 @@ public class DirectoryDto extends BaseDto implements IDto<EMFODirectory>
     }
 
     public DirectoryDto(EMFODirectory jpaEntityDirectory){
+        this.setId(jpaEntityDirectory.getId());
         if(jpaEntityDirectory.getId()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            this.setId(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityDirectory.getId()));
+            this.setUuid(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityDirectory.getId()));
         }
         this.setCode(jpaEntityDirectory.getCode());
         this.setNote(jpaEntityDirectory.getNote());
@@ -123,8 +124,10 @@ public class DirectoryDto extends BaseDto implements IDto<EMFODirectory>
         EMFODirectory jpaEntityDirectory = new EMFODirectory();
 
         if(this.getId()!=null){
+            jpaEntityDirectory.setId(this.getId());
+        }else if(this.getUuid()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            jpaEntityDirectory.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getId()));
+            jpaEntityDirectory.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getUuid()));
         }
         jpaEntityDirectory.setCode(this.getCode());
         jpaEntityDirectory.setNote(this.getNote());

@@ -200,6 +200,7 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
             NoSuchAlgorithmException,
             InvalidKeyException
     {
+        LOGGER.info("getMFODirectoryByDirectoryFullPathAndZipLevelZipFileDrive directoryFullPath : "+directoryFullPath+" , zipLevel : "+zipLevel+" , directoryDriveCode : "+directoryDriveCode);
         MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
         Path dir = Paths.get(directoryFullPath);
         String dirName = dir.toString();
@@ -217,10 +218,24 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
             NoSuchAlgorithmException,
             InvalidKeyException
     {
-        if(pathModel.getZipParentFile()==null) {
+        MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
+        Path dir = pathModel.getPath();
+        String dirName = dir.toString();
+        if(!dir.toString().equals(dir.getRoot().toString())){
+            dirName = dir.getFileName().toString();
+        }
+
+        Path zipFile=null;
+        String zipFileName=null;
+        if(pathModel.getZipParentFilePath()!=null) {
+            zipFile = pathModel.getZipParentFilePath();
+            zipFileName = zipFile.getFileName().toString();
+        }
+
+        if(pathModel.getZipParentFilePath()==null){
             Optional<List<EMFODirectory>> opListDir = getAllMFODirectoryByDirectoryFullPathAndZipLevelDrive(pathModel.getPath().toAbsolutePath().toString(), pathModel.getZipLevel(),directoryDriveCode);
             if(opListDir.isPresent()){
-                if(!opListDir.get().isEmpty()){
+                if(opListDir.get().size()==1){
                     return Optional.of(opListDir.get().get(0));
                 }else {
                     return Optional.empty();
@@ -228,22 +243,23 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
             }else {
                 return Optional.empty();
             }
+        } else if (pathModel.getZipParentFileId()==null) {
+            return directoryDao.getMFODirectoryBySearchPathModelDrive(
+                    hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+                            EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+                            dir.toAbsolutePath().toString(), dirName),
+                    pathModel.getZipLevel(),
+                    hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
+                            EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
+                            zipFile.toAbsolutePath().toString(), zipFileName),
+                    pathModel.getZipLevel(),
+                    directoryDriveCode);
         }else {
-            MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
-            Path dir = pathModel.getPath();
-            String dirName = dir.toString();
-            if(!dir.toString().equals(dir.getRoot().toString())){
-                dirName = dir.getFileName().toString();
-            }
-
-            Path zipFile = pathModel.getZipParentFile();
             return directoryDao.getMFODirectoryBySearchPathModelDrive(
                     hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
                             EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
                             dir.toAbsolutePath().toString(), dirName), pathModel.getZipLevel(),
-                    hmacUtilities.hmacStringByMacUsingAlgorithmKey_156(
-                            EHmacAlgorithm.SHA256.getHmacAlgorithmNameString(),
-                            zipFile.toAbsolutePath().toString(), zipFile.getFileName().toString()), pathModel.getZipParentFileLevel(),directoryDriveCode);
+                    pathModel.getZipParentFileId(),directoryDriveCode);
         }
     }
 

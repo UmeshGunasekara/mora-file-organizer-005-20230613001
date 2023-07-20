@@ -63,7 +63,7 @@ public class EMFOFile extends BaseEntity
     private static final long serialVersionUID = 4954906237766057765L;
 
     @Column(name = "file_name")
-    @Size(max = 150)
+    @Size(max = 255)
     @NotNull
     private String fileName;
 
@@ -72,7 +72,7 @@ public class EMFOFile extends BaseEntity
     private String fileFullPath;
 
     @Column(name = "file_full_path_sha_256")
-    @Size(max = 150)
+    @Size(max = 255)
     @NotNull
     private String fileFullPathSha256;
 
@@ -81,7 +81,7 @@ public class EMFOFile extends BaseEntity
     private String fileTextPath;
 
     @Column(name = "file_text_path_sha_256")
-    @Size(max = 150)
+    @Size(max = 255)
     @NotNull
     private String fileTextPathSha256;
 
@@ -130,7 +130,7 @@ public class EMFOFile extends BaseEntity
 
     @Column(name = "file_search_status", columnDefinition = "TINYINT(1) default '0'")
     @NotNull
-    private Integer fileSearchStatus=0;
+    private Integer fileSearchStatus=1;
 
     @Column(name = "file_drive_code", columnDefinition = "SMALLINT default '0'")
     @NotNull

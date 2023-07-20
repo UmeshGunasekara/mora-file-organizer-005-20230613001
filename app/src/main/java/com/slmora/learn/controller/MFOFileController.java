@@ -25,6 +25,7 @@ import com.slmora.learn.service.impl.MFODirectoryServiceImpl;
 import com.slmora.learn.service.impl.MFOFileServiceImpl;
 import com.slmora.learn.system.property.SingleSystemProperty;
 import com.slmora.learn.util.EMFileCategory;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,7 +61,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MFOFileController {
     final static Logger LOGGER = LogManager.getLogger(MFOFileController.class);
-    public void addFile(Path file, Integer zipFileLevel, EMFOFile zipFile, Path zipParent, Integer driveCode){
+    public void addFile(Path file, Integer zipFileLevel, EMFOFile zipFile, Path zipParent, Integer driveCode, boolean isSkipEnable){
         IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
         IMFOFileCategoryService fileCategoryService = new MFOFileCategoryServiceImpl(new MFOFileCategoryDaoImpl());
         MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
@@ -69,14 +70,21 @@ public class MFOFileController {
 
         String zipExtractionDestination = SingleSystemProperty.PROP_MFO_ZIP_EXTRACT_DESTINATION+"_"+zipFileLevel;
 
-        String dbFileString = file.toAbsolutePath().toString().replace(zipExtractionDestination, zipParent.toAbsolutePath().toString());
+//        String dbFileString = file.toAbsolutePath().toString().replace(zipExtractionDestination, zipParent.toAbsolutePath().toString());
+//        String dbFileString = file.toAbsolutePath().toString().replace(zipExtractionDestination, getGeneratedZipParent(zipParent,zipFile.getFileName()));
+        String dbFileString = file.toAbsolutePath().toString().replace(zipExtractionDestination, zipFile.getFileFullPath());
         Path dbFile = Paths.get(dbFileString);
 
+        EMFOFile eFile = null;
+        FileDto fileDto = null;
+        Path parentDir = null;
+
+
         try {
-            FileDto fileDto = new FileDto(file, dbFile, zipFileLevel);
+            fileDto = new FileDto(file, dbFile, zipFileLevel);
             fileDto.setFileDriveCode(driveCode);
-            EMFOFile eFile = fileDto.getEntity();
-            Path parentDir = dbFile.getParent();
+            eFile = fileDto.getEntity();
+            parentDir = dbFile.getParent();
             if (parentDir != null) {
                 Optional<EMFODirectory> opEntityDir = dirService.getMFODirectoryByDirectoryFullPathAndZipLevelZipFileDrive(parentDir.toAbsolutePath()
                         .toString(), zipFileLevel, zipFile, driveCode);
@@ -88,6 +96,9 @@ public class MFOFileController {
             eFile.setFileZipParent(zipFile);
             eFile.setFileCategory(fileCategoryService.getMFOFileCategoryByFileFormatName(fileDto.getFileExtension().toLowerCase())
                     .get());
+            if(!fileDto.getFileExtension().isBlank()&&fileDto.getFileExtension().toLowerCase().endsWith("zip")){
+                eFile.setFileSearchStatus(0);
+            }
 
             eFile = fileService.persistMFOFile(eFile);
 
@@ -125,12 +136,6 @@ public class MFOFileController {
                 audioFileDataController.addAudioFileDate(eFile, file);
             }
 
-            if(!fileDto.getFileExtension().isBlank()&&fileDto.getFileExtension().toLowerCase().endsWith("zip")){
-                eFile.setFileSearchStatus(0);
-                addZipFile(file, eFile, ++zipFileLevel,parentDir, driveCode);
-                eFile.setFileSearchStatus(1);
-            }
-
 
         } catch (IOException e) {
             LOGGER.error(ExceptionUtils.getStackTrace(e));
@@ -140,20 +145,42 @@ public class MFOFileController {
             LOGGER.error(ExceptionUtils.getStackTrace(e));
         } finally {
             dirService.close();
+            fileCategoryService.close();
+            fileService.close();
+        }
+
+        IMFOFileService zipFileService = new MFOFileServiceImpl(new MFOFileDaoImpl());
+        try {
+            if (!fileDto.getFileExtension().isBlank() && fileDto.getFileExtension().toLowerCase().endsWith("zip")) {
+                addZipFile(file, eFile, ++zipFileLevel, parentDir, driveCode,isSkipEnable);
+                Optional<EMFOFile> opEntityZipFile = zipFileService.getMFOFileById(eFile.getId());
+                if(opEntityZipFile.isPresent()){
+                    EMFOFile eZipFile = opEntityZipFile.get();
+                    eZipFile.setFileSearchStatus(1);
+                    zipFileService.persistMFOFile(eZipFile);
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error(ExceptionUtils.getStackTrace(e));
+        } finally {
+            zipFileService.close();
         }
 
     }
 
-    public void addFile(Path file, Integer zipFileLevel, Integer driveCode){
+    public void addFile(Path file, Integer zipFileLevel, Integer driveCode, boolean isSkipEnable){
         IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
         IMFOFileCategoryService fileCategoryService = new MFOFileCategoryServiceImpl(new MFOFileCategoryDaoImpl());
         MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
 
         IMFOFileService fileService = new MFOFileServiceImpl(new MFOFileDaoImpl());
+        EMFOFile eFile = null;
+        FileDto fileDto = null;
+        Path parentDir = null;
 
 
         try {
-            FileDto fileDto = new FileDto(file);
+            fileDto = new FileDto(file);
             fileDto.setFileDriveCode(driveCode);
 //            fileDto.setFileName(file.getFileName().toString());
 //            fileDto.setFileFullPath(file.toAbsolutePath().toString());
@@ -164,8 +191,8 @@ public class MFOFileController {
 //            fileDto.setFileExtension(FilenameUtils.getExtension(fileDto.getFileName()));
 
 
-            EMFOFile eFile = fileDto.getEntity();
-            Path parentDir = file.getParent();
+            eFile = fileDto.getEntity();
+            parentDir = file.getParent();
             if (parentDir != null && parentDir.toFile().isDirectory()) {
                 Optional<List<EMFODirectory>> opListEntityDir = dirService.getAllMFODirectoryByDirectoryFullPathAndZipLevelDrive(parentDir.toAbsolutePath()
                         .toString(), zipFileLevel,driveCode);
@@ -180,6 +207,10 @@ public class MFOFileController {
 
             eFile.setFileCategory(fileCategoryService.getMFOFileCategoryByFileFormatName(fileDto.getFileExtension().toLowerCase())
                     .get());
+
+            if(!fileDto.getFileExtension().isBlank()&&fileDto.getFileExtension().toLowerCase().endsWith("zip")){
+                eFile.setFileSearchStatus(0);
+            }
 
             eFile = fileService.persistMFOFile(eFile);
 
@@ -217,13 +248,7 @@ public class MFOFileController {
                 audioFileDataController.addAudioFileDate(eFile);
             }
 
-            if(!fileDto.getFileExtension().isBlank()&&fileDto.getFileExtension().toLowerCase().endsWith("zip")){
-                eFile.setFileSearchStatus(0);
-//                fileService.persistMFOFile(eFile);
-                addZipFile(Paths.get(fileDto.getFileFullPath()), eFile, ++zipFileLevel, parentDir, driveCode);
-                eFile.setFileSearchStatus(1);
-//                fileService.persistMFOFile(eFile);
-            }
+
 
 
         } catch (IOException e) {
@@ -234,10 +259,156 @@ public class MFOFileController {
             LOGGER.error(ExceptionUtils.getStackTrace(e));
         } finally {
             dirService.close();
+            fileCategoryService.close();
+            fileService.close();
+        }
+
+        IMFOFileService zipFileService = new MFOFileServiceImpl(new MFOFileDaoImpl());
+
+        try {
+            if (!fileDto.getFileExtension().isBlank() && fileDto.getFileExtension().toLowerCase().endsWith("zip")) {
+//                eFile.setFileSearchStatus(0);
+//                fileService.persistMFOFile(eFile);
+                addZipFile(Paths.get(fileDto.getFileFullPath()), eFile, ++zipFileLevel, parentDir, driveCode,isSkipEnable);
+                Optional<EMFOFile> opEntityZipFile = zipFileService.getMFOFileById(eFile.getId());
+                if(opEntityZipFile.isPresent()){
+                    EMFOFile eZipFile = opEntityZipFile.get();
+                    eZipFile.setFileSearchStatus(1);
+                    zipFileService.persistMFOFile(eZipFile);
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error(ExceptionUtils.getStackTrace(e));
+        } finally {
+            zipFileService.close();
         }
     }
 
-    public void addZipFile(Path file, EMFOFile eFile, Integer zipFileLevel, Path zipParent, Integer driveCode) throws IOException
+    public void addFile(Path file, FileDto fileDto, Integer zipFileLevel, EMFOFile zipFile, Path zipParent, Integer driveCode, boolean isSkipEnable){
+        IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
+        IMFOFileCategoryService fileCategoryService = new MFOFileCategoryServiceImpl(new MFOFileCategoryDaoImpl());
+        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+
+        IMFOFileService fileService = new MFOFileServiceImpl(new MFOFileDaoImpl());
+
+//        String zipExtractionDestination = SingleSystemProperty.PROP_MFO_ZIP_EXTRACT_DESTINATION+"_"+zipFileLevel;
+//        String dbFileString = fileDto.getFilePath().toAbsolutePath().toString().replace(zipExtractionDestination, zipFile.getFileFullPath());
+//        Path dbFile = Paths.get(dbFileString);
+
+        Path dbFile = fileDto.getFilePath();
+
+        EMFOFile eFile = null;
+        Path parentDir = dbFile.getParent();
+
+        if(!fileDto.getFileExtension().isBlank()&&fileDto.getFileExtension().toLowerCase().endsWith("zip")) {
+            try {
+                Optional<EMFOFile> opEFile = fileService.getMFOFileById(fileDto.getId());
+                if (opEFile.isPresent()) {
+                    eFile = opEFile.get();
+                    eFile.setFileSearchStatus(0);
+
+                    if (SingleSystemProperty.SEARCH_DIR_STACK.size() > 0) {
+                        SearchPathModel lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
+                        while (!isSearchPathMatching(dbFile, lastPathModel.getPath())) {
+                            Optional<EMFODirectory> opSearchDir = dirService.getMFODirectoryBySearchPathModelDrive(lastPathModel, driveCode);
+                            if (opSearchDir.isPresent()) {
+                                EMFODirectory searchDir = opSearchDir.get();
+                                searchDir.setDirectorySearchStatus(1);
+                                dirService.persistMFODirectory(searchDir);
+                            }
+                            LOGGER.info("Poped from the search stack : " + SingleSystemProperty.SEARCH_DIR_STACK.pop());
+                            if (SingleSystemProperty.SEARCH_DIR_STACK.size() > 0) {
+                                lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                addZipFile(file, eFile, ++zipFileLevel, parentDir, driveCode,isSkipEnable);
+
+                eFile.setFileSearchStatus(1);
+                fileService.persistMFOFile(eFile);
+
+            } catch (IOException e) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            } catch (NoSuchAlgorithmException e) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            } catch (InvalidKeyException e) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            } finally {
+                dirService.close();
+                fileCategoryService.close();
+                fileService.close();
+            }
+        }
+
+    }
+
+    public void addFile(FileDto fileDto, Integer zipFileLevel, Integer driveCode, boolean isSkipEnable){
+        IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
+        IMFOFileCategoryService fileCategoryService = new MFOFileCategoryServiceImpl(new MFOFileCategoryDaoImpl());
+
+        IMFOFileService fileService = new MFOFileServiceImpl(new MFOFileDaoImpl());
+        EMFOFile eFile = null;
+        Path parentDir = fileDto.getFilePath().getParent();
+
+
+        if(!fileDto.getFileExtension().isBlank()&&fileDto.getFileExtension().toLowerCase().endsWith("zip")) {
+            try {
+                Optional<EMFOFile> opEFile = fileService.getMFOFileById(fileDto.getId());
+                if (opEFile.isPresent()) {
+                    eFile = opEFile.get();
+                    eFile.setFileSearchStatus(0);
+
+                    if (SingleSystemProperty.SEARCH_DIR_STACK.size() > 0) {
+                        SearchPathModel lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
+                        while (!isSearchPathMatching(fileDto.getFilePath(), lastPathModel.getPath())) {
+                            Optional<EMFODirectory> opSearchDir = dirService.getMFODirectoryBySearchPathModelDrive(lastPathModel, driveCode);
+                            if (opSearchDir.isPresent()) {
+                                EMFODirectory searchDir = opSearchDir.get();
+                                searchDir.setDirectorySearchStatus(1);
+                                dirService.persistMFODirectory(searchDir);
+                            }
+                            LOGGER.info("Poped from the search stack : " + SingleSystemProperty.SEARCH_DIR_STACK.pop());
+                            if (SingleSystemProperty.SEARCH_DIR_STACK.size() > 0) {
+                                lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+
+                    addZipFile(fileDto.getFilePath(), eFile, ++zipFileLevel, parentDir, driveCode,isSkipEnable);
+//                    Optional<EMFOFile> opEntityZipFile = fileService.getMFOFileById(eFile.getId());
+//                    if (opEntityZipFile.isPresent()) {
+//                        EMFOFile eZipFile = opEntityZipFile.get();
+//                        eZipFile.setFileSearchStatus(1);
+//                        fileService.persistMFOFile(eZipFile);
+//                    }
+
+                    eFile.setFileSearchStatus(1);
+                    fileService.persistMFOFile(eFile);
+
+                }
+
+            } catch (IOException e) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            } catch (NoSuchAlgorithmException e) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            } catch (InvalidKeyException e) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            } finally {
+                dirService.close();
+                fileCategoryService.close();
+                fileService.close();
+            }
+        }
+
+    }
+
+    public void addZipFile(Path file, EMFOFile eFile, Integer zipFileLevel, Path zipParent, Integer driveCode, boolean isSkipEnable) throws IOException
     {
         MoraFileWriteAccessUtilities fileWriteAccessUtilities = new MoraFileWriteAccessUtilities();
         MoraFileZipUtilities fileZipUtilities = new MoraFileZipUtilities();
@@ -258,7 +429,7 @@ public class MFOFileController {
             MoraFileOrganizerWalkingController walkingController = new MoraFileOrganizerWalkingController();
             LOGGER.info("File : "+file.toAbsolutePath().toString()+" ,Extracted in "+extractedPath.toAbsolutePath().toString());
 
-            walkingController.sourcePathWalk(extractedPath, zipFileLevel, parent, eFile, driveCode);
+            walkingController.sourcePathWalk(extractedPath, zipFileLevel, parent, eFile, driveCode,isSkipEnable);
             if(zipExtractionDestination.equals(extractedPath.toAbsolutePath().toString())){
                 fileWriteAccessUtilities.removeAll(extractedPath,false);
             }else {
@@ -304,6 +475,21 @@ public class MFOFileController {
             return path.toAbsolutePath().toString().equals(searchPath)|| path.toAbsolutePath().toString().contains(searchPath.toAbsolutePath().toString()+path.getFileSystem().getSeparator());
         }
 
+    }
+
+    private String getGeneratedZipParent(Path zipParent, String zipFileName){
+        String generatedZipParent = zipParent.toAbsolutePath().toString()+zipParent.getFileSystem().getSeparator()+removeExtension(zipFileName);
+//        String generatedZipParent = zipParent.toAbsolutePath().toString()+zipParent.getFileSystem().getSeparator()+zipFileName;
+        return generatedZipParent;
+    }
+
+    private String removeExtension(final String filename) {
+        final int index = FilenameUtils.indexOfExtension(filename); //used the String.lastIndexOf() method
+        if (index == -1) {
+            return filename;
+        } else {
+            return filename.substring(0, index);
+        }
     }
 
 }

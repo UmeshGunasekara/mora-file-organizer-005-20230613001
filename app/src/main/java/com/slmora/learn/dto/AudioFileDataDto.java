@@ -51,9 +51,10 @@ public class AudioFileDataDto extends BaseDto implements IDto<EMFOAudioFileData>
     private FileDto file;
 
     public AudioFileDataDto(EMFOAudioFileData jpaEntityAudioFileData){
+        this.setId(jpaEntityAudioFileData.getId());
         if(jpaEntityAudioFileData.getId()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            this.setId(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityAudioFileData.getId()));
+            this.setUuid(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityAudioFileData.getId()));
         }
         this.setCode(jpaEntityAudioFileData.getCode());
         this.setNote(jpaEntityAudioFileData.getNote());
@@ -87,8 +88,10 @@ public class AudioFileDataDto extends BaseDto implements IDto<EMFOAudioFileData>
         EMFOAudioFileData jpaEntityAudioFileData = new EMFOAudioFileData();
 
         if(this.getId()!=null){
+            jpaEntityAudioFileData.setId(this.getId());
+        }else if(this.getUuid()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            jpaEntityAudioFileData.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getId()));
+            jpaEntityAudioFileData.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getUuid()));
         }
         jpaEntityAudioFileData.setCode(this.getCode());
         jpaEntityAudioFileData.setNote(this.getNote());

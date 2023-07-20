@@ -49,9 +49,10 @@ public class FilePropertyDto extends BaseDto implements IDto<EMFOFileProperty>
     private List<FilePropertyDataDto> filePropertyData;
 
     public FilePropertyDto(EMFOFileProperty jpaEntityFileProperty){
+        this.setId(jpaEntityFileProperty.getId());
         if(jpaEntityFileProperty.getId()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            this.setId(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityFileProperty.getId()));
+            this.setUuid(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityFileProperty.getId()));
         }
         this.setCode(jpaEntityFileProperty.getCode());
         this.setNote(jpaEntityFileProperty.getNote());
@@ -82,8 +83,10 @@ public class FilePropertyDto extends BaseDto implements IDto<EMFOFileProperty>
         EMFOFileProperty jpaEntityFileProperty = new EMFOFileProperty();
 
         if(this.getId()!=null){
+            jpaEntityFileProperty.setId(this.getId());
+        }else if(this.getUuid()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            jpaEntityFileProperty.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getId()));
+            jpaEntityFileProperty.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getUuid()));
         }
         jpaEntityFileProperty.setCode(this.getCode());
         jpaEntityFileProperty.setNote(this.getNote());

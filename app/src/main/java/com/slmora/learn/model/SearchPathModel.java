@@ -34,6 +34,7 @@ import java.nio.file.Path;
 public class SearchPathModel {
     private Path path;
     private Integer zipLevel;
-    private Path zipParentFile;
+    private Path zipParentFilePath;
     private Integer zipParentFileLevel;
+    private byte[] zipParentFileId;
 }

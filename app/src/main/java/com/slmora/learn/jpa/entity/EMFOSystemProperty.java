@@ -55,7 +55,7 @@ public class EMFOSystemProperty extends BaseEntity
     private String systemPropCode;
 
     @Column(name = "system_prop_value")
-    @Size(max = 150)
+    @Size(max = 255)
     @NotNull
     private String systemPropValue;
 

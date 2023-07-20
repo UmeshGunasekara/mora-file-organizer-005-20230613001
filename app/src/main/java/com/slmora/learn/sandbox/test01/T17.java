@@ -30,7 +30,10 @@ public class T17 {
     {
         String sourcePath = "D:\\MORA\\Video\\TM";
 //        String sourcePath = "F:\\";
+        Integer driveCode = 1;
+        boolean isSkipEnable = true;
         MoraFileOrganizerWalkingController walkingController = new MoraFileOrganizerWalkingController();
-        walkingController.sourcePathWalk(Paths.get(sourcePath), 0, 1);
+        //Set Source path and Drive Code and Zip Level
+        walkingController.sourcePathWalk(Paths.get(sourcePath), 0, driveCode, isSkipEnable);
     }
 }

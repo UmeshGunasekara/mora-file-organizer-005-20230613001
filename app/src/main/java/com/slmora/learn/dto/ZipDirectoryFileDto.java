@@ -47,9 +47,10 @@ public class ZipDirectoryFileDto extends BaseDto implements IDto<EMFOZipDirector
     private FileDto file;
 
     public ZipDirectoryFileDto(EMFOZipDirectoryFile jpaEntityZipDirectoryFile){
+        this.setId(jpaEntityZipDirectoryFile.getId());
         if(jpaEntityZipDirectoryFile.getId()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            this.setId(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityZipDirectoryFile.getId()));
+            this.setUuid(uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(jpaEntityZipDirectoryFile.getId()));
         }
         this.setCode(jpaEntityZipDirectoryFile.getCode());
         this.setNote(jpaEntityZipDirectoryFile.getNote());
@@ -80,8 +81,10 @@ public class ZipDirectoryFileDto extends BaseDto implements IDto<EMFOZipDirector
         EMFOZipDirectoryFile jpaEntityZipDirectoryFile = new EMFOZipDirectoryFile();
 
         if(this.getId()!=null){
+            jpaEntityZipDirectoryFile.setId(this.getId());
+        }else if(this.getUuid()!=null){
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-            jpaEntityZipDirectoryFile.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getId()));
+            jpaEntityZipDirectoryFile.setId(uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(this.getUuid()));
         }
         jpaEntityZipDirectoryFile.setCode(this.getCode());
         jpaEntityZipDirectoryFile.setNote(this.getNote());
