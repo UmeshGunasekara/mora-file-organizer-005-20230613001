@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.common.file.util;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.system.property.SingleSystemProperty;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,10 +35,11 @@ import java.util.stream.Stream;
  * </pre></blockquote>
  */
 public class MoraFileWriteAccessUtilities {
-    final static Logger LOGGER = LogManager.getLogger(MoraFileWriteAccessUtilities.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MoraFileWriteAccessUtilities.class);
 
     public Optional<Set<String>> createDirectories(Path path) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Create directories for {}", (null!=path)?path.toAbsolutePath():null);
         Set<String> dirSet = new TreeSet<>();
         Path temPath = Paths.get(path.toString());
         while (!temPath.toFile().exists()){
@@ -50,34 +52,37 @@ public class MoraFileWriteAccessUtilities {
             }
         }
         if(temPath == null){
-            LOGGER.info("Invalid File Path : "+path.toString());
-            LOGGER.info("Your File System roots are");
-            FileSystems.getDefault().getRootDirectories().forEach(System.out::println);
+            LOGGER.error(Thread.currentThread().getStackTrace(), "Invalid File Path : "+path.toString());
+            LOGGER.error(Thread.currentThread().getStackTrace(), "Your File System roots are");
+            FileSystems.getDefault().getRootDirectories().forEach(i->LOGGER.debug(Thread.currentThread().getStackTrace(), "Root Dir for {}",  (null!=i)?i.toAbsolutePath():null));
             return Optional.empty();
         }else if (Files.isWritable(temPath)){
             Files.createDirectories(path);
             return Optional.of(dirSet);
         }else {
-            LOGGER.info("User don't have permission to Write Dir in File System : "+path.toString());
+            LOGGER.error(Thread.currentThread().getStackTrace(), "User don't have permission to Write Dir in File System {} ", (null!=path)?path.toAbsolutePath():null);
             return Optional.empty();
         }
     }
 
     public void removeAll(Path targetPath, boolean isRemoveTargetParent) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Remove All from {} and remove target Path also : {}", (null!=targetPath)?targetPath.toAbsolutePath():null, isRemoveTargetParent);
         try (Stream<Path> walk = Files.walk(targetPath)) {
             walk.sorted(Comparator.reverseOrder())
                     .forEach(path -> {
                         try {
                             if(isRemoveTargetParent){
                                 Files.delete(path);
+                                LOGGER.debug(Thread.currentThread().getStackTrace(), "Path removed {}", (null!=path)?path.toAbsolutePath():null);
                             }else{
                                 if(!targetPath.toAbsolutePath().toString().endsWith(path.toAbsolutePath().toString())){
                                     Files.delete(path);
+                                    LOGGER.debug(Thread.currentThread().getStackTrace(), "Path removed {}", (null!=path)?path.toAbsolutePath():null);
                                 }
                             }
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            LOGGER.error(Thread.currentThread().getStackTrace(), e);
                         }
                     });
 //            walk.filter(Files::isRegularFile)
@@ -99,6 +104,7 @@ public class MoraFileWriteAccessUtilities {
     }
 
     public Long getAccessibleFileCount(Path path) throws IOException {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Accessible file count from {}", (null!=path)?path.toAbsolutePath():null);
         try (Stream<Path> walk = Files.walk(path)) {
             return walk
                     .filter(p -> Files.isReadable(p))
@@ -108,17 +114,23 @@ public class MoraFileWriteAccessUtilities {
     }
 
     public String removeExtension(String filename) {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Remove file extension from {}", filename);
         final int NOT_FOUND = -1;
         final int index = FilenameUtils.indexOfExtension(filename); //used the String.lastIndexOf() method
+        String result = null;
         if (index == NOT_FOUND) {
-            return filename;
+            LOGGER.debug(Thread.currentThread().getStackTrace(), "File doesn't have an extension");
+            result = filename;
         } else {
-            return filename.substring(0, index);
+            result = filename.substring(0, index);
         }
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "File extension removed {}", result);
+        return result;
     }
 
     public boolean isEmpty(Path path) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Is this path empty {}", (null!=path)?path.toAbsolutePath():null);
         if (Files.isDirectory(path)) {
             try (Stream<Path> entries = Files.list(path)) {
                 return !entries.findFirst().isPresent();
@@ -129,18 +141,26 @@ public class MoraFileWriteAccessUtilities {
     }
 
     public String getNonWindowsPathPatternByPath(Path path){
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Non windows pattern path for {}", (null!=path)?path.toAbsolutePath():null);
+        String result = null;
         if(!path.getFileSystem().getSeparator().equals("/")&&path.toAbsolutePath().toString().contains("\\")){
-            return path.toAbsolutePath().toString().replace(path.getRoot().toAbsolutePath().toString(),"/").replace("\\","/");
+            result = path.toAbsolutePath().toString().replace(path.getRoot().toAbsolutePath().toString(),"/").replace("\\","/");
+        }else {
+            result = path.toAbsolutePath().toString();
         }
-        return path.toAbsolutePath().toString();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Result path {}", result);
+        return result;
     }
 
     public Integer getDirectoryLevel(Path path){
         String sPath = path.toAbsolutePath().toString();
-        return StringUtils.countMatches(sPath,path.getFileSystem().getSeparator());
+        Integer result = StringUtils.countMatches(sPath,path.getFileSystem().getSeparator());
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Directory Level for {} is {}", (null!=path)?path.toAbsolutePath():null, result);
+        return result;
     }
 
-    public List<Path> getImmidiateFilesAndDirectoryList(Path sourcePath){
+    public List<Path> getImmediateFilesAndDirectoryList(Path sourcePath){
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Immediate Files list for {}", (null!=sourcePath)?sourcePath.toAbsolutePath():null);
         int baseDirectoryLevel = getDirectoryLevel(sourcePath);
         List<Path> resultList = new ArrayList<>();
         try{
@@ -185,8 +205,8 @@ public class MoraFileWriteAccessUtilities {
                         }
                     });
         } catch (IOException e) {
-//            LOGGER.error(ExceptionUtils.getStackTrace(e));
-            e.printStackTrace();
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
+//            e.printStackTrace();
         }
         return resultList;
     }

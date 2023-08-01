@@ -10,7 +10,9 @@ package com.slmora.learn.service.impl;
 import com.slmora.learn.common.cryptography.hmac.util.EHmacAlgorithm;
 import com.slmora.learn.common.cryptography.hmac.util.MoraHMACUtilities;
 import com.slmora.learn.common.dao.IGenericDao;
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.service.impl.GenericServiceImpl;
+import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dao.IMFODirectoryDao;
 import com.slmora.learn.dao.impl.MFOFileDaoImpl;
 import com.slmora.learn.dto.DirectoryDto;
@@ -48,7 +50,7 @@ import java.util.UUID;
 public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODirectory> implements IMFODirectoryService
 {
 
-    final static Logger LOGGER = LogManager.getLogger(MFODirectoryServiceImpl.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MFODirectoryServiceImpl.class);
     private IMFODirectoryDao directoryDao;
 
     public MFODirectoryServiceImpl() {}
@@ -65,7 +67,6 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
      */
     @Override
     public Optional<byte[]> addMFODirectory(EMFODirectory directory) {
-//        System.out.println("com.slmora.learn.service.impl.MFODirectoryServiceImpl.addMFODirectory()");
         return directoryDao.addMFODirectory(directory);
     }
 
@@ -76,7 +77,6 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
      */
     @Override
     public Optional<EMFODirectory> getMFODirectoryById(byte[] id) {
-//        System.out.println("com.slmora.learn.service.impl.MFODirectoryServiceImpl.getMFODirectoryById()");
         return directoryDao.getMFODirectoryById(id);
     }
 
@@ -92,7 +92,6 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
      */
     @Override
     public void deleteMFODirectory(EMFODirectory directory) {
-//        System.out.println("com.slmora.learn.service.impl.MFODirectoryServiceImpl.deleteMFODirectory()");
         directoryDao.deleteMFODirectory(directory);
     }
 
@@ -101,7 +100,6 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
      */
     @Override
     public List<EMFODirectory> getAllMFODirectories() {
-//        System.out.println("com.slmora.learn.service.impll.MFODirectoryServiceImpl.getAllMFODirectories()");
         return directoryDao.getAllMFODirectories();
     }
 
@@ -138,6 +136,7 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
     @Override
     public Optional<List<EMFODirectory>> getMFODirectoryByDirectoryFullPathSha256AndZipLevel(String directoryFullPathSha256, Integer zipLevel)
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with directoryFullPathSha256 {} zipLevel {} ", directoryFullPathSha256, zipLevel);
         return directoryDao.getAllMFODirectoryByDirectoryFullPathSha256AndZipLevel(directoryFullPathSha256, zipLevel);
     }
 
@@ -146,6 +145,7 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
                                                                                                   Integer zipLevel,
                                                                                                   Integer directoryDriveCode)
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with directoryFullPathSha256 {} zipLevel {} directoryDriveCode {}", directoryFullPathSha256, zipLevel, directoryDriveCode);
         return directoryDao.getAllMFODirectoryByDirectoryFullPathSha256AndZipLevelDrive(directoryFullPathSha256, zipLevel,directoryDriveCode);
     }
 
@@ -154,6 +154,7 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
             NoSuchAlgorithmException,
             InvalidKeyException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with directoryFullPath {} zipLevel {} ", directoryFullPath, zipLevel);
         MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
         Path dir = Paths.get(directoryFullPath);
         String dirName = dir.toString();
@@ -173,6 +174,7 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
             NoSuchAlgorithmException,
             InvalidKeyException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with directoryFullPath {},  directoryFullPath {}, directoryDriveCode {} ", directoryFullPath, zipLevel, directoryDriveCode);
         MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
         Path dir = Paths.get(directoryFullPath);
         String dirName = dir.toString();
@@ -190,6 +192,8 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
                                                                                                    Integer zipLevel,
                                                                                                    EMFOFile zipFile, Integer directoryDriveCode)
     {
+        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with directoryFullPathSha256 {},  zipLevel {}, zipFile UUID {}, directoryDriveCode {} ", directoryFullPathSha256, zipLevel, (null!=zipFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFile.getId()):null, directoryDriveCode);
         return directoryDao.getMFODirectoryByDirectoryFullPathSha256AndZipLevelZipFileDrive(directoryFullPathSha256,zipLevel,zipFile,directoryDriveCode);
     }
 
@@ -200,7 +204,8 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
             NoSuchAlgorithmException,
             InvalidKeyException
     {
-        LOGGER.info("getMFODirectoryByDirectoryFullPathAndZipLevelZipFileDrive directoryFullPath : "+directoryFullPath+" , zipLevel : "+zipLevel+" , directoryDriveCode : "+directoryDriveCode);
+        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with directoryFullPath {},  zipLevel {}, zipFile UUID {}, directoryDriveCode {} ", directoryFullPath, zipLevel, (null!=zipFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFile.getId()):null, directoryDriveCode);
         MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
         Path dir = Paths.get(directoryFullPath);
         String dirName = dir.toString();
@@ -218,6 +223,7 @@ public class MFODirectoryServiceImpl extends GenericServiceImpl<byte[], EMFODire
             NoSuchAlgorithmException,
             InvalidKeyException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with pathModel {},  directoryDriveCode {} ", (null!=pathModel)?pathModel.toString():null, directoryDriveCode);
         MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
         Path dir = pathModel.getPath();
         String dirName = dir.toString();

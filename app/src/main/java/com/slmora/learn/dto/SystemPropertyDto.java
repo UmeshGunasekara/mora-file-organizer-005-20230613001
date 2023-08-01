@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.dto;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dto.base.BaseDto;
 import com.slmora.learn.dto.base.IDto;
@@ -41,7 +42,7 @@ import java.sql.Timestamp;
 @EqualsAndHashCode(callSuper=false)
 public class SystemPropertyDto extends BaseDto implements IDto<EMFOSystemProperty>
 {
-    final static Logger LOGGER = LogManager.getLogger(SystemPropertyDto.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(SystemPropertyDto.class);
 
     private String systemPropCode;
     private String systemPropValue;

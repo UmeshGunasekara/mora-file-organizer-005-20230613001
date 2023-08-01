@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.dto;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dto.base.BaseDto;
 import com.slmora.learn.dto.base.IDto;
@@ -41,7 +42,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper=false)
 public class FilePropertyDto extends BaseDto implements IDto<EMFOFileProperty>
 {
-    final static Logger LOGGER = LogManager.getLogger(FilePropertyDto.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(FilePropertyDto.class);
 
     private String filePropertyName;
     private String filePropertyDescription;

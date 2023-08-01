@@ -8,6 +8,8 @@
 package com.slmora.learn.dao.impl;
 
 import com.slmora.learn.common.dao.impl.GenericDaoImpl;
+import com.slmora.learn.common.logging.MoraLogger;
+import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dao.IMFOFileDao;
 import com.slmora.learn.jpa.entity.EMFODirectory;
 import com.slmora.learn.jpa.entity.EMFOFile;
@@ -44,11 +46,13 @@ import java.util.UUID;
  */
 public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements IMFOFileDao
 {
-    final static Logger LOGGER = LogManager.getLogger(MFOFileDaoImpl.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MFOFileDaoImpl.class);
+    private MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
 
     @Override
     public Optional<byte[]> addMFOFile(EMFOFile file)
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Adding File with UUID {}", (null!=file)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(file.getId()):null);
         return add(file);
 //        return Optional.empty();
     }
@@ -56,6 +60,7 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
     @Override
     public Optional<EMFOFile> getMFOFileById(byte[] id)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve File with UUID {}", (null!=id)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(id):null);
         return getById(id);
 //        return Optional.empty();
     }
@@ -63,6 +68,7 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
     @Override
     public Optional<EMFOFile> getMFOFileByUUID(UUID uuidKey)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve File with UUID {}", (null!=uuidKey)?uuidKey:null);
         return getByUUID(uuidKey);
 //        return Optional.empty();
     }
@@ -70,6 +76,7 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
     @Override
     public void deleteMFOFile(EMFOFile file)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Delete File with UUID {}", (null!=file)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(file.getId()):null);
         delete(file);
     }
 
@@ -83,6 +90,7 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
     @Override
     public Optional<EMFOFile> getMFOFileByCode(Integer code)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve File with Code {}", code);
         return getByCode(code);
 //        return Optional.empty();
     }
@@ -90,6 +98,7 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
     @Override
     public Optional<byte[]> persistReturnIdMFOFile(EMFOFile file)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Adding File with UUID {}", (null!=file)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(file.getId()):null);
         return persistReturnId(file);
 //        return Optional.empty();
     }
@@ -97,6 +106,7 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
     @Override
     public EMFOFile persistMFOFile(EMFOFile file)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Adding File with UUID {}", (null!=file)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(file.getId()):null);
         return persist(file);
 //        return Optional.empty();
     }
@@ -104,6 +114,7 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
     @Override
     public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathSha256(String fileFullPathSha256)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve files with fileFullPathSha256 {}", fileFullPathSha256);
         Transaction transaction = null;
         try{
             Session session = getSession();
@@ -118,27 +129,28 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
             criteriaQuery.where(predicate);
 
             TypedQuery<EMFOFile> typedQuery = session.createQuery(criteriaQuery);
-            List<EMFOFile> ListFile = typedQuery.getResultList();
+            List<EMFOFile> filesList = typedQuery.getResultList();
 //            transaction=getSession().beginTransaction();
 //            T t= (T) session.get(daoType, key);
             transaction.commit();
-            return Optional.of(ListFile);
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve files with fileFullPathSha256 {} out List Size {}", fileFullPathSha256, (null!=filesList)?filesList.size():null);
+            return Optional.of(filesList);
 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("No record found for the file full path SHA 256 :"+fileFullPathSha256);
+            LOGGER.error(Thread.currentThread().getStackTrace(), "ERRO-00001", "No files found with fileFullPathSha256 {}", fileFullPathSha256);
+            LOGGER.error(Thread.currentThread().getStackTrace(), ex);
             return Optional.empty();
         }catch (Throwable throwable) {
-//            if (transaction != null) {
-//                transaction.rollback();
-//            }
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
-            return Optional.empty();
-        }finally {
             if (transaction != null) {
                 transaction.rollback();
+            }
+            LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            return Optional.empty();
+        }finally {
+            if(transaction != null && transaction.isActive()){
+                transaction.commit();
             }
         }
     }
@@ -147,7 +159,7 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
     public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathSha256AndZipLevel(String fileFullPathSha256,
                                                                                  Integer zipLevel)
     {
-        LOGGER.info("getAllMFOFileByFileFullPathSha256AndZipLevel with fileFullPathSha256 : "+fileFullPathSha256+", zipLevel : "+zipLevel);
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve files with fileFullPathSha256 {} and zipLevel {}", fileFullPathSha256, zipLevel);
         Transaction transaction = null;
         try{
             Session session = getSession();
@@ -168,20 +180,24 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
 //            transaction=getSession().beginTransaction();
 //            T t= (T) session.get(daoType, key);
             transaction.commit();
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve files with fileFullPathSha256 {}, zipLevel {} out List Size {}", fileFullPathSha256, zipLevel, (null!=fileList)?fileList.size():null);
             return Optional.of(fileList);
 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("getAllMFOFileByFileFullPathSha256AndZipLevel No record found for the file full path SHA 256 :"+fileFullPathSha256+", zipLevel : "+zipLevel);
+            LOGGER.error(Thread.currentThread().getStackTrace(), "ERRO-00001", "No files found with fileFullPathSha256 {} and zipLevel {}", fileFullPathSha256, zipLevel);
+            LOGGER.error(Thread.currentThread().getStackTrace(), ex);
             return Optional.empty();
         }catch (Throwable throwable) {
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
-            return Optional.empty();
-        }finally {
             if (transaction != null) {
                 transaction.rollback();
+            }
+            LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            return Optional.empty();
+        }finally {
+            if(transaction != null && transaction.isActive()){
+                transaction.commit();
             }
         }
     }
@@ -191,7 +207,7 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
                                                                                       Integer zipLevel,
                                                                                       Integer fileDriveCode)
     {
-        LOGGER.info("getAllMFOFileByFileFullPathSha256AndZipLevelDrive with fileFullPathSha256 : "+fileFullPathSha256+", zipLevel : "+zipLevel+", fileDriveCode : "+fileDriveCode);
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve files with fileFullPathSha256 {}, zipLevel {} and fileDriveCode {}", fileFullPathSha256, zipLevel, fileDriveCode);
         Transaction transaction = null;
         try{
             Session session = getSession();
@@ -214,20 +230,24 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
 //            transaction=getSession().beginTransaction();
 //            T t= (T) session.get(daoType, key);
             transaction.commit();
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve files with fileFullPathSha256 {}, zipLevel {} and fileDriveCode {} out List Size {}", fileFullPathSha256, zipLevel, fileDriveCode, (null!=fileList)?fileList.size():null);
             return Optional.of(fileList);
 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("getAllMFOFileByFileFullPathSha256AndZipLevelDrive No record found for the file full path SHA 256 :"+fileFullPathSha256+", zipLevel : "+zipLevel+", fileDriveCode : "+fileDriveCode);
+            LOGGER.error(Thread.currentThread().getStackTrace(), "ERRO-00001", "No files found with fileFullPathSha256 {}, zipLevel {} and fileDriveCode {}", fileFullPathSha256, zipLevel, fileDriveCode);
+            LOGGER.error(Thread.currentThread().getStackTrace(), ex);
             return Optional.empty();
         }catch (Throwable throwable) {
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
-            return Optional.empty();
-        }finally {
             if (transaction != null) {
                 transaction.rollback();
+            }
+            LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            return Optional.empty();
+        }finally {
+            if(transaction != null && transaction.isActive()){
+                transaction.commit();
             }
         }
     }
@@ -238,6 +258,7 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
                                                                                     EMFOFile zipFile,
                                                                                     Integer fileDriveCode)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve file with fileFullPathSha256 {}, zipLevel {}, Zip File UUID {} and fileDriveCode {}", fileFullPathSha256, zipLevel, (null!=zipFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFile.getId()):null, fileDriveCode);
         Transaction transaction = null;
         try{
             Session session = getSession();
@@ -262,20 +283,24 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
 //            transaction=getSession().beginTransaction();
 //            T t= (T) session.get(daoType, key);
             transaction.commit();
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve file with UUID {}", (null!=file)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(file.getId()):null);
             return Optional.of(file);
 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("getMFOFileByFileFullPathSha256AndZipLevelZipFileDrive No record found for the file full path SHA 256 :"+fileFullPathSha256+", zipLevel : "+zipLevel+", fileDriveCode : "+fileDriveCode);
+            LOGGER.error(Thread.currentThread().getStackTrace(), "ERRO-00001", "No file found with fileFullPathSha256 {}, zipLevel {}, Zip File UUID {} and fileDriveCode {}", fileFullPathSha256, zipLevel, (null!=zipFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFile.getId()):null, fileDriveCode);
+            LOGGER.error(Thread.currentThread().getStackTrace(), ex);
             return Optional.empty();
         }catch (Throwable throwable) {
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
-            return Optional.empty();
-        }finally {
             if (transaction != null) {
                 transaction.rollback();
+            }
+            LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            return Optional.empty();
+        }finally {
+            if(transaction != null && transaction.isActive()){
+                transaction.commit();
             }
         }
     }
@@ -285,7 +310,7 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
                                                                Integer zipLevel, byte[] zipFileId,
                                                                Integer fileDriveCode)
     {
-        LOGGER.info("fileFullPathSha256 : "+fileFullPathSha256+" , zipLevel : "+zipLevel+" , zipFileFullPathSha256 : "+" , fileDriveCode : "+fileDriveCode);
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve file with fileFullPathSha256 {}, zipLevel {}, Zip File UUID {} and fileDriveCode {}", fileFullPathSha256, zipLevel, (null!=zipFileId)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFileId):null, fileDriveCode);
         Transaction transaction = null;
         try{
             Session session = getSession();
@@ -318,23 +343,24 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
 //            transaction=getSession().beginTransaction();
 //            T t= (T) session.get(daoType, key);
             transaction.commit();
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve file with UUID {}", (null!=file)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(file.getId()):null);
             return Optional.of(file);
 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("getMFOFileBySearchPathModelDrive No record found for the file full path SHA 256 :"+fileFullPathSha256+" , zipLevel : "+zipLevel+" , fileDriveCode : "+fileDriveCode);
+            LOGGER.error(Thread.currentThread().getStackTrace(), "ERRO-00001", "No file found with fileFullPathSha256 {}, zipLevel {}, Zip File UUID {} and fileDriveCode {}", fileFullPathSha256, zipLevel, (null!=zipFileId)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFileId):null, fileDriveCode);
+            LOGGER.error(Thread.currentThread().getStackTrace(), ex);
             return Optional.empty();
         }catch (Throwable throwable) {
-//            if (transaction != null) {
-//                transaction.rollback();
-//            }
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
-            return Optional.empty();
-        }finally {
             if (transaction != null) {
                 transaction.rollback();
+            }
+            LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            return Optional.empty();
+        }finally {
+            if(transaction != null && transaction.isActive()){
+                transaction.commit();
             }
         }
     }
@@ -346,7 +372,7 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
                                                                Integer zipFileZipLevel,
                                                                Integer driveCode)
     {
-        LOGGER.info("fileFullPathSha256 : "+fileFullPathSha256+" , zipLevel : "+fileZipLevel+" , zipFileFullPathSha256 : "+zipFileFullPathSha256+" , zipFileZipLevel : "+zipFileZipLevel+" , driveCode : "+driveCode);
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve file with fileFullPathSha256 {}, fileZipLevel {}, zipFileFullPathSha256 {}, zipFileZipLevel {} and driveCode {}", fileFullPathSha256, fileZipLevel, zipFileFullPathSha256, zipFileZipLevel, driveCode);
         Transaction transaction = null;
         try{
             Session session = getSession();
@@ -383,23 +409,24 @@ public class MFOFileDaoImpl extends GenericDaoImpl<byte[], EMFOFile> implements 
 //            transaction=getSession().beginTransaction();
 //            T t= (T) session.get(daoType, key);
             transaction.commit();
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve file with UUID {}", (null!=file)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(file.getId()):null);
             return Optional.of(file);
 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("getMFOFileBySearchPathModelDrive No record found for the file full path SHA 256 :"+fileFullPathSha256+" , zipLevel : "+fileZipLevel+" , zipFileFullPathSha256 : "+zipFileFullPathSha256+" , zipFileZipLevel : "+zipFileZipLevel+" , driveCode : "+driveCode);
+            LOGGER.info(Thread.currentThread().getStackTrace(), "ERRO-00001", "No file found with fileFullPathSha256 {}, fileZipLevel {}, zipFileFullPathSha256 {}, zipFileZipLevel {} and driveCode {}", fileFullPathSha256, fileZipLevel, zipFileFullPathSha256, zipFileZipLevel, driveCode);
+            LOGGER.error(Thread.currentThread().getStackTrace(), ex);
             return Optional.empty();
         }catch (Throwable throwable) {
-//            if (transaction != null) {
-//                transaction.rollback();
-//            }
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
-            return Optional.empty();
-        }finally {
             if (transaction != null) {
                 transaction.rollback();
+            }
+            LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            return Optional.empty();
+        }finally {
+            if(transaction != null && transaction.isActive()){
+                transaction.commit();
             }
         }
     }

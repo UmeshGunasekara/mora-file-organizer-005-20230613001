@@ -9,8 +9,10 @@ package com.slmora.learn.common.dao.impl;
 
 import com.slmora.learn.common.dao.IGenericDao;
 import com.slmora.learn.common.ds.hibernate.HibernateHikariAnoUtil;
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.jpa.entity.common.BaseEntity;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -45,7 +47,8 @@ import java.util.UUID;
  */
 public abstract class GenericDaoImpl <K extends Serializable, T extends BaseEntity> implements IGenericDao<K, T>
 {
-    final static Logger LOGGER = LogManager.getLogger(GenericDaoImpl.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(GenericDaoImpl.class);
+    private MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
 
     private final Class<? extends T> daoType;
     private Session session;
@@ -63,8 +66,7 @@ public abstract class GenericDaoImpl <K extends Serializable, T extends BaseEnti
 //            session= HibernateDBCPAnoUtil.getHibernateSessionFactory().openSession();
             session= HibernateHikariAnoUtil.getHibernateSessionFactory().openSession();
         } catch (Throwable throwable) {
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
+            LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
         }
     }
 
@@ -89,20 +91,27 @@ public abstract class GenericDaoImpl <K extends Serializable, T extends BaseEnti
 //        transaction.commit();
 
         Transaction transaction = null;
-        try{
-            transaction=session.beginTransaction();
-            K k=(K)session.save(entity);
+        if(null != entity) {
+            try {
+                transaction = session.beginTransaction();
+                K k = (K) session.save(entity);
 //            session.persist(entity);
-            transaction.commit();
-            return Optional.of(k);
-        } catch (Throwable throwable) {
-            if (transaction != null) {
-                transaction.rollback();
+                transaction.commit();
+                LOGGER.info(Thread.currentThread().getStackTrace(),
+                        "Added with UUID {}",
+                        uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(entity.getId()));
+                return Optional.of(k);
+            } catch (Throwable throwable) {
+                if (transaction != null) {
+                    transaction.rollback();
+                }
+                LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            }finally {
+                if(transaction != null && transaction.isActive()){
+                    transaction.commit();
+                }
             }
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
         }
-
         return Optional.empty();
     }
 
@@ -110,20 +119,27 @@ public abstract class GenericDaoImpl <K extends Serializable, T extends BaseEnti
     public Optional<byte[]> persistReturnId(T entity)
     {
         Transaction transaction = null;
-        try{
-            transaction=session.beginTransaction();
-            session.persist(entity);
-            session.flush();
-            transaction.commit();
-            return Optional.of(entity.getId());
-        } catch (Throwable throwable) {
-            if (transaction != null) {
-                transaction.rollback();
+        if(null != entity) {
+            try {
+                transaction = session.beginTransaction();
+                session.persist(entity);
+                session.flush();
+                transaction.commit();
+                LOGGER.info(Thread.currentThread().getStackTrace(),
+                        "Persist with UUID {}",
+                        uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(entity.getId()));
+                return Optional.of(entity.getId());
+            } catch (Throwable throwable) {
+                if (transaction != null) {
+                    transaction.rollback();
+                }
+                LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            }finally {
+                if(transaction != null && transaction.isActive()){
+                    transaction.commit();
+                }
             }
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
         }
-
         return Optional.empty();
     }
 
@@ -131,19 +147,26 @@ public abstract class GenericDaoImpl <K extends Serializable, T extends BaseEnti
     public T persist(T entity)
     {
         Transaction transaction = null;
-        try{
-            transaction=session.beginTransaction();
-            session.persist(entity);
-            session.flush();
-            transaction.commit();
-        } catch (Throwable throwable) {
-            if (transaction != null) {
-                transaction.rollback();
+        if(null != entity) {
+            try {
+                transaction = session.beginTransaction();
+                session.persist(entity);
+                session.flush();
+                transaction.commit();
+                LOGGER.info(Thread.currentThread().getStackTrace(),
+                        "Persist with UUID {}",
+                        uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(entity.getId()));
+            } catch (Throwable throwable) {
+                if (transaction != null) {
+                    transaction.rollback();
+                }
+                LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            }finally {
+                if(transaction != null && transaction.isActive()){
+                    transaction.commit();
+                }
             }
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
         }
-
         return entity;
     }
 
@@ -155,16 +178,24 @@ public abstract class GenericDaoImpl <K extends Serializable, T extends BaseEnti
 //        transaction.commit();
 
         Transaction transaction = null;
-        try{
-            transaction=session.beginTransaction();
-            session.saveOrUpdate(entity);
-            transaction.commit();
-        } catch (Throwable throwable) {
-            if (transaction != null) {
-                transaction.rollback();
+        if(null != entity) {
+            try {
+                transaction = session.beginTransaction();
+                session.saveOrUpdate(entity);
+                transaction.commit();
+                LOGGER.info(Thread.currentThread().getStackTrace(),
+                        "Update with UUID {}",
+                        uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(entity.getId()));
+            } catch (Throwable throwable) {
+                if (transaction != null) {
+                    transaction.rollback();
+                }
+                LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            }finally {
+                if(transaction != null && transaction.isActive()){
+                    transaction.commit();
+                }
             }
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
         }
     }
 
@@ -176,17 +207,30 @@ public abstract class GenericDaoImpl <K extends Serializable, T extends BaseEnti
 //        transaction.commit();
 
         Transaction transaction = null;
-        try{
-            transaction=session.beginTransaction();
+        if(null != entity) {
+            try {
+                transaction = session.beginTransaction();
 //            session.delete(entity);
-            session.remove(entity);
-            transaction.commit();
-        } catch (Throwable throwable) {
-            if (transaction != null) {
-                transaction.rollback();
+                session.remove(entity);
+                transaction.commit();
+                LOGGER.info(Thread.currentThread().getStackTrace(),
+                        "Delete with UUID {}",
+                        uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(entity.getId()));
+            } catch (NoResultException ex) {
+                LOGGER.error(Thread.currentThread().getStackTrace(), "ERRO-00001",
+                        "No Record find with UUID {}",
+                        uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(entity.getId()));
+                LOGGER.error(Thread.currentThread().getStackTrace(), ex);
+            } catch (Throwable throwable) {
+                if (transaction != null) {
+                    transaction.rollback();
+                }
+                LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            }finally {
+                if(transaction != null && transaction.isActive()){
+                    transaction.commit();
+                }
             }
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
         }
     }
 
@@ -198,17 +242,28 @@ public abstract class GenericDaoImpl <K extends Serializable, T extends BaseEnti
 //        transaction.commit();
 //        return t;
         Transaction transaction = null;
-        try{
-            transaction=session.beginTransaction();
-            T t= (T) session.get(daoType, key);
-            transaction.commit();
-            return Optional.of(t);
-        } catch (Throwable throwable) {
-            if (transaction != null) {
-                transaction.rollback();
+        if(null != key) {
+            try {
+                transaction = session.beginTransaction();
+                T t = (T) session.get(daoType, key);
+                transaction.commit();
+                LOGGER.info(Thread.currentThread().getStackTrace(),
+                        "Retrieve with UUID {}",
+                        (null != t)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(t.getId()):null);
+                return Optional.of(t);
+            } catch (NoResultException ex) {
+                LOGGER.error(Thread.currentThread().getStackTrace(), "ERRO-00001", "No Record find");
+                LOGGER.error(Thread.currentThread().getStackTrace(), ex);
+            } catch (Throwable throwable) {
+                if (transaction != null) {
+                    transaction.rollback();
+                }
+                LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            }finally {
+                if(transaction != null && transaction.isActive()){
+                    transaction.commit();
+                }
             }
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
         }
         return Optional.empty();
     }
@@ -221,29 +276,40 @@ public abstract class GenericDaoImpl <K extends Serializable, T extends BaseEnti
 //        transaction.commit();
 //        return t;
         Transaction transaction = null;
-        try{
-            transaction=session.beginTransaction();
+        if(null != code) {
+            try {
+                transaction = session.beginTransaction();
 
-            CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
-            CriteriaQuery criteriaQuery = criteriaBuilder.createQuery(daoType);
-            Root root = criteriaQuery.from(daoType);
-            criteriaQuery.select(root);
+                CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+                CriteriaQuery criteriaQuery = criteriaBuilder.createQuery(daoType);
+                Root root = criteriaQuery.from(daoType);
+                criteriaQuery.select(root);
 
-            Predicate predicate = criteriaBuilder.like(root.get("code"), code.intValue()+"");
-            criteriaQuery.where(predicate);
+                Predicate predicate = criteriaBuilder.like(root.get("code"), code.intValue() + "");
+                criteriaQuery.where(predicate);
 
-            TypedQuery typedQuery = session.createQuery(criteriaQuery);
-            T t = (T)typedQuery.getSingleResult();
+                TypedQuery typedQuery = session.createQuery(criteriaQuery);
+                T t = (T) typedQuery.getSingleResult();
 //            transaction=getSession().beginTransaction();
 //            T t= (T) session.get(daoType, key);
-            transaction.commit();
-            return Optional.of(t);
-        } catch (Throwable throwable) {
-            if (transaction != null) {
-                transaction.rollback();
+                transaction.commit();
+                LOGGER.info(Thread.currentThread().getStackTrace(),
+                        "Retrieve with UUID {}",
+                        (null != t) ? uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(t.getId()) : null);
+                return Optional.of(t);
+            } catch (NoResultException ex) {
+                LOGGER.error(Thread.currentThread().getStackTrace(), "ERRO-00001", "No Record find Code {}", code);
+                LOGGER.error(Thread.currentThread().getStackTrace(), ex);
+            } catch (Throwable throwable) {
+                if (transaction != null) {
+                    transaction.rollback();
+                }
+                LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            }finally {
+                if(transaction != null && transaction.isActive()){
+                    transaction.commit();
+                }
             }
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
         }
         return Optional.empty();
     }
@@ -256,18 +322,29 @@ public abstract class GenericDaoImpl <K extends Serializable, T extends BaseEnti
 //        transaction.commit();
 //        return t;
         Transaction transaction = null;
-        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
-        try{
-            transaction=session.beginTransaction();
-            T t= (T) session.get(daoType, uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(uuidKey));
-            transaction.commit();
-            return Optional.of(t);
-        } catch (Throwable throwable) {
-            if (transaction != null) {
-                transaction.rollback();
+//        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        if(null != uuidKey) {
+            try {
+                transaction = session.beginTransaction();
+                T t = (T) session.get(daoType, uuidUtilities.getOrderedUUIDByteArrayFromUUIDWithApacheCommons(uuidKey));
+                transaction.commit();
+                LOGGER.info(Thread.currentThread().getStackTrace(),
+                        "Retrieve with UUID {}",
+                        (null != t) ? uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(t.getId()) : null);
+                return Optional.of(t);
+            } catch (NoResultException ex) {
+                LOGGER.error(Thread.currentThread().getStackTrace(), "ERRO-00001", "No Record find UUID {}", uuidKey);
+                LOGGER.error(Thread.currentThread().getStackTrace(), ex);
+            } catch (Throwable throwable) {
+                if (transaction != null) {
+                    transaction.rollback();
+                }
+                LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            }finally {
+                if(transaction != null && transaction.isActive()){
+                    transaction.commit();
+                }
             }
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
         }
         return Optional.empty();
     }
@@ -283,6 +360,7 @@ public abstract class GenericDaoImpl <K extends Serializable, T extends BaseEnti
     public void close()
     {
         if(session!=null){
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Session closed");
             session.close();
         }
     }

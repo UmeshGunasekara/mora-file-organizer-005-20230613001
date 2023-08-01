@@ -8,6 +8,8 @@
 package com.slmora.learn.dao.impl;
 
 import com.slmora.learn.common.dao.impl.GenericDaoImpl;
+import com.slmora.learn.common.logging.MoraLogger;
+import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dao.IMFOFileCategoryDao;
 import com.slmora.learn.jpa.entity.EMFOFileCategory;
 import jakarta.persistence.NoResultException;
@@ -43,29 +45,34 @@ import java.util.UUID;
  */
 public class MFOFileCategoryDaoImpl extends GenericDaoImpl<byte[], EMFOFileCategory> implements IMFOFileCategoryDao
 {
-    final static Logger LOGGER = LogManager.getLogger(MFOFileCategoryDaoImpl.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MFOFileCategoryDaoImpl.class);
+    private MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
 
     @Override
     public Optional<byte[]> addMFOFileCategory(EMFOFileCategory fileCategory)
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Adding file category with UUID {}", (null!=fileCategory)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(fileCategory.getId()):null);
         return add(fileCategory);
     }
 
     @Override
     public Optional<EMFOFileCategory> getMFOFileCategoryById(byte[] id)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve file category with UUID {}", (null!=id)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(id):null);
         return getById(id);
     }
 
     @Override
     public Optional<EMFOFileCategory> getMFOFileCategoryByUUID(UUID uuidKey)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve file category with UUID {}", (null!=uuidKey)?uuidKey:null);
         return getByUUID(uuidKey);
     }
 
     @Override
     public void deleteMFOFileCategory(EMFOFileCategory fileCategory)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Delete file category with UUID {}", (null!=fileCategory)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(fileCategory.getId()):null);
         delete(fileCategory);
     }
 
@@ -78,24 +85,28 @@ public class MFOFileCategoryDaoImpl extends GenericDaoImpl<byte[], EMFOFileCateg
     @Override
     public Optional<EMFOFileCategory> getMFOFileCategoryByCode(Integer code)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve file category with Code {}", code);
         return getByCode(code);
     }
 
     @Override
     public Optional<byte[]> persistReturnIdMFOFileCategory(EMFOFileCategory fileCategory)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Adding file category with UUID {}", (null!=fileCategory)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(fileCategory.getId()):null);
         return persistReturnId(fileCategory);
     }
 
     @Override
     public EMFOFileCategory persistMFOFileCategory(EMFOFileCategory fileCategory)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Adding file category with UUID {}", (null!=fileCategory)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(fileCategory.getId()):null);
         return persist(fileCategory);
     }
 
     @Override
     public Optional<EMFOFileCategory> getMFOFileCategoryByFileFormatName(String fileFormatName)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve file category with file format name {}", fileFormatName);
         //https://www.digitalocean.com/community/tutorials/hibernate-query-language-hql-example-tutorial
         //https://thorben-janssen.com/hibernate-tip-left-join-fetch-join-criteriaquery/
         Transaction transaction = null;
@@ -114,27 +125,28 @@ public class MFOFileCategoryDaoImpl extends GenericDaoImpl<byte[], EMFOFileCateg
             criteriaQuery.where(predicate);
 
             TypedQuery<EMFOFileCategory> typedQuery = session.createQuery(criteriaQuery);
-            EMFOFileCategory file = typedQuery.getSingleResult();
+            EMFOFileCategory fileCategory = typedQuery.getSingleResult();
 //            transaction=getSession().beginTransaction();
 //            T t= (T) session.get(daoType, key);
             transaction.commit();
-            return Optional.of(file);
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieved file category with UUID {}", (null!=fileCategory)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(fileCategory.getId()):null);
+            return Optional.of(fileCategory);
 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("No record found for the file category compatible to given file format name :"+fileFormatName);
+            LOGGER.error(Thread.currentThread().getStackTrace(), "ERRO-00001", "No file category find with file format name {}", fileFormatName);
+            LOGGER.error(Thread.currentThread().getStackTrace(), ex);
             return Optional.empty();
         }catch (Throwable throwable) {
-//            if (transaction != null) {
-//                transaction.rollback();
-//            }
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
-            return Optional.empty();
-        }finally {
             if (transaction != null) {
                 transaction.rollback();
+            }
+            LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            return Optional.empty();
+        }finally {
+            if(transaction != null && transaction.isActive()){
+                transaction.commit();
             }
         }
     }

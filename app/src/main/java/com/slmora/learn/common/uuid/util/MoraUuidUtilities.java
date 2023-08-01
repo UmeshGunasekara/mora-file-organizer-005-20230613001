@@ -8,10 +8,12 @@
 package com.slmora.learn.common.uuid.util;
 
 import com.slmora.learn.common.hex.util.MoraHexUtilities;
+import com.slmora.learn.common.logging.MoraLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.StringJoiner;
 import java.util.UUID;
@@ -39,7 +41,7 @@ import java.util.UUID;
  * </pre></blockquote>
  */
 public class MoraUuidUtilities {
-    final static Logger LOGGER = LogManager.getLogger(MoraUuidUtilities.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MoraUuidUtilities.class);
 
     private volatile SecureRandom numberGenerator = null;
     private final long MSB = 0x8000000000000000L;
@@ -62,7 +64,7 @@ public class MoraUuidUtilities {
      * @since                                   1.0
      */
     public void printUUIDDetails(UUID uuid) throws UnsupportedOperationException{
-        LOGGER.info("printUUIDDetails() is called with uuid = "+uuid);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "print UUID details with uuid {} ", (null!=uuid)?uuid:null);
         System.out.println("UUID String : "+uuid.toString());
         System.out.println("UUID Variant : "+uuid.variant());
         System.out.println("UUID Version : "+uuid.version());
@@ -90,7 +92,9 @@ public class MoraUuidUtilities {
      * @since           1.0
      */
     public String removeHyphensFromUUID(UUID uuid){
-        return uuid.toString().replace("-","");
+        String result = uuid.toString().replace("-","");
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Remove hyphens from UUID input {} and get {}", (null!=uuid)?uuid:null, result);
+        return result;
     }
 
     /**
@@ -108,7 +112,9 @@ public class MoraUuidUtilities {
                 .append(uuidString.substring(12,16)+"-")
                 .append(uuidString.substring(16,20)+"-")
                 .append(uuidString.substring(20));
-        return sb.toString();
+        String result = sb.toString();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Adding hyphens to UUID input {} and get {}", uuidString, result);
+        return result;
     }
 
     /**
@@ -145,7 +151,9 @@ public class MoraUuidUtilities {
                 .append(uuidString, 0, 8)
                 .append(uuidString, 19, 23)
                 .append(uuidString.substring(24));
-        return sb.toString();
+        String result = sb.toString();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Order UUID String input {} and get {}", uuidString, result);
+        return result;
     }
 
     /**
@@ -163,7 +171,9 @@ public class MoraUuidUtilities {
                 .add(orderedUUIDString.substring(0,4))
                 .add(orderedUUIDString.substring(16,20))
                 .add(orderedUUIDString.substring(20));
-        return UUID.fromString(joiner.toString());
+        UUID result = UUID.fromString(joiner.toString());
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "UUID String input {} and get {}", orderedUUIDString, result);
+        return result;
     }
 
     /**
@@ -174,6 +184,7 @@ public class MoraUuidUtilities {
      * @Note analyze the given UUID object
      */
     public byte[] getOrderedUUIDByteArrayFromUUIDWithApacheCommons(UUID uuid) {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "UUID byte from input {}", (null!=uuid)?uuid:null);
         MoraHexUtilities hexUtils = new MoraHexUtilities();
         return hexUtils.convertStringToUnHexByteArrayWithApacheCommons(getOrderedUUIDString(uuid));
     }
@@ -186,8 +197,15 @@ public class MoraUuidUtilities {
      * @Note analyze the given UUID object
      */
     public UUID getUUIDFromOrderedUUIDByteArrayWithApacheCommons(byte[] orderedUUID) {
-        MoraHexUtilities hexUtils = new MoraHexUtilities();
-        String orderedUUIDString = hexUtils.convertByteArrayToHexWithApacheCommons(orderedUUID);
-        return getUUIDFromOrderedUUIDString(orderedUUIDString);
+        if(null != orderedUUID) {
+            MoraHexUtilities hexUtils = new MoraHexUtilities();
+            String orderedUUIDString = hexUtils.convertByteArrayToHexWithApacheCommons(orderedUUID);
+            UUID result = getUUIDFromOrderedUUIDString(orderedUUIDString);
+            LOGGER.debug(Thread.currentThread().getStackTrace(), "UUID from ordered bytes and get {}", result);
+            return result;
+        }else {
+            LOGGER.debug(Thread.currentThread().getStackTrace(), "UUID from ordered bytes and input orderedUUID is null");
+        }
+        return null;
     }
 }

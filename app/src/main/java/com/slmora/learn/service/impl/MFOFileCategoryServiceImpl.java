@@ -8,6 +8,7 @@
 package com.slmora.learn.service.impl;
 
 import com.slmora.learn.common.dao.IGenericDao;
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.service.impl.GenericServiceImpl;
 import com.slmora.learn.dao.IMFOFileCategoryDao;
 import com.slmora.learn.jpa.entity.EMFOFileCategory;
@@ -36,7 +37,7 @@ import java.util.UUID;
  */
 public class MFOFileCategoryServiceImpl extends GenericServiceImpl<byte[], EMFOFileCategory> implements IMFOFileCategoryService
 {
-    final static Logger LOGGER = LogManager.getLogger(MFOFileCategoryServiceImpl.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MFOFileCategoryServiceImpl.class);
 
     private IMFOFileCategoryDao fileCategoryDao;
 
@@ -98,6 +99,7 @@ public class MFOFileCategoryServiceImpl extends GenericServiceImpl<byte[], EMFOF
     @Override
     public Optional<EMFOFileCategory> getMFOFileCategoryByFileFormatName(String fileFormatName)
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with fileFormatName {} ", fileFormatName);
         Optional<EMFOFileCategory> opEFileCategory =  fileCategoryDao.getMFOFileCategoryByFileFormatName(fileFormatName);
         if(!opEFileCategory.isPresent()){
             return fileCategoryDao.getMFOFileCategoryByCode(EMFileCategory.FILE_CAT_OTHER.getFileCategoryCode());

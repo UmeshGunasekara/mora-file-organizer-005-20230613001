@@ -8,6 +8,7 @@
 package com.slmora.learn.service.impl;
 
 import com.slmora.learn.common.dao.IGenericDao;
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.service.impl.GenericServiceImpl;
 import com.slmora.learn.dao.IMFOFileFormatDao;
 import com.slmora.learn.jpa.entity.EMFOFileFormat;
@@ -36,7 +37,7 @@ import java.util.UUID;
 public class MFOFileFormatServiceImpl extends GenericServiceImpl<byte[], EMFOFileFormat> implements
         IMFOFileFormatService
 {
-    final static Logger LOGGER = LogManager.getLogger(MFOFileFormatServiceImpl.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MFOFileFormatServiceImpl.class);
 
     private IMFOFileFormatDao fileFormatDao;
 

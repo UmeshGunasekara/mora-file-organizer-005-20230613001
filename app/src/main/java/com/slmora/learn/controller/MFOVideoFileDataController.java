@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.controller;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dao.impl.MFOVideoFileDataDaoImpl;
 import com.slmora.learn.dto.FileDto;
@@ -48,7 +49,7 @@ import java.util.UUID;
  * </pre></blockquote>
  */
 public class MFOVideoFileDataController {
-    final static Logger LOGGER = LogManager.getLogger(MFOVideoFileDataController.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MFOVideoFileDataController.class);
 
     public void addVideoFileDate(EMFOFile eFile){
         File source = new File(eFile.getFileFullPath());
@@ -111,15 +112,12 @@ public class MFOVideoFileDataController {
             eVideoFileData = videoFileDataService.persistMFOVideoFileData(eVideoFileData);
 
             UUID uuid = uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eVideoFileData.getId());
-            LOGGER.info("Added Video File " + fileDto.getFilePath() + " with UUID : " + uuid.toString());
-            System.out.println("Added Video File " + fileDto.getFilePath() + " with UUID : " + uuid.toString());
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Added Video File " + fileDto.getFilePath() + " with UUID : " + uuid.toString());
 
         } catch (InputFormatException e) {
-            LOGGER.error("Error with source : "+source);
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         } catch (EncoderException e) {
-            LOGGER.error("Error with source : "+source);
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         }finally {
             videoFileDataService.close();
         }

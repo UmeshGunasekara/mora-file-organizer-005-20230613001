@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.system.property;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.property.util.MoraAccessProperties;
 import com.slmora.learn.model.SearchPathModel;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -31,7 +32,7 @@ import java.util.Stack;
  * </pre></blockquote>
  */
 public final class SingleSystemProperty {
-    final static Logger LOGGER = LogManager.getLogger(SingleSystemProperty.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(SingleSystemProperty.class);
 
     public static String PROP_MFO_ZIP_EXTRACT_DESTINATION;
     public static Stack<SearchPathModel> SEARCH_DIR_STACK = new Stack<>();

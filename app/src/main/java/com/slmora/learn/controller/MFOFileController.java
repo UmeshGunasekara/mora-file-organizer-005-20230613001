@@ -8,6 +8,7 @@
 package com.slmora.learn.controller;
 
 import com.slmora.learn.common.file.util.MoraFileWriteAccessUtilities;
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.common.zip.util.MoraFileZipUtilities;
 import com.slmora.learn.dao.impl.MFODirectoryDaoImpl;
@@ -16,6 +17,7 @@ import com.slmora.learn.dao.impl.MFOFileDaoImpl;
 import com.slmora.learn.dto.FileDto;
 import com.slmora.learn.jpa.entity.EMFODirectory;
 import com.slmora.learn.jpa.entity.EMFOFile;
+import com.slmora.learn.jpa.entity.EMFOFileCategory;
 import com.slmora.learn.model.SearchPathModel;
 import com.slmora.learn.service.IMFODirectoryService;
 import com.slmora.learn.service.IMFOFileCategoryService;
@@ -60,11 +62,12 @@ import java.util.concurrent.TimeUnit;
  * </pre></blockquote>
  */
 public class MFOFileController {
-    final static Logger LOGGER = LogManager.getLogger(MFOFileController.class);
-    public void addFile(Path file, Integer zipFileLevel, EMFOFile zipFile, Path zipParent, Integer driveCode, boolean isSkipEnable){
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MFOFileController.class);
+    public void addFile(Path file, Integer zipFileLevel, EMFOFile zipFile, Path zipParent, Integer driveCode, Integer isSkipEnable){
+        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Adding File file {}, zipFileLevel {}, zipFile UUID {}, zipParent {}, driveCode {}, isSkipEnable {}", (null!=file)?file.toAbsolutePath():null, zipFileLevel, (null!=zipFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFile.getId()):null, (null!=zipParent)?zipParent.toAbsolutePath():null, driveCode, isSkipEnable);
         IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
         IMFOFileCategoryService fileCategoryService = new MFOFileCategoryServiceImpl(new MFOFileCategoryDaoImpl());
-        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
 
         IMFOFileService fileService = new MFOFileServiceImpl(new MFOFileDaoImpl());
 
@@ -102,6 +105,7 @@ public class MFOFileController {
 
             eFile = fileService.persistMFOFile(eFile);
 
+            LOGGER.debug(Thread.currentThread().getStackTrace(), "Size of the directory search stack {} ", SingleSystemProperty.SEARCH_DIR_STACK.size());
             if(SingleSystemProperty.SEARCH_DIR_STACK.size()>0) {
                 SearchPathModel lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
                 while (!isSearchPathMatching(dbFile, lastPathModel.getPath())) {
@@ -111,7 +115,7 @@ public class MFOFileController {
                         searchDir.setDirectorySearchStatus(1);
                         dirService.persistMFODirectory(searchDir);
                     }
-                    LOGGER.info("Poped from the search stack : " + SingleSystemProperty.SEARCH_DIR_STACK.pop());
+                    LOGGER.debug(Thread.currentThread().getStackTrace(), "Poped from the directory search stack {} ", SingleSystemProperty.SEARCH_DIR_STACK.pop());
                     if(SingleSystemProperty.SEARCH_DIR_STACK.size()>0){
                         lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
                     }else {
@@ -121,9 +125,7 @@ public class MFOFileController {
             }
 
             UUID uuid = uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eFile.getId());
-            LOGGER.info("Added File " + dbFile.toAbsolutePath()
-                    .toString() + " with UUID : " + uuid.toString());
-            System.out.println("Added File " + dbFile.toAbsolutePath()
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Added File " + dbFile.toAbsolutePath()
                     .toString() + " with UUID : " + uuid.toString());
 
             if(eFile.getFileCategory().getCode().equals(EMFileCategory.FILE_CAT_VIDEO.getFileCategoryCode())){
@@ -138,11 +140,11 @@ public class MFOFileController {
 
 
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         } catch (NoSuchAlgorithmException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         } catch (InvalidKeyException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         } finally {
             dirService.close();
             fileCategoryService.close();
@@ -161,14 +163,15 @@ public class MFOFileController {
                 }
             }
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         } finally {
             zipFileService.close();
         }
 
     }
 
-    public void addFile(Path file, Integer zipFileLevel, Integer driveCode, boolean isSkipEnable){
+    public void addFile(Path file, Integer zipFileLevel, Integer driveCode, Integer isSkipEnable){
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Adding File file {}, zipFileLevel {}, driveCode {}, isSkipEnable {}", (null!=file)?file.toAbsolutePath():null, zipFileLevel, driveCode, isSkipEnable);
         IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
         IMFOFileCategoryService fileCategoryService = new MFOFileCategoryServiceImpl(new MFOFileCategoryDaoImpl());
         MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
@@ -200,13 +203,13 @@ public class MFOFileController {
                 if (opListEntityDir.isPresent()&&opListEntityDir.get().size()==1) {
                     eFile.setDirectory(opListEntityDir.get().get(0));
                 }else {
-                    LOGGER.error(parentDir.toAbsolutePath()
+                    LOGGER.error(Thread.currentThread().getStackTrace(), parentDir.toAbsolutePath()
                             .toString()+" has not only single result");
                 }
             }
 
-            eFile.setFileCategory(fileCategoryService.getMFOFileCategoryByFileFormatName(fileDto.getFileExtension().toLowerCase())
-                    .get());
+            eFile.setFileCategory(fileCategoryService.getMFOFileCategoryByFileFormatName(fileDto.getFileExtension().toLowerCase()).get());
+
 
             if(!fileDto.getFileExtension().isBlank()&&fileDto.getFileExtension().toLowerCase().endsWith("zip")){
                 eFile.setFileSearchStatus(0);
@@ -214,6 +217,7 @@ public class MFOFileController {
 
             eFile = fileService.persistMFOFile(eFile);
 
+            LOGGER.debug(Thread.currentThread().getStackTrace(), "Size of the directory search stack {} ", SingleSystemProperty.SEARCH_DIR_STACK.size());
             if(SingleSystemProperty.SEARCH_DIR_STACK.size()>0) {
                 SearchPathModel lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
                 while (!isSearchPathMatching(file, lastPathModel.getPath())) {
@@ -223,7 +227,7 @@ public class MFOFileController {
                         searchDir.setDirectorySearchStatus(1);
                         dirService.persistMFODirectory(searchDir);
                     }
-                    LOGGER.info("Poped from the search stack : " + SingleSystemProperty.SEARCH_DIR_STACK.pop());
+                    LOGGER.debug(Thread.currentThread().getStackTrace(), "Poped from the directory search stack {} ", SingleSystemProperty.SEARCH_DIR_STACK.pop());
                     if(SingleSystemProperty.SEARCH_DIR_STACK.size()>0){
                         lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
                     }else {
@@ -233,9 +237,7 @@ public class MFOFileController {
             }
 
             UUID uuid = uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eFile.getId());
-            LOGGER.info("Added File " + file.toAbsolutePath()
-                    .toString() + " with UUID : " + uuid.toString());
-            System.out.println("Added File " + file.toAbsolutePath()
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Added File " + file.toAbsolutePath()
                     .toString() + " with UUID : " + uuid.toString());
 
             if(eFile.getFileCategory().getCode().equals(EMFileCategory.FILE_CAT_VIDEO.getFileCategoryCode())){
@@ -252,11 +254,11 @@ public class MFOFileController {
 
 
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         } catch (NoSuchAlgorithmException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         } catch (InvalidKeyException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         } finally {
             dirService.close();
             fileCategoryService.close();
@@ -278,16 +280,17 @@ public class MFOFileController {
                 }
             }
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         } finally {
             zipFileService.close();
         }
     }
 
-    public void addFile(Path file, FileDto fileDto, Integer zipFileLevel, EMFOFile zipFile, Path zipParent, Integer driveCode, boolean isSkipEnable){
+    public void addFile(Path file, FileDto fileDto, Integer zipFileLevel, EMFOFile zipFile, Path zipParent, Integer driveCode, Integer isSkipEnable){
+        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Adding File file {}, fileDto UUID {}, zipFileLevel {}, zipFile UUID {}, zipParent {}, driveCode {}, isSkipEnable {}", (null!=file)?file.toAbsolutePath():null, (null!=fileDto)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(fileDto.getId()):null, zipFileLevel, (null!=zipFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFile.getId()):null, (null!=zipParent)?zipParent.toAbsolutePath():null, driveCode, isSkipEnable);
         IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
         IMFOFileCategoryService fileCategoryService = new MFOFileCategoryServiceImpl(new MFOFileCategoryDaoImpl());
-        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
 
         IMFOFileService fileService = new MFOFileServiceImpl(new MFOFileDaoImpl());
 
@@ -307,6 +310,7 @@ public class MFOFileController {
                     eFile = opEFile.get();
                     eFile.setFileSearchStatus(0);
 
+                    LOGGER.debug(Thread.currentThread().getStackTrace(), "Size of the directory search stack {} ", SingleSystemProperty.SEARCH_DIR_STACK.size());
                     if (SingleSystemProperty.SEARCH_DIR_STACK.size() > 0) {
                         SearchPathModel lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
                         while (!isSearchPathMatching(dbFile, lastPathModel.getPath())) {
@@ -316,7 +320,7 @@ public class MFOFileController {
                                 searchDir.setDirectorySearchStatus(1);
                                 dirService.persistMFODirectory(searchDir);
                             }
-                            LOGGER.info("Poped from the search stack : " + SingleSystemProperty.SEARCH_DIR_STACK.pop());
+                            LOGGER.debug(Thread.currentThread().getStackTrace(), "Poped from the directory search stack {} ", SingleSystemProperty.SEARCH_DIR_STACK.pop());
                             if (SingleSystemProperty.SEARCH_DIR_STACK.size() > 0) {
                                 lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
                             } else {
@@ -332,11 +336,11 @@ public class MFOFileController {
                 fileService.persistMFOFile(eFile);
 
             } catch (IOException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             } catch (NoSuchAlgorithmException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             } catch (InvalidKeyException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             } finally {
                 dirService.close();
                 fileCategoryService.close();
@@ -346,7 +350,9 @@ public class MFOFileController {
 
     }
 
-    public void addFile(FileDto fileDto, Integer zipFileLevel, Integer driveCode, boolean isSkipEnable){
+    public void addFile(FileDto fileDto, Integer zipFileLevel, Integer driveCode, Integer isSkipEnable){
+        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Adding File fileDto UUID {}, zipFileLevel {}, driveCode {}, isSkipEnable {}", (null!=fileDto)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(fileDto.getId()):null, zipFileLevel, driveCode, isSkipEnable);
         IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
         IMFOFileCategoryService fileCategoryService = new MFOFileCategoryServiceImpl(new MFOFileCategoryDaoImpl());
 
@@ -362,6 +368,7 @@ public class MFOFileController {
                     eFile = opEFile.get();
                     eFile.setFileSearchStatus(0);
 
+                    LOGGER.debug(Thread.currentThread().getStackTrace(), "Size of the directory search stack {} ", SingleSystemProperty.SEARCH_DIR_STACK.size());
                     if (SingleSystemProperty.SEARCH_DIR_STACK.size() > 0) {
                         SearchPathModel lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
                         while (!isSearchPathMatching(fileDto.getFilePath(), lastPathModel.getPath())) {
@@ -371,7 +378,7 @@ public class MFOFileController {
                                 searchDir.setDirectorySearchStatus(1);
                                 dirService.persistMFODirectory(searchDir);
                             }
-                            LOGGER.info("Poped from the search stack : " + SingleSystemProperty.SEARCH_DIR_STACK.pop());
+                            LOGGER.debug(Thread.currentThread().getStackTrace(), "Poped from the directory search stack {} ", SingleSystemProperty.SEARCH_DIR_STACK.pop());
                             if (SingleSystemProperty.SEARCH_DIR_STACK.size() > 0) {
                                 lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
                             } else {
@@ -394,11 +401,11 @@ public class MFOFileController {
                 }
 
             } catch (IOException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             } catch (NoSuchAlgorithmException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             } catch (InvalidKeyException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             } finally {
                 dirService.close();
                 fileCategoryService.close();
@@ -408,8 +415,10 @@ public class MFOFileController {
 
     }
 
-    public void addZipFile(Path file, EMFOFile eFile, Integer zipFileLevel, Path zipParent, Integer driveCode, boolean isSkipEnable) throws IOException
+    public void addZipFile(Path file, EMFOFile eFile, Integer zipFileLevel, Path zipParent, Integer driveCode, Integer isSkipEnable) throws IOException
     {
+        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Adding Zip File file {}, zipFileLevel {}, eFile UUID {}, zipParent {}, driveCode {}, isSkipEnable {}", (null!=file)?file.toAbsolutePath():null, zipFileLevel, (null!=eFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eFile.getId()):null, (null!=zipParent)?zipParent.toAbsolutePath():null, driveCode, isSkipEnable);
         MoraFileWriteAccessUtilities fileWriteAccessUtilities = new MoraFileWriteAccessUtilities();
         MoraFileZipUtilities fileZipUtilities = new MoraFileZipUtilities();
 
@@ -427,7 +436,7 @@ public class MFOFileController {
         if(opExtractedPath.isPresent()){
             Path extractedPath = opExtractedPath.get();
             MoraFileOrganizerWalkingController walkingController = new MoraFileOrganizerWalkingController();
-            LOGGER.info("File : "+file.toAbsolutePath().toString()+" ,Extracted in "+extractedPath.toAbsolutePath().toString());
+            LOGGER.info(Thread.currentThread().getStackTrace(), "File : "+file.toAbsolutePath().toString()+" ,Extracted in "+extractedPath.toAbsolutePath().toString());
 
             walkingController.sourcePathWalk(extractedPath, zipFileLevel, parent, eFile, driveCode,isSkipEnable);
             if(zipExtractionDestination.equals(extractedPath.toAbsolutePath().toString())){

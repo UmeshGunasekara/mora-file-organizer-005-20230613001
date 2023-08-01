@@ -11,6 +11,7 @@ import com.slmora.learn.jpa.entity.EMFOFile;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.nio.file.Path;
 
@@ -31,6 +32,7 @@ import java.nio.file.Path;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
+@ToString
 public class SearchPathModel {
     private Path path;
     private Integer zipLevel;

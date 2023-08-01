@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.controller;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dao.impl.MFOAudioFileDataDaoImpl;
 import com.slmora.learn.dao.impl.MFOVideoFileDataDaoImpl;
@@ -50,7 +51,7 @@ import java.util.UUID;
  * </pre></blockquote>
  */
 public class MFOAudioFileDataController {
-    final static Logger LOGGER = LogManager.getLogger(MFOAudioFileDataController.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MFOAudioFileDataController.class);
 
     public void addAudioFileDate(EMFOFile eFile){
         File source = new File(eFile.getFileFullPath());
@@ -65,6 +66,7 @@ public class MFOAudioFileDataController {
     public void addAudioFileDate(EMFOFile eFile, File source){
         IMFOAudioFileDataService audioFileDataService = new MFOAudioFileDataServiceImpl(new MFOAudioFileDataDaoImpl());
         MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Adding Audio file data with eFile UUID {}, source {}", (null!=eFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eFile.getId()):null, (null!=source)?source.getAbsolutePath():null);
 
         FileDto fileDto = new FileDto(eFile);
         Encoder encoder = new Encoder();
@@ -90,15 +92,12 @@ public class MFOAudioFileDataController {
             eAudioFileData = audioFileDataService.persistMFOAudioFileData(eAudioFileData);
 
             UUID uuid = uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eAudioFileData.getId());
-            LOGGER.info("Added Audio File " + fileDto.getFilePath() + " with UUID : " + uuid.toString());
-//            System.out.println("Added Audio File " + fileDto.getFilePath() + " with UUID : " + uuid.toString());
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Added Audio File {} with UUID {}", (null!=fileDto)?fileDto.getFilePath():null, (null!=uuid)?uuid.toString():null);
 
         } catch (InputFormatException e) {
-            LOGGER.error("Error with source : "+source);
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         } catch (EncoderException e) {
-            LOGGER.error("Error with source : "+source);
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         }finally {
             audioFileDataService.close();
         }

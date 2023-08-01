@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.common.file.util;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
@@ -117,7 +118,7 @@ import java.util.stream.Stream;
  */
 public class MoraFileReadAccessUtilities
 {
-    final static Logger LOGGER = LogManager.getLogger(MoraFileReadAccessUtilities.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MoraFileReadAccessUtilities.class);
 
     /**
      * Get string content of file as a List using {@link Files#lines(Path, Charset)}
@@ -136,11 +137,12 @@ public class MoraFileReadAccessUtilities
      */
     public Optional<List<String>> readByFilePathToList_21(String filePath, Charset charset) throws IOException {
         //read file into stream, try-with-resources
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with Charset {}", filePath, (null != charset)?charset.toString():null);
         try (Stream<String> fileStream = Files.lines(Paths.get(filePath),charset==null? StandardCharsets.UTF_8:charset)) {
             List<String> resultList = fileStream.collect(Collectors.toList());
             return Optional.of(resultList);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -157,6 +159,7 @@ public class MoraFileReadAccessUtilities
      * @see                 #readByFilePathToList_21(String, Charset)
      */
     public Optional<List<String>> readByFilePathToList_21(String filePath) throws IOException {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {}", filePath);
         return readByFilePathToList_21(filePath,StandardCharsets.UTF_8);
     }
 
@@ -176,12 +179,12 @@ public class MoraFileReadAccessUtilities
      * @since               1.0
      */
     public Optional<List<String>> readByFilePathToList_3(String filePath, Charset charset) throws IOException {
-
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with Charset {}", filePath, (null != charset)?charset.toString():null);
         try{
             List<String> resultList = Files.readAllLines(Paths.get(filePath),charset==null?StandardCharsets.UTF_8:charset);
             return Optional.of(resultList);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -202,11 +205,12 @@ public class MoraFileReadAccessUtilities
      */
     public Optional<List<String>> readByFilePathToList_451(String filePath, Charset charset) throws IOException {
         //read file into BufferedReader, try-with-resources
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with Charset {}", filePath, (null != charset)?charset.toString():null);
         try (BufferedReader br = Files.newBufferedReader(Paths.get(filePath),charset==null?StandardCharsets.UTF_8:charset)) {
             List<String> resultList = br.lines().collect(Collectors.toList());
             return Optional.of(resultList);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -223,6 +227,7 @@ public class MoraFileReadAccessUtilities
      * @see                 #readByFilePathToList_451(String, Charset)
      */
     public Optional<List<String>> readByFilePathToList_451(String filePath) throws IOException {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with default Charset", filePath);
         return readByFilePathToList_451(filePath, StandardCharsets.UTF_8);
     }
 
@@ -241,6 +246,7 @@ public class MoraFileReadAccessUtilities
      */
     public Optional<List<String>> readByFilePathToList_65(String filePath, Charset charset) throws IOException {
         //read file into BufferedReader, try-with-resources
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with Charset {}", filePath, (null != charset)?charset.toString():null);
         try (BufferedReader br = new BufferedReader(new FileReader(filePath, charset==null?StandardCharsets.UTF_8:charset))) {
             //with while loop
             List<String> resultList = new ArrayList<>();
@@ -250,7 +256,7 @@ public class MoraFileReadAccessUtilities
             }
             return Optional.of(resultList);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -267,6 +273,7 @@ public class MoraFileReadAccessUtilities
      * @see                 #readByFilePathToList_65(String, Charset)
      */
     public Optional<List<String>> readByFilePathToList_65(String filePath) throws IOException {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with default Charset", filePath);
         return readByFilePathToList_65(filePath, StandardCharsets.UTF_8);
     }
 
@@ -287,6 +294,7 @@ public class MoraFileReadAccessUtilities
     public Optional<List<String>> readByFilePathToList_7895(String filePath, Charset charset) throws
             IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with Charset {}", filePath, (null != charset)?charset.toString():null);
         try (
                 InputStream iStream = new FileInputStream(filePath);
                 BufferedReader br = new BufferedReader(new InputStreamReader(iStream, charset==null?StandardCharsets.UTF_8:charset))
@@ -298,7 +306,7 @@ public class MoraFileReadAccessUtilities
             }
             return Optional.of(resultList);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -317,6 +325,7 @@ public class MoraFileReadAccessUtilities
     public Optional<List<String>> readByFilePathToList_7895(String filePath) throws
             IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with default Charset", filePath);
         return readByFilePathToList_7895(filePath, StandardCharsets.UTF_8);
     }
 
@@ -334,6 +343,7 @@ public class MoraFileReadAccessUtilities
      */
     public Optional<List<String>> readByFilePathToList_0e(String filePath, Charset charset) throws IOException {
         //read file into Scanner, try-with-resources
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with Charset {}", filePath, (null != charset)?charset.toString():null);
         try (Scanner scanner = new Scanner(new File(filePath),charset==null?StandardCharsets.UTF_8:charset)) {
             List<String> resultList = new ArrayList<>();
             while (scanner.hasNext()) {
@@ -341,7 +351,7 @@ public class MoraFileReadAccessUtilities
             }
             return Optional.of(resultList);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -358,6 +368,7 @@ public class MoraFileReadAccessUtilities
      * @see                 #readByFilePathToList_0e(String, Charset)
      */
     public Optional<List<String>> readByFilePathToList_0e(String filePath) throws IOException {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with default Charset", filePath);
         return readByFilePathToList_0e(filePath, StandardCharsets.UTF_8);
     }
 
@@ -377,6 +388,7 @@ public class MoraFileReadAccessUtilities
      */
     public Optional<List<String>> readByFilePathToList_0pq(String filePath, String charsetName) throws IOException {
         //read file into Scanner, try-with-resources
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with Charset {}", filePath, charsetName);
         try (LineIterator lineIterator = FileUtils.lineIterator(new File(filePath), charsetName==null?"UTF-8":charsetName)) {
             List<String> resultList = new ArrayList<>();
             while (lineIterator.hasNext()) {
@@ -384,7 +396,7 @@ public class MoraFileReadAccessUtilities
             }
             return Optional.of(resultList);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -409,6 +421,7 @@ public class MoraFileReadAccessUtilities
      */
     public Optional<List<String>> readByFilePathToListWithFiltersNotStartsWithAndNumberReplace_21(String filePath, String notStartsWith, String numberReplace) throws IOException {
         //read file into stream, try-with-resources
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} lines not started with {} and replace value 10 replaced to 4 digit value with {}", filePath, notStartsWith, numberReplace);
         try (Stream<String> fileStream = Files.lines(Paths.get(filePath))) {
             List<String> resultList = fileStream
                     .filter(line -> !line.toUpperCase().startsWith(notStartsWith.toUpperCase()))
@@ -417,7 +430,7 @@ public class MoraFileReadAccessUtilities
                     .collect(Collectors.toList());
             return Optional.of(resultList);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -442,6 +455,7 @@ public class MoraFileReadAccessUtilities
     public Optional<List<String>> readByFilePathToListWithFiltersNotStartsWithAndNumberReplace_65(String filePath, String notStartsWith, String numberReplace) throws
             IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} lines not started with {} and replace value 10 replaced to 4 digit value with {}", filePath, notStartsWith, numberReplace);
         try (BufferedReader br = new BufferedReader(new FileReader(filePath, StandardCharsets.UTF_8))) {
             String line = null;
             List<String> resultList = new ArrayList<>();
@@ -456,7 +470,7 @@ public class MoraFileReadAccessUtilities
             }
             return Optional.of(resultList);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -482,6 +496,7 @@ public class MoraFileReadAccessUtilities
     public Optional<List<String>> readByFilePathToListWithFiltersNotStartsWithAndNumberReplace_7895(String filePath, String notStartsWith, String numberReplace) throws
             IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} lines not started with {} and replace value 10 replaced to 4 digit value with {}", filePath, notStartsWith, numberReplace);
         StringBuilder contentBuilder = new StringBuilder(1024);
 
         try (
@@ -501,7 +516,7 @@ public class MoraFileReadAccessUtilities
             }
             return Optional.of(resultList);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -520,10 +535,11 @@ public class MoraFileReadAccessUtilities
      */
     public byte[] readByFilePathToBytes_a(String filePath) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {}", filePath);
         try {
             return Files.readAllBytes(Paths.get(filePath));
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -543,10 +559,11 @@ public class MoraFileReadAccessUtilities
      */
     public String readByFilePathToString_a(String filePath, Charset charset) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with Charset {}", filePath, (null != charset)?charset.toString():null);
         try {
             return new String (readByFilePathToBytes_a(filePath), charset==null?StandardCharsets.UTF_8:charset);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -566,10 +583,11 @@ public class MoraFileReadAccessUtilities
      */
     public String readByFilePathToString_a(String filePath) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {}", filePath);
         try {
             return readByFilePathToString_a (filePath,StandardCharsets.UTF_8);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -594,9 +612,10 @@ public class MoraFileReadAccessUtilities
         try {
             ClassLoader classLoader = getClass().getClassLoader();
             File file = new File(classLoader.getResource(fileName).getFile());
+            LOGGER.debug(Thread.currentThread().getStackTrace(), "Read class path File {} with Charset {}", file.getAbsolutePath(), charsetName);
             return FileUtils.readFileToString(file, charsetName==null?"UTF-8":charsetName);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -615,6 +634,7 @@ public class MoraFileReadAccessUtilities
      */
     public String readByFilePathToStringOnClassLoader_b0c(String fileName) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read class path File {} with Charset {}", fileName);
         return readByFilePathToStringOnClassLoader_b0c(fileName, "UTF-8");
     }
 
@@ -633,10 +653,11 @@ public class MoraFileReadAccessUtilities
      */
     public String readByFilePathToStringOnClassLoader_78d(String filePath, String charsetName) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with Charset {}", filePath, charsetName);
         try (InputStream iStream = new FileInputStream(filePath)){
             return IOUtils.toString(iStream, charsetName==null?"UTF-8":charsetName);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -654,6 +675,7 @@ public class MoraFileReadAccessUtilities
      */
     public String readByFilePathToStringOnClassLoader_78d(String filePath) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {}", filePath);
         return readByFilePathToStringOnClassLoader_78d(filePath,  "UTF-8");
     }
 
@@ -678,13 +700,14 @@ public class MoraFileReadAccessUtilities
     public StringBuilder readByFilePathToStringBuilder_21(String filePath, Charset charset) throws IOException
     {
         //read file into stream, try-with-resources
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with Charset {}", filePath, (null != charset)?charset.toString():null);
         try (Stream<String> fileStream = Files.lines(Paths.get(filePath),charset==null?StandardCharsets.UTF_8:charset)){
             StringBuilder contentBuilder = new StringBuilder();
             fileStream.forEach(line -> contentBuilder.append(line).append("\n"));
 //            fileStream.reduce((a,b) -> String.valueOf(contentBuilder.append(a).append("\n").append(b)));
             return contentBuilder;
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -702,6 +725,7 @@ public class MoraFileReadAccessUtilities
      */
     public StringBuilder readByFilePathToStringBuilder_21(String filePath) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {}", filePath);
         return readByFilePathToStringBuilder_21(filePath, StandardCharsets.UTF_8);
     }
 
@@ -725,13 +749,14 @@ public class MoraFileReadAccessUtilities
      */
     public StringBuilder readByFilePathToStringBuilder_3(String filePath, Charset charset) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with Charset {}", filePath, (null != charset)?charset.toString():null);
         try {
             StringBuilder contentBuilder = new StringBuilder(1024);
             List lines = Files.readAllLines(Paths.get(filePath),charset==null?StandardCharsets.UTF_8:charset);
             lines.forEach(line -> contentBuilder.append(line).append("\n"));
             return contentBuilder;
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -749,6 +774,7 @@ public class MoraFileReadAccessUtilities
      */
     public byte[] readByFilePathToBytes_7f(String filePath) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {}", filePath);
         byte[] bytes = null;
         try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(filePath))){
             int nBytesToRead = dataInputStream.available();
@@ -758,7 +784,7 @@ public class MoraFileReadAccessUtilities
             }
             return bytes;
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -778,10 +804,11 @@ public class MoraFileReadAccessUtilities
      */
     public String readByFilePathToString_7f(String filePath, Charset charset) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with Charset {}", filePath, (null != charset)?charset.toString():null);
         try {
             return new String (readByFilePathToBytes_7f(filePath), charset==null?StandardCharsets.UTF_8:charset);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -801,11 +828,12 @@ public class MoraFileReadAccessUtilities
      */
     public Optional<String> readByFilePathToString_7f(String filePath) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {}", filePath);
         try {
             String content = readByFilePathToString_7f(filePath, StandardCharsets.UTF_8);
             return content==null?Optional.empty():Optional.of(content);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -828,12 +856,13 @@ public class MoraFileReadAccessUtilities
      */
     public String readByFilePathToString_21(String filePath, Charset charset) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with Charset {}", filePath, (null != charset)?charset.toString():null);
         //read file into BufferedReader, try-with-resources
         try {
             String content = Files.lines(Paths.get(filePath),charset==null?StandardCharsets.UTF_8:charset).collect(Collectors.joining(System.lineSeparator()));
             return content;
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -851,6 +880,7 @@ public class MoraFileReadAccessUtilities
      */
     public String readByFilePathToString_21(String filePath) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {}", filePath);
         return readByFilePathToString_21(filePath, StandardCharsets.UTF_8);
     }
 
@@ -868,12 +898,13 @@ public class MoraFileReadAccessUtilities
      */
     public String readByFilePathToString_g(String filePath) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {}", filePath);
         //read file into BufferedReader, try-with-resources
         try {
             String content = Files.readString(Paths.get(filePath));
             return content;
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -894,6 +925,7 @@ public class MoraFileReadAccessUtilities
      */
     public String readByFilePathToString_hij(String filePath) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {}", filePath);
         try (RandomAccessFile accessFile = new RandomAccessFile(filePath, "r");
              FileChannel channel = accessFile.getChannel()){
             int bufferSize = 1024;
@@ -906,7 +938,7 @@ public class MoraFileReadAccessUtilities
             String content = new String(buff.array(),StandardCharsets.UTF_8);
             return content;
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -934,6 +966,7 @@ public class MoraFileReadAccessUtilities
     public StringBuilder readByFilePathToStringBuilderWithFiltersNotStartsWithAndNumberReplace_7895(String filePath, String notStartsWith, String numberReplace) throws
             IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} lines not started with {} and replace value 10 replaced to 4 digit value with {}", filePath, notStartsWith, numberReplace);
         try(
                 InputStream iStream = new FileInputStream(filePath);
                 BufferedReader br = new BufferedReader(new InputStreamReader(iStream))
@@ -951,7 +984,7 @@ public class MoraFileReadAccessUtilities
             }
             return contentBuilder;
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -979,7 +1012,7 @@ public class MoraFileReadAccessUtilities
             }
             return resultStringBuilder;
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -1004,7 +1037,7 @@ public class MoraFileReadAccessUtilities
             br.lines().forEach(line -> contentBuilder.append(line).append("\n"));
             return contentBuilder;
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
 
@@ -1023,6 +1056,7 @@ public class MoraFileReadAccessUtilities
      */
     public StringBuilder readByUrlPathToStringBuilder_kl8(String urlPath) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read URL {}", urlPath);
         InputStream inputStream = null;
         StringBuilder resultStringBuilder = new StringBuilder();
         //read file into BufferedReader, try-with-resources
@@ -1032,13 +1066,13 @@ public class MoraFileReadAccessUtilities
             inputStream = urlConnection.getInputStream();
             resultStringBuilder = readByInputStreamToStringBuilder_95(inputStream);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         } finally {
             try {
                 inputStream.close();
             } catch (IOException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
                 throw e;
             }
             return resultStringBuilder;
@@ -1059,6 +1093,7 @@ public class MoraFileReadAccessUtilities
      */
     public String readByFilePathToEncodedString_amn(String filePath) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {}", filePath);
         byte[] fileBytes = readByFilePathToBytes_a(filePath);
         return Base64.getEncoder().encodeToString(fileBytes);
     }
@@ -1079,6 +1114,7 @@ public class MoraFileReadAccessUtilities
     public String readByFilePathToEncodedString_3mno(String filePath, Charset charset) throws
             IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {} with Charset {}", filePath, (null != charset)?charset.toString():null);
         StringBuilder fileContent = readByFilePathToStringBuilder_3(filePath, charset);
         return Base64.getEncoder().encodeToString(fileContent.toString().getBytes());
 
@@ -1098,6 +1134,7 @@ public class MoraFileReadAccessUtilities
      */
     public StringBuilder readByFilePathToString_r7(String filePath) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {}", filePath);
         try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(filePath))){
             StringBuilder resultStringBuilder = new StringBuilder();
             byte[] buff = new byte[4096];
@@ -1108,7 +1145,7 @@ public class MoraFileReadAccessUtilities
             }
             return resultStringBuilder;
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }
@@ -1132,6 +1169,7 @@ public class MoraFileReadAccessUtilities
      */
     public StringBuilder readByFilePathToString_sij(String filePath) throws IOException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Read File {}", filePath);
         try (FileChannel inputChannel = new FileInputStream(filePath).getChannel()){
             StringBuilder resultStringBuilder = new StringBuilder();
             int bufferSize = 1024*4;
@@ -1150,7 +1188,7 @@ public class MoraFileReadAccessUtilities
             }
             return resultStringBuilder;
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
             throw e;
         }
     }

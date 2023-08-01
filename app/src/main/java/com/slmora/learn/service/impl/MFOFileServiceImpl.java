@@ -10,7 +10,9 @@ package com.slmora.learn.service.impl;
 import com.slmora.learn.common.cryptography.hmac.util.EHmacAlgorithm;
 import com.slmora.learn.common.cryptography.hmac.util.MoraHMACUtilities;
 import com.slmora.learn.common.dao.IGenericDao;
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.service.impl.GenericServiceImpl;
+import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dao.IMFOFileDao;
 import com.slmora.learn.dto.FileDto;
 import com.slmora.learn.jpa.entity.EMFODirectory;
@@ -44,7 +46,7 @@ import java.util.UUID;
  */
 public class MFOFileServiceImpl extends GenericServiceImpl<byte[], EMFOFile> implements IMFOFileService
 {
-    final static Logger LOGGER = LogManager.getLogger(MFOFileServiceImpl.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MFOFileServiceImpl.class);
 
     private IMFOFileDao fileDao;
 
@@ -127,6 +129,7 @@ public class MFOFileServiceImpl extends GenericServiceImpl<byte[], EMFOFile> imp
             NoSuchAlgorithmException,
             InvalidKeyException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with fileFullPath {}", fileFullPath);
         MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
         Path file = Paths.get(fileFullPath);
         String fileName = file.getFileName().toString();
@@ -140,6 +143,7 @@ public class MFOFileServiceImpl extends GenericServiceImpl<byte[], EMFOFile> imp
     public Optional<List<EMFOFile>> getAllMFOFileByFileFullPathSha256AndZipLevel(String fileFullPathSha256,
                                                                                  Integer zipLevel)
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with fileFullPathSha256 {} zipLevel {} ", fileFullPathSha256, zipLevel);
         return fileDao.getAllMFOFileByFileFullPathSha256AndZipLevel(fileFullPathSha256,zipLevel);
     }
 
@@ -148,6 +152,7 @@ public class MFOFileServiceImpl extends GenericServiceImpl<byte[], EMFOFile> imp
                                                                                       Integer zipLevel,
                                                                                       Integer fileDriveCode)
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with fileFullPathSha256 {} zipLevel {} fileDriveCode {}", fileFullPathSha256, zipLevel, fileDriveCode);
         return fileDao.getAllMFOFileByFileFullPathSha256AndZipLevelDrive(fileFullPathSha256,zipLevel,fileDriveCode);
     }
 
@@ -156,6 +161,7 @@ public class MFOFileServiceImpl extends GenericServiceImpl<byte[], EMFOFile> imp
             NoSuchAlgorithmException,
             InvalidKeyException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with fileFullPath {} zipLevel {} ", fileFullPath, zipLevel);
         MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
         Path file = Paths.get(fileFullPath);
         String fileName = file.getFileName().toString();
@@ -172,6 +178,7 @@ public class MFOFileServiceImpl extends GenericServiceImpl<byte[], EMFOFile> imp
             NoSuchAlgorithmException,
             InvalidKeyException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with fileFullPath {},  zipLevel {}, fileDriveCode {} ", fileFullPath, zipLevel, fileDriveCode);
         MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
         Path file = Paths.get(fileFullPath);
         String fileName = file.getFileName().toString();
@@ -187,6 +194,8 @@ public class MFOFileServiceImpl extends GenericServiceImpl<byte[], EMFOFile> imp
                                                                                     EMFOFile zipFile,
                                                                                     Integer fileDriveCode)
     {
+        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with fileFullPathSha256 {},  zipLevel {}, zipFile UUID {}, fileDriveCode {} ", fileFullPathSha256, zipLevel, (null!=zipFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFile.getId()):null, fileDriveCode);
         return fileDao.getMFOFileByFileFullPathSha256AndZipLevelZipFileDrive(fileFullPathSha256,zipLevel,zipFile,fileDriveCode);
     }
 
@@ -198,6 +207,8 @@ public class MFOFileServiceImpl extends GenericServiceImpl<byte[], EMFOFile> imp
             NoSuchAlgorithmException,
             InvalidKeyException
     {
+        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with fileFullPath {},  zipLevel {}, zipFile UUID {}, fileDriveCode {} ", fileFullPath, zipLevel, (null!=zipFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFile.getId()):null, fileDriveCode);
         MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
         Path file = Paths.get(fileFullPath);
         String fileName = file.getFileName().toString();
@@ -213,6 +224,7 @@ public class MFOFileServiceImpl extends GenericServiceImpl<byte[], EMFOFile> imp
             NoSuchAlgorithmException,
             InvalidKeyException
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Service call with pathModel {},  fileDriveCode {} ", (null!=pathModel)?pathModel.toString():null, fileDriveCode);
         MoraHMACUtilities hmacUtilities = new MoraHMACUtilities();
         Path file = pathModel.getPath();
         String fileName = file.getFileName().toString();

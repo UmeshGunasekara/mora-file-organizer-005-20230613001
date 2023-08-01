@@ -10,6 +10,7 @@ package com.slmora.learn.dto;
 import com.slmora.learn.common.cryptography.hmac.util.EHmacAlgorithm;
 import com.slmora.learn.common.cryptography.hmac.util.MoraHMACUtilities;
 import com.slmora.learn.common.file.util.MoraFileWriteAccessUtilities;
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dto.base.BaseDto;
 import com.slmora.learn.dto.base.IDto;
@@ -58,7 +59,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper=false)
 public class FileDto  extends BaseDto implements IDto<EMFOFile>
 {
-    final static Logger LOGGER = LogManager.getLogger(DirectoryDto.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(DirectoryDto.class);
 
     private String fileName;
     private String fileFullPath;
@@ -226,9 +227,9 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
             try {
                 this.setFileFullPathSha256BytFileFullPath();
             } catch (NoSuchAlgorithmException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             } catch (InvalidKeyException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             }
             jpaEntityFile.setFileFullPathSha256(this.getFileFullPathSha256());
         }else{
@@ -239,9 +240,9 @@ public class FileDto  extends BaseDto implements IDto<EMFOFile>
             try {
                 this.setFileTextPathSha256BytFileTextPath();
             } catch (NoSuchAlgorithmException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             } catch (InvalidKeyException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             }
             jpaEntityFile.setFileTextPathSha256(this.getFileTextPathSha256());
         }else{

@@ -8,6 +8,7 @@
 package com.slmora.learn.service.impl;
 
 import com.slmora.learn.common.dao.IGenericDao;
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.service.impl.GenericServiceImpl;
 import com.slmora.learn.dao.IMFOZipDirectoryFileDao;
 import com.slmora.learn.jpa.entity.EMFOFile;
@@ -37,7 +38,7 @@ import java.util.UUID;
 public class MFOZipDirectoryFileServiceImpl extends GenericServiceImpl<byte[], EMFOZipDirectoryFile> implements
         IMFOZipDirectoryFileService
 {
-    final static Logger LOGGER = LogManager.getLogger(MFOZipDirectoryFileServiceImpl.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MFOZipDirectoryFileServiceImpl.class);
 
     private IMFOZipDirectoryFileDao zipDirectoryFileDao;
 

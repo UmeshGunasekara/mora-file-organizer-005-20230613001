@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.common.ds.hibernate;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.property.util.MoraAccessProperties;
 import com.slmora.learn.jpa.entity.EMFOAudioFileData;
 import com.slmora.learn.jpa.entity.EMFODirectory;
@@ -45,7 +46,7 @@ import java.util.Properties;
  * </pre></blockquote>
  */
 public class HibernateHikariAnoUtil {
-    final static Logger LOGGER = LogManager.getLogger(HibernateHikariAnoUtil.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(HibernateHikariAnoUtil.class);
 
     private static String CONNECTION_HOST;
     private static String CONNECTION_PORT;
@@ -137,8 +138,7 @@ public class HibernateHikariAnoUtil {
                 SESSION_FACTORY=configuration.buildSessionFactory(REGISTRY);
 
             }catch (Exception e){
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
-                e.printStackTrace();
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
                 if(REGISTRY != null){
                     StandardServiceRegistryBuilder.destroy(REGISTRY);
                 }
@@ -187,28 +187,34 @@ public class HibernateHikariAnoUtil {
                     "datasource.properties");
             if (CONNECTION_HOST == null || CONNECTION_HOST.isBlank()) {
                 CONNECTION_HOST = dataSourceProperties.getProperty("MORA.DATASOURCE.HOST");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set CONNECTION_HOST {}", CONNECTION_HOST);
             }
             if (CONNECTION_PORT == null || CONNECTION_PORT.isBlank()) {
                 CONNECTION_PORT = dataSourceProperties.getProperty("MORA.DATASOURCE.PORT");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set CONNECTION_PORT {}", CONNECTION_PORT);
             }
             if (CONNECTION_DATABASE == null || CONNECTION_DATABASE.isBlank()) {
                 CONNECTION_DATABASE = dataSourceProperties.getProperty("MORA.DATASOURCE.DATABASE");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set CONNECTION_DATABASE {}", CONNECTION_DATABASE);
             }
             if (CONNECTION_USER == null || CONNECTION_USER.isBlank()) {
                 CONNECTION_USER = dataSourceProperties.getProperty("MORA.DATASOURCE.USER");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set CONNECTION_USER {}", CONNECTION_USER);
             }
             if (CONNECTION_PASSWORD == null || CONNECTION_PASSWORD.isBlank()) {
                 CONNECTION_PASSWORD = dataSourceProperties.getProperty("MORA.DATASOURCE.PASSWORD");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set CONNECTION_PASSWORD {}", CONNECTION_PASSWORD);
             }
             if (CONNECTION_CLASS_NAME == null || CONNECTION_CLASS_NAME.isBlank()) {
                 CONNECTION_CLASS_NAME = dataSourceProperties.getProperty("MORA.DATASOURCE.CLASS");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set CONNECTION_CLASS_NAME {}", CONNECTION_CLASS_NAME);
             }
             if (CONNECTION_PROPERTY_STRING == null || CONNECTION_PROPERTY_STRING.isBlank()) {
                 CONNECTION_PROPERTY_STRING = dataSourceProperties.getProperty("MORA.DATASOURCE.PROPERTY_STRING");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set CONNECTION_PROPERTY_STRING {}", CONNECTION_PROPERTY_STRING);
             }
         }catch (Exception e){
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
-            e.printStackTrace();
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         }
     }
 
@@ -224,28 +230,34 @@ public class HibernateHikariAnoUtil {
             Properties hibernateProperties = new MoraAccessProperties().getAllPropertiesFromResource("datasource.hibernate.properties");
             if(HIBERNATE_DIALECT == null || HIBERNATE_DIALECT.isBlank()){
                 HIBERNATE_DIALECT = hibernateProperties.getProperty("MORA.DATASOURCE.HIBERNATE.DIALECT");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set HIBERNATE_DIALECT {}", HIBERNATE_DIALECT);
             }
             if(HIBERNATE_SHOW_SQL == null || HIBERNATE_SHOW_SQL.isBlank()){
                 HIBERNATE_SHOW_SQL = hibernateProperties.getProperty("MORA.DATASOURCE.HIBERNATE.SHOW_SQL");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set HIBERNATE_SHOW_SQL {}", HIBERNATE_SHOW_SQL);
             }
             if(HIBERNATE_CURRENT_SESSION_CONTEXT_CLASS == null || HIBERNATE_CURRENT_SESSION_CONTEXT_CLASS.isBlank()){
                 HIBERNATE_CURRENT_SESSION_CONTEXT_CLASS = hibernateProperties.getProperty("MORA.DATASOURCE.HIBERNATE.CURRENT_SESSION_CONTEXT_CLASS");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set HIBERNATE_CURRENT_SESSION_CONTEXT_CLASS {}", HIBERNATE_CURRENT_SESSION_CONTEXT_CLASS);
             }
             if(HIBERNATE_HBM2DDL_AUTO == null || HIBERNATE_HBM2DDL_AUTO.isBlank()){
                 HIBERNATE_HBM2DDL_AUTO = hibernateProperties.getProperty("MORA.DATASOURCE.HIBERNATE.HBM2DDL_AUTO");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set HIBERNATE_HBM2DDL_AUTO {}", HIBERNATE_HBM2DDL_AUTO);
             }
             if(HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE == null || HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE.isBlank()){
                 HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = hibernateProperties.getProperty("MORA.DATASOURCE.HIBERNATE.CACHE.USE_SECOND_LEVEL_CACHE");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE {}", HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE);
             }
             if(HIBERNATE_CACHE_USE_QUERY_CACHE == null || HIBERNATE_CACHE_USE_QUERY_CACHE.isBlank()){
                 HIBERNATE_CACHE_USE_QUERY_CACHE = hibernateProperties.getProperty("MORA.DATASOURCE.HIBERNATE.CACHE.USE_QUERY_CACHE");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set HIBERNATE_CACHE_USE_QUERY_CACHE {}", HIBERNATE_CACHE_USE_QUERY_CACHE);
             }
             if(HIBERNATE_CACHE_REGION_FACTORY_CLASS == null || HIBERNATE_CACHE_REGION_FACTORY_CLASS.isBlank()){
                 HIBERNATE_CACHE_REGION_FACTORY_CLASS = hibernateProperties.getProperty("MORA.DATASOURCE.HIBERNATE.CACHE.REGION.FACTORY_CLASS");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set HIBERNATE_CACHE_REGION_FACTORY_CLASS {}", HIBERNATE_CACHE_REGION_FACTORY_CLASS);
             }
         }catch (Exception e){
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
-            e.printStackTrace();
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         }
     }
 
@@ -261,31 +273,38 @@ public class HibernateHikariAnoUtil {
             Properties hibernateProperties = new MoraAccessProperties().getAllPropertiesFromResource("datasource.hibernate.hikari.properties");
             if(HIBERNATE_HIKARI_CONNECTION_PROVIDER_CLASS == null || HIBERNATE_HIKARI_CONNECTION_PROVIDER_CLASS.isBlank()){
                 HIBERNATE_HIKARI_CONNECTION_PROVIDER_CLASS = hibernateProperties.getProperty("MORA.DATASOURCE.HIBERNATE.HIKARI.CONNECTION_PROVIDER_CLASS");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set HIBERNATE_HIKARI_CONNECTION_PROVIDER_CLASS {}", HIBERNATE_HIKARI_CONNECTION_PROVIDER_CLASS);
             }
             if(HIBERNATE_HIKARI_MAXIMUM_POOL_SIZE == null || HIBERNATE_HIKARI_MAXIMUM_POOL_SIZE.isBlank()){
                 HIBERNATE_HIKARI_MAXIMUM_POOL_SIZE = hibernateProperties.getProperty("MORA.DATASOURCE.HIBERNATE.HIKARI.MAXIMUM_POOL_SIZE");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set HIBERNATE_HIKARI_MAXIMUM_POOL_SIZE {}", HIBERNATE_HIKARI_MAXIMUM_POOL_SIZE);
             }
             if(HIBERNATE_HIKARI_MINIMUM_IDLE == null || HIBERNATE_HIKARI_MINIMUM_IDLE.isBlank()){
                 HIBERNATE_HIKARI_MINIMUM_IDLE = hibernateProperties.getProperty("MORA.DATASOURCE.HIBERNATE.HIKARI.MINIMUM_IDLE");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set HIBERNATE_HIKARI_MINIMUM_IDLE {}", HIBERNATE_HIKARI_MINIMUM_IDLE);
             }
             if(HIBERNATE_HIKARI_CACHE_PREP_STMTS == null || HIBERNATE_HIKARI_CACHE_PREP_STMTS.isBlank()){
                 HIBERNATE_HIKARI_CACHE_PREP_STMTS = hibernateProperties.getProperty("MORA.DATASOURCE.HIBERNATE.HIKARI.CACHE_PREP_STMTS");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set HIBERNATE_HIKARI_CACHE_PREP_STMTS {}", HIBERNATE_HIKARI_CACHE_PREP_STMTS);
             }
             if(HIBERNATE_HIKARI_PREP_STMT_CACHE_SIZE == null || HIBERNATE_HIKARI_PREP_STMT_CACHE_SIZE.isBlank()){
                 HIBERNATE_HIKARI_PREP_STMT_CACHE_SIZE = hibernateProperties.getProperty("MORA.DATASOURCE.HIBERNATE.HIKARI.PREP_STMT_CACHE_SIZE");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set HIBERNATE_HIKARI_PREP_STMT_CACHE_SIZE {}", HIBERNATE_HIKARI_PREP_STMT_CACHE_SIZE);
             }
             if(HIBERNATE_HIKARI_PREP_STMT_CACHE_SQL_LIMIT == null || HIBERNATE_HIKARI_PREP_STMT_CACHE_SQL_LIMIT.isBlank()){
                 HIBERNATE_HIKARI_PREP_STMT_CACHE_SQL_LIMIT = hibernateProperties.getProperty("MORA.DATASOURCE.HIBERNATE.HIKARI.PREP_STMT_CACHE_SQL_LIMIT");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set HIBERNATE_HIKARI_PREP_STMT_CACHE_SQL_LIMIT {}", HIBERNATE_HIKARI_PREP_STMT_CACHE_SQL_LIMIT);
             }
             if(HIBERNATE_HIKARI_USE_SERVER_PREP_STMTS == null || HIBERNATE_HIKARI_USE_SERVER_PREP_STMTS.isBlank()){
                 HIBERNATE_HIKARI_USE_SERVER_PREP_STMTS = hibernateProperties.getProperty("MORA.DATASOURCE.HIBERNATE.HIKARI.USE_SERVER_PREP_STMTS");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set HIBERNATE_HIKARI_USE_SERVER_PREP_STMTS {}", HIBERNATE_HIKARI_USE_SERVER_PREP_STMTS);
             }
             if(HIBERNATE_HIKARI_IDLE_TIMEOUT == null || HIBERNATE_HIKARI_IDLE_TIMEOUT.isBlank()){
                 HIBERNATE_HIKARI_IDLE_TIMEOUT = hibernateProperties.getProperty("MORA.DATASOURCE.HIBERNATE.HIKARI.IDLE_TIMEOUT");
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Set HIBERNATE_HIKARI_IDLE_TIMEOUT {}", HIBERNATE_HIKARI_IDLE_TIMEOUT);
             }
         }catch (Exception e){
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
-            e.printStackTrace();
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         }
     }
 
@@ -297,10 +316,13 @@ public class HibernateHikariAnoUtil {
      * @Note If CONNECTION_PORT is null set default port
      */
     private static String getFullConnectionURL(){
+        String connString = null;
         if(null == CONNECTION_PORT){
-            return "jdbc:mysql://"+ CONNECTION_HOST +":3306/"+CONNECTION_DATABASE+"?"+CONNECTION_PROPERTY_STRING;
+            connString = "jdbc:mysql://"+ CONNECTION_HOST +":3306/"+CONNECTION_DATABASE+"?"+CONNECTION_PROPERTY_STRING;
         }else{
-            return "jdbc:mysql://"+ CONNECTION_HOST +":"+CONNECTION_PORT+"/"+CONNECTION_DATABASE+"?"+CONNECTION_PROPERTY_STRING;
+            connString = "jdbc:mysql://"+ CONNECTION_HOST +":"+CONNECTION_PORT+"/"+CONNECTION_DATABASE+"?"+CONNECTION_PROPERTY_STRING;
         }
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Set Connection URL {}", connString);
+        return connString;
     }
 }

@@ -8,6 +8,7 @@
 package com.slmora.learn.service.impl;
 
 import com.slmora.learn.common.dao.IGenericDao;
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.service.impl.GenericServiceImpl;
 import com.slmora.learn.dao.IMFOFileDao;
 import com.slmora.learn.dao.IMFOVideoFileDataDao;
@@ -38,7 +39,7 @@ import java.util.UUID;
 public class MFOVideoFileDataServiceImpl extends GenericServiceImpl<byte[], EMFOVideoFileData> implements
         IMFOVideoFileDataService
 {
-    final static Logger LOGGER = LogManager.getLogger(MFOVideoFileDataServiceImpl.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MFOVideoFileDataServiceImpl.class);
 
     private IMFOVideoFileDataDao videoFileDataDao;
 

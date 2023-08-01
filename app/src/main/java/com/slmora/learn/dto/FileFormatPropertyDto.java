@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.dto;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dto.base.BaseDto;
 import com.slmora.learn.dto.base.IDto;
@@ -40,7 +41,7 @@ import java.sql.Timestamp;
 @EqualsAndHashCode(callSuper=false)
 public class FileFormatPropertyDto extends BaseDto implements IDto<EMFOFileFormatProperty>
 {
-    final static Logger LOGGER = LogManager.getLogger(FileFormatPropertyDto.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(FileFormatPropertyDto.class);
 
     private FilePropertyDto fileProperty;
     private FileFormatDto fileFormat;

@@ -8,6 +8,8 @@
 package com.slmora.learn.controller;
 
 import com.slmora.learn.common.file.util.MoraFileWriteAccessUtilities;
+import com.slmora.learn.common.logging.MoraLogger;
+import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dao.impl.MFODirectoryDaoImpl;
 import com.slmora.learn.dao.impl.MFOFileDaoImpl;
 import com.slmora.learn.dto.DirectoryDto;
@@ -20,6 +22,7 @@ import com.slmora.learn.service.IMFOFileService;
 import com.slmora.learn.service.impl.MFODirectoryServiceImpl;
 import com.slmora.learn.service.impl.MFOFileServiceImpl;
 import com.slmora.learn.system.property.SingleSystemProperty;
+import com.slmora.learn.util.ConSkipMode;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,16 +56,13 @@ import java.util.Optional;
  * </pre></blockquote>
  */
 public class MoraFileOrganizerWalkingController {
-    final static Logger LOGGER = LogManager.getLogger(MoraFileOrganizerWalkingController.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MoraFileOrganizerWalkingController.class);
 
 
-    public void sourcePathWalk(Path source, Integer zipFileLevel, Path zipParent, EMFOFile eFile, Integer driveCode, boolean isSkipEnable){
+    public void sourcePathWalk(Path source, Integer zipFileLevel, Path zipParent, EMFOFile eFile, Integer driveCode, Integer isSkipEnable){
 
-        if(zipParent!=null && eFile!=null){
-            LOGGER.info("sourcePathWalk source : "+source.toAbsolutePath().toString()+", zipFileLevel"+zipFileLevel+", zipParent"+zipParent.toAbsolutePath().toString()+", eFile : "+eFile.getFileFullPath()+", driveCode : "+driveCode);
-        }else {
-            LOGGER.info("sourcePathWalk source : "+source.toAbsolutePath().toString()+", zipFileLevel"+zipFileLevel+", driveCode : "+driveCode);
-        }
+        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "source {}, zipFileLevel {}, zipParent {}, zip File UUID {}, driveCode {}, isSkipEnable {} ", (null!=source)?source.toAbsolutePath():null, zipFileLevel, (null!=zipParent)?zipParent.toAbsolutePath():null, (null!=eFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eFile.getId()):null, driveCode, isSkipEnable);
 
         final String[] basePathString = {null};
         final Integer[] basePathLevel = {null};
@@ -76,12 +76,12 @@ public class MoraFileOrganizerWalkingController {
                         @Override
                         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                         {
-//                            System.out.printf("-------- Visiting file %s\n", file+", Level: "+zipFileLevel);
-                            LOGGER.info("-------- Visiting file :"+ file.toAbsolutePath()+", Level: "+zipFileLevel+", driveCode : "+driveCode);
+                            LOGGER.debug(Thread.currentThread().getStackTrace(), "Visiting file {} ", (null!=file)?file.toAbsolutePath():null);
 //                            LOGGER.info("Visiting file "+file+"\n");
                             MFOFileController fileController = new MFOFileController();
                             MoraFileWriteAccessUtilities writeAccessUtilities = new MoraFileWriteAccessUtilities();
                             if(zipFileLevel<1) {
+                                LOGGER.debug(Thread.currentThread().getStackTrace(), "Running zipFileLevel<1 file {} ", (null!=file)?file.toAbsolutePath():null);
 //                                if(isSkipEnable) {
 //                                    if (basePathString[0] != null && basePathLevel[0] != null) {
 //                                        Integer dirLevel = writeAccessUtilities.getDirectoryLevel(file) + 1;
@@ -94,6 +94,13 @@ public class MoraFileOrganizerWalkingController {
                                 if (opFileDto.isPresent()) {
                                     FileDto fileDto = opFileDto.get();
                                     if (fileDto.getFileSearchStatus() == 1) {
+                                        if(isSkipEnable==ConSkipMode.NO_ALL_ZIP_SKIP) {
+                                            if (!fileDto.getFileExtension().isBlank() && fileDto.getFileExtension()
+                                                    .toLowerCase()
+                                                    .endsWith("zip")) {
+                                                fileController.addFile(fileDto, 0, driveCode, isSkipEnable);
+                                            }
+                                        }
                                         System.gc();
                                         return FileVisitResult.CONTINUE;
                                     } else {
@@ -109,6 +116,7 @@ public class MoraFileOrganizerWalkingController {
                             }else {
                                 String zipExtractionDestination = SingleSystemProperty.PROP_MFO_ZIP_EXTRACT_DESTINATION+"_"+zipFileLevel;
                                 String dbFileString = file.toAbsolutePath().toString().replace(zipExtractionDestination, eFile.getFileFullPath());
+                                LOGGER.debug(Thread.currentThread().getStackTrace(), "Running zipFileLevel > 0 file {} ", dbFileString);
                                 Path dbFile = Paths.get(dbFileString);
 //                                if(isSkipEnable) {
 //                                    if (basePathString[0] != null && basePathLevel[0] != null) {
@@ -122,6 +130,13 @@ public class MoraFileOrganizerWalkingController {
                                 if(opFileDto.isPresent()){
                                     FileDto fileDto = opFileDto.get();
                                     if(fileDto.getFileSearchStatus()==1){
+                                        if(isSkipEnable==ConSkipMode.NO_ALL_ZIP_SKIP) {
+                                            if (!fileDto.getFileExtension().isBlank() && fileDto.getFileExtension()
+                                                    .toLowerCase()
+                                                    .endsWith("zip")) {
+                                                fileController.addFile(file, fileDto, zipFileLevel, eFile, zipParent, driveCode,isSkipEnable);
+                                            }
+                                        }
                                         System.gc();
                                         return FileVisitResult.CONTINUE;
                                     }else {
@@ -215,7 +230,6 @@ public class MoraFileOrganizerWalkingController {
                         @Override
                         public FileVisitResult visitFileFailed(Path file, IOException e)
                         {
-//                            System.err.printf("Visiting failed for %s\n", file+", Level: "+zipFileLevel);
 //                            LOGGER.info("Visiting failed for "+file+"\n");
                             return FileVisitResult.SKIP_SUBTREE;
                         }
@@ -224,13 +238,13 @@ public class MoraFileOrganizerWalkingController {
                         public FileVisitResult preVisitDirectory(Path dir,
                                                                  BasicFileAttributes attrs)
                         {
-//                            System.out.printf("---------- About to visit directory %s\n", dir);
-                            LOGGER.info("---------- Visiting directory :"+ dir.toAbsolutePath()+", Level: "+zipFileLevel+", driveCode : "+driveCode);
+                            LOGGER.debug(Thread.currentThread().getStackTrace(), "Visiting directory {}", (null!=dir)?dir.toAbsolutePath():null);
 //                            LOGGER.info("About to visit directory "+dir+"\n");
                             MFODirectoryController directoryController = new MFODirectoryController();
                             MoraFileWriteAccessUtilities writeAccessUtilities = new MoraFileWriteAccessUtilities();
 
                             if(zipFileLevel<1) {
+                                LOGGER.debug(Thread.currentThread().getStackTrace(), "Running zipFileLevel<1 directory {} ", (null!=dir)?dir.toAbsolutePath():null);
 //                                if(isSkipEnable) {
 //                                    if (basePathString[0] != null && basePathLevel[0] != null) {
 //                                        Integer dirLevel = writeAccessUtilities.getDirectoryLevel(dir) + 1;
@@ -243,7 +257,7 @@ public class MoraFileOrganizerWalkingController {
                                 if(opDirDto.isPresent()){
                                     DirectoryDto dirDto = opDirDto.get();
                                     if(dirDto.getDirectorySearchStatus()==1){
-                                        if(isSkipEnable) {
+                                        if(isSkipEnable.intValue()== ConSkipMode.SKIP_FINALIZED) {
                                             System.gc();
                                             return FileVisitResult.SKIP_SUBTREE;
                                         }else {
@@ -267,6 +281,7 @@ public class MoraFileOrganizerWalkingController {
                             }else {
                                 String zipExtractionDestination = SingleSystemProperty.PROP_MFO_ZIP_EXTRACT_DESTINATION+"_"+zipFileLevel;
                                 String dbDirString = dir.toAbsolutePath().toString().replace(zipExtractionDestination, eFile.getFileFullPath());
+                                LOGGER.debug(Thread.currentThread().getStackTrace(), "Running zipFileLevel > 0 directory {} ", dbDirString);
                                 Path dbDir = Paths.get(dbDirString);
 //                                if(isSkipEnable) {
 //                                    if (basePathString[0] != null && basePathLevel[0] != null) {
@@ -280,7 +295,7 @@ public class MoraFileOrganizerWalkingController {
                                 if(opDirDto.isPresent()){
                                     DirectoryDto dirDto = opDirDto.get();
                                     if(dirDto.getDirectorySearchStatus()==1){
-                                        if(isSkipEnable) {
+                                        if(isSkipEnable.intValue()== ConSkipMode.SKIP_FINALIZED) {
                                             System.gc();
                                             return FileVisitResult.SKIP_SUBTREE;
                                         }else {
@@ -415,17 +430,17 @@ public class MoraFileOrganizerWalkingController {
                         @Override
                         public FileVisitResult postVisitDirectory(Path dir, IOException exc)
                         {
-//                            System.out.println("Post Visit Directory: " + dir);
                             return FileVisitResult.CONTINUE;
                         }
                     });
         } catch (IOException e) {
-//            LOGGER.error(ExceptionUtils.getStackTrace(e));
-            e.printStackTrace();
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         }
     }
 
     private Optional<DirectoryDto> isDirectoryAvailable(Path source, Integer zipFileLevel, EMFOFile eZipFile, Integer driveCode){
+        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "source {}, zipFileLevel {}, zip File UUID {}, driveCode {}", (null!=source)?source.toAbsolutePath():null, zipFileLevel, (null!=eZipFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eZipFile.getId()):null, driveCode);
         IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
         SearchPathModel searchModel = SearchPathModel.of(source, zipFileLevel, Paths.get(eZipFile.getFileFullPath()), eZipFile.getFileIsZip(), eZipFile.getId());
         try{
@@ -436,15 +451,18 @@ public class MoraFileOrganizerWalkingController {
                 return Optional.empty();
             }
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
+            return Optional.empty();
         } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
+            return Optional.empty();
         }finally {
             dirService.close();
         }
     }
 
     private Optional<DirectoryDto> isDirectoryAvailable(Path source, Integer zipFileLevel, Integer driveCode){
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Source {},  zipFileLevel {}, driveCode {}", (null!=source)?source.toAbsolutePath():null, zipFileLevel, driveCode);
         IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
         SearchPathModel searchModel = SearchPathModel.of(source, zipFileLevel, null, null, null);
         try{
@@ -455,15 +473,19 @@ public class MoraFileOrganizerWalkingController {
                 return Optional.empty();
             }
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
+            return Optional.empty();
         } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
+            return Optional.empty();
         }finally {
             dirService.close();
         }
     }
 
     private Optional<FileDto> isFileAvailable(Path source, Integer zipFileLevel, EMFOFile eZipFile, Integer driveCode){
+        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "source {}, zipFileLevel {}, zip File UUID {}, driveCode {}", (null!=source)?source.toAbsolutePath():null, zipFileLevel, (null!=eZipFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eZipFile.getId()):null, driveCode);
         IMFOFileService fileService = new MFOFileServiceImpl(new MFOFileDaoImpl());
         SearchPathModel searchModel = SearchPathModel.of(source, zipFileLevel, Paths.get(eZipFile.getFileFullPath()), eZipFile.getFileIsZip(), eZipFile.getId());
         try{
@@ -474,15 +496,18 @@ public class MoraFileOrganizerWalkingController {
                 return Optional.empty();
             }
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
+            return Optional.empty();
         } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
+            return Optional.empty();
         }finally {
             fileService.close();
         }
     }
 
     private Optional<FileDto> isFileAvailable(Path source, Integer zipFileLevel, Integer driveCode){
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Source {},  zipFileLevel {}, driveCode {}", (null!=source)?source.toAbsolutePath():null, zipFileLevel, driveCode);
         IMFOFileService fileService = new MFOFileServiceImpl(new MFOFileDaoImpl());
         SearchPathModel searchModel = SearchPathModel.of(source, zipFileLevel, null, null, null);
         try{
@@ -493,19 +518,22 @@ public class MoraFileOrganizerWalkingController {
                 return Optional.empty();
             }
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
+            return Optional.empty();
         } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
+            return Optional.empty();
         }finally {
             fileService.close();
         }
     }
 
-    public void sourcePathWalk(Path source, Integer zipFileLevel, Integer driveCode, boolean isSkipEnable){
-        LOGGER.info("sourcePathWalk source : "+source.toAbsolutePath().toString()+", zipFileLevel : "+zipFileLevel+", driveCode : "+driveCode);
+    public void sourcePathWalk(Path source, Integer zipFileLevel, Integer driveCode, Integer isSkipEnable){
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Source {},  zipFileLevel {}, driveCode {} and isSkipEnable {} ", (null!=source)?source.toAbsolutePath():null, zipFileLevel, driveCode, isSkipEnable);
         sourcePathWalk(source, zipFileLevel, null, null, driveCode, isSkipEnable);
         IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
         try {
+            LOGGER.debug(Thread.currentThread().getStackTrace(), "Size of the directory search stack {} ", SingleSystemProperty.SEARCH_DIR_STACK.size());
             if(SingleSystemProperty.SEARCH_DIR_STACK.size()>0) {
                 SearchPathModel lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
                 while (SingleSystemProperty.SEARCH_DIR_STACK.size()>0) {
@@ -515,7 +543,7 @@ public class MoraFileOrganizerWalkingController {
                         searchDir.setDirectorySearchStatus(1);
                         dirService.persistMFODirectory(searchDir);
                     }
-                    LOGGER.info("Poped from the search stack : " + SingleSystemProperty.SEARCH_DIR_STACK.pop());
+                    LOGGER.debug(Thread.currentThread().getStackTrace(), "Poped from the directory search stack {} ", SingleSystemProperty.SEARCH_DIR_STACK.pop());
                     if(SingleSystemProperty.SEARCH_DIR_STACK.size()>0){
                         lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
                     }else {
@@ -534,10 +562,10 @@ public class MoraFileOrganizerWalkingController {
 //                }
 //            }
         } catch (NoSuchAlgorithmException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
 //            throw new RuntimeException(e);
         } catch (InvalidKeyException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
 //            throw new RuntimeException(e);
         }finally {
             dirService.close();

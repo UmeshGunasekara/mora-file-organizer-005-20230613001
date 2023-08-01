@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.jpa.entity;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.jpa.entity.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -46,7 +47,7 @@ import java.math.BigDecimal;
 @Table(name = "MFO_AUDIO_FILE_DATA")
 public class EMFOAudioFileData extends BaseEntity
 {
-    final static Logger LOGGER = LogManager.getLogger(EMFOAudioFileData.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(EMFOAudioFileData.class);
 
     @Serial
     private static final long serialVersionUID = 4051090441217195916L;

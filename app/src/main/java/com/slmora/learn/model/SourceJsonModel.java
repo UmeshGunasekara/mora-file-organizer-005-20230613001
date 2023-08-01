@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.model;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.jpa.entity.EMFOFileFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -44,11 +45,11 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
 public class SourceJsonModel {
-    final static Logger LOGGER = LogManager.getLogger(SourceJsonModel.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(SourceJsonModel.class);
 
     String source;
     Integer drive;
-    Boolean isskip;
+    Integer isskip; // 0-noskip/ 1-skip/ 2-zipnoskip
 
     public static Optional<List<SourceJsonModel>> getSourceJsonModelListFromJsonFile(String sourceJsonPath){
         try (FileReader reader = new FileReader(sourceJsonPath)){
@@ -57,21 +58,22 @@ public class SourceJsonModel {
 
             Object obj = jsonParser.parse(reader);
             JSONArray sourceList = (JSONArray) obj;
-            LOGGER.info(sourceList);
+            LOGGER.getLogger().info(sourceList);
 
             for(Object source: sourceList){
                 JSONObject sourceObject = (JSONObject) source;
                 JSONObject selectedSource = (JSONObject) sourceObject.get("data");
-                SourceJsonModel model = SourceJsonModel.of((String)selectedSource.get("source"), ((Long)selectedSource.get("drive")).intValue(), (Boolean)selectedSource.get("isskip"));
+//                SourceJsonModel model = SourceJsonModel.of((String)selectedSource.get("source"), ((Long)selectedSource.get("drive")).intValue(), (Boolean)selectedSource.get("isskip"));
+                SourceJsonModel model = SourceJsonModel.of((String)selectedSource.get("source"), ((Long)selectedSource.get("drive")).intValue(), ((Long)selectedSource.get("isskip")).intValue());
                 resultList.add(model);
             }
             return Optional.of(resultList);
         } catch (FileNotFoundException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         } catch (IOException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         } catch (ParseException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         }
         return Optional.empty();
     }

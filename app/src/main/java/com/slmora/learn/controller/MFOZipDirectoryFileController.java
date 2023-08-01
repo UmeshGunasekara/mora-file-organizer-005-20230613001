@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.controller;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dao.impl.MFOZipDirectoryFileDaoImpl;
 import com.slmora.learn.jpa.entity.EMFODirectory;
@@ -35,12 +36,13 @@ import java.util.UUID;
  * </pre></blockquote>
  */
 public class MFOZipDirectoryFileController {
-    final static Logger LOGGER = LogManager.getLogger(MFOZipDirectoryFileController.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MFOZipDirectoryFileController.class);
 
     public void addZipDirectory(EMFOFile zipFile, EMFODirectory zipDir){
         IMFOZipDirectoryFileService zipDirectoryFileService = new MFOZipDirectoryFileServiceImpl(new MFOZipDirectoryFileDaoImpl());
 
         MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Adding zip record with zipFile UUID {}, ZipDir UUID {}", (null!=zipFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFile.getId()):null, (null!=zipDir)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipDir.getId()):null);
 
         EMFOZipDirectoryFile eZipDirectoryFile = new EMFOZipDirectoryFile();
         eZipDirectoryFile.setFile(zipFile);
@@ -49,8 +51,7 @@ public class MFOZipDirectoryFileController {
         eZipDirectoryFile = zipDirectoryFileService.persistMFOZipDirectoryFile(eZipDirectoryFile);
 
         UUID uuid = uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eZipDirectoryFile.getId());
-        LOGGER.info("For Zip File "+zipFile.getFileFullPath()+" Added Zip Directory " + zipDir.getDirectoryFullPath() + " with UUID : " + uuid.toString());
-//        System.out.println("For Zip File "+zipFile.getFileFullPath()+" Added Zip Directory " + zipDir.getDirectoryFullPath() + " with UUID : " + uuid.toString());
+        LOGGER.info(Thread.currentThread().getStackTrace(), "For Zip File {} and Zip Directory {} with UUID", (null!=zipFile)?zipFile.getFileFullPath():null, (null!=zipDir)?zipDir.getDirectoryFullPath():null, (null!=uuid)?uuid.toString():null);
 
     }
 }

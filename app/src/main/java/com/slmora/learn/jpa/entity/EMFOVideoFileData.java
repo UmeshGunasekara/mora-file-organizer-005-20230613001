@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.jpa.entity;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.jpa.entity.common.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -52,7 +53,7 @@ import java.util.Collection;
 @Table(name = "MFO_VIDEO_FILE_DATA")
 public class EMFOVideoFileData extends BaseEntity
 {
-    final static Logger LOGGER = LogManager.getLogger(EMFOVideoFileData.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(EMFOVideoFileData.class);
 
     @Serial
     private static final long serialVersionUID = -8078770271321169417L;

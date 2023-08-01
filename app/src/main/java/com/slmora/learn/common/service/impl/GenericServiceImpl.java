@@ -8,6 +8,7 @@
 package com.slmora.learn.common.service.impl;
 
 import com.slmora.learn.common.dao.IGenericDao;
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.service.IGenericService;
 import com.slmora.learn.jpa.entity.common.BaseEntity;
 import org.apache.logging.log4j.LogManager;
@@ -34,7 +35,7 @@ import java.util.UUID;
  */
 public abstract class GenericServiceImpl <K, T extends BaseEntity> implements IGenericService<K, T>
 {
-    final static Logger LOGGER = LogManager.getLogger(GenericServiceImpl.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(GenericServiceImpl.class);
     private IGenericDao<K, T> genericDao;
 
     public GenericServiceImpl(IGenericDao<K, T> genericDao) {

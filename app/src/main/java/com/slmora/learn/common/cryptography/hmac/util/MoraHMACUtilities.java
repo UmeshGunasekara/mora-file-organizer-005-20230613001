@@ -8,6 +8,7 @@
 package com.slmora.learn.common.cryptography.hmac.util;
 
 import com.slmora.learn.common.hex.util.MoraHexUtilities;
+import com.slmora.learn.common.logging.MoraLogger;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.HmacUtils;
 import org.apache.logging.log4j.LogManager;
@@ -79,7 +80,7 @@ import java.security.NoSuchAlgorithmException;
  */
 public class MoraHMACUtilities {
 
-    final static Logger LOGGER = LogManager.getLogger(MoraHMACUtilities.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MoraHMACUtilities.class);
 
     /**
      * Generate hasmac (encrypted checksum) string with {@link SecretKeySpec} and {@link Mac#getInstance(String)}, {@link Mac#init(Key)} and
@@ -107,7 +108,9 @@ public class MoraHMACUtilities {
         Mac mac = Mac.getInstance(algorithm);
         mac.init(secretKeySpec);
         byte[] hmacByte = mac.doFinal(data);
-        return hexUtilities.convertByteArrayToHexWithApacheCommons(hmacByte);
+        String result = hexUtilities.convertByteArrayToHexWithApacheCommons(hmacByte);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "HMAC String :{}, generated with Algorithm:{} and Key:{}", result, algorithm, key);
+        return result;
     }
 
     /**
@@ -131,7 +134,9 @@ public class MoraHMACUtilities {
             throws NoSuchAlgorithmException, InvalidKeyException
     {
         byte byteData[] = data.getBytes(charset==null? StandardCharsets.UTF_8:charset);
-        return hmacStringByMacUsingAlgorithmKey_156(algorithm, byteData, key);
+        String result = hmacStringByMacUsingAlgorithmKey_156(algorithm, byteData, key);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "HMAC String :{}, generated with Algorithm:{} and Key:{} for Data:{}", result, algorithm, key, data);
+        return result;
     }
 
     /**
@@ -153,7 +158,9 @@ public class MoraHMACUtilities {
     public String hmacStringByMacUsingAlgorithmKey_156(String algorithm, String data, String key)
             throws NoSuchAlgorithmException, InvalidKeyException
     {
-        return hmacStringByMacUsingAlgorithmKey_156(algorithm, key, data, StandardCharsets.UTF_8);
+        String result = hmacStringByMacUsingAlgorithmKey_156(algorithm, key, data, StandardCharsets.UTF_8);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "HMAC String :{}, generated with Algorithm:{} and Key:{} for Data:{}", result, algorithm, key, data);
+        return result;
     }
 
 
@@ -173,8 +180,9 @@ public class MoraHMACUtilities {
      * @see #hmacStringByMacUsingAlgorithmKey_156(String, String, String, Charset)
      */
     public static String hmacStringByHmacUtilsUsingAlgorithmKey_7(String algorithm, String data, String key) {
-        String hmac = new HmacUtils(algorithm, key).hmacHex(data);
-        return hmac;
+        String result = new HmacUtils(algorithm, key).hmacHex(data);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "HMAC String :{}, generated with Algorithm:{} and Key:{} for Data:{}", result, algorithm, key, data);
+        return result;
     }
 
     /**
@@ -203,7 +211,9 @@ public class MoraHMACUtilities {
         byte[] hmacOut = new byte[hMac.getMacSize()];
 
         hMac.doFinal(hmacOut, 0);
-        return hexUtilities.convertByteArrayToHexWithApacheCommons(hmacOut);
+        String result = hexUtilities.convertByteArrayToHexWithApacheCommons(hmacOut);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "HMAC String :{}, generated with Algorithm:{} and Key:{}", result, (null != digest)?digest.getAlgorithmName():null, key);
+        return result;
     }
 
     /**
@@ -251,7 +261,9 @@ public class MoraHMACUtilities {
      * @see #hmacStringByBouncycastleHmacUsingAlgorithmKey_86(String, String, String)
      */
     public String hmacStringByBouncycastleHmacUsingAlgorithmKey_86(String algorithm, String data, String key) {
-        return hmacStringByBouncycastleHmacUsingAlgorithmKey_86(algorithm,data, StandardCharsets.UTF_8,key);
+        String result = hmacStringByBouncycastleHmacUsingAlgorithmKey_86(algorithm,data, StandardCharsets.UTF_8,key);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "HMAC String :{}, generated with Algorithm:{} and Key:{} for Data:{}", result, algorithm, key, data);
+        return result;
     }
 
     /**
@@ -269,7 +281,9 @@ public class MoraHMACUtilities {
      * @see #hmacStringByBouncycastleHmacUsingAlgorithmKey_86(String, String, String)
      */
     public String hmacStringByBouncycastleHmacUsingAlgorithmKey_86(String algorithm, String data, Charset charset, String key) {
-        return hmacStringByBouncycastleHmacUsingDigestKey_86(getDigestByBouncycastle(algorithm),data.getBytes(charset==null? StandardCharsets.UTF_8:charset),key);
+        String result = hmacStringByBouncycastleHmacUsingDigestKey_86(getDigestByBouncycastle(algorithm),data.getBytes(charset==null? StandardCharsets.UTF_8:charset),key);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "HMAC String :{}, generated with Algorithm:{} and Key:{} for Data:{}", result, algorithm, key, data);
+        return result;
     }
 
     /**
@@ -402,11 +416,13 @@ public class MoraHMACUtilities {
         }
 
         // bytes to hex
-        StringBuilder result = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         for (byte b : md.digest()) {
-            result.append(String.format("%02x", b));
+            sb.append(String.format("%02x", b));
         }
-        return result.toString();
+        String result = sb.toString();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "HMAC String :{}, generated with Algorithm:{} for File:{}", result, (null != md)?md.getAlgorithm():null, filepath);
+        return result;
 
     }
 
@@ -420,11 +436,13 @@ public class MoraHMACUtilities {
         }
 
         // bytes to hex
-        StringBuilder result = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         for (byte b : md.digest()) {
-            result.append(String.format("%02x", b));
+            sb.append(String.format("%02x", b));
         }
-        return result.toString();
+        String result = sb.toString();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "HMAC String :{}, generated with Algorithm:{} for File:{}", result, (null!=md)?md.getAlgorithm():null, filepath);
+        return result;
 
     }
 

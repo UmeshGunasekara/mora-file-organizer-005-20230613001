@@ -8,6 +8,7 @@
 package com.slmora.learn.service.impl;
 
 import com.slmora.learn.common.dao.IGenericDao;
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.service.impl.GenericServiceImpl;
 import com.slmora.learn.dao.IMFOFileCategoryDao;
 import com.slmora.learn.dao.IMFOSystemPropertyDao;
@@ -38,7 +39,7 @@ import java.util.UUID;
 public class MFOSystemPropertyServiceImpl extends GenericServiceImpl<byte[], EMFOSystemProperty> implements
         IMFOSystemPropertyService
 {
-    final static Logger LOGGER = LogManager.getLogger(MFOSystemPropertyServiceImpl.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MFOSystemPropertyServiceImpl.class);
 
     private IMFOSystemPropertyDao systemPropertyDao;
 

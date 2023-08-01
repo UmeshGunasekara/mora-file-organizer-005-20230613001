@@ -54,7 +54,7 @@ public class T07 {
                             System.out.printf("Visiting file %s\n", file);
 //                            LOGGER.info("Visiting file "+file+"\n");
                             MFOFileController fileController =  new MFOFileController();
-                            fileController.addFile(file, 0, null, null, 1, true);
+                            fileController.addFile(file, 0, null, null, 1, 1);
                             return FileVisitResult.CONTINUE;
                         }
 

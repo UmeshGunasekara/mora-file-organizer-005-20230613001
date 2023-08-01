@@ -10,6 +10,7 @@ package com.slmora.learn.dto;
 import com.slmora.learn.common.cryptography.hmac.util.EHmacAlgorithm;
 import com.slmora.learn.common.cryptography.hmac.util.MoraHMACUtilities;
 import com.slmora.learn.common.file.util.MoraFileWriteAccessUtilities;
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dto.base.BaseDto;
 import com.slmora.learn.dto.base.IDto;
@@ -50,7 +51,7 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(callSuper=false)
 public class DirectoryDto extends BaseDto implements IDto<EMFODirectory>
 {
-    final static Logger LOGGER = LogManager.getLogger(DirectoryDto.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(DirectoryDto.class);
 
     private String directoryName;
     private String directoryFullPath;
@@ -154,9 +155,9 @@ public class DirectoryDto extends BaseDto implements IDto<EMFODirectory>
             try {
                 this.setDirectoryFullPathSha256BytDirectoryFullPath();
             } catch (NoSuchAlgorithmException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             } catch (InvalidKeyException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             }
             jpaEntityDirectory.setDirectoryFullPathSha256(this.getDirectoryFullPathSha256());
         }else{
@@ -167,9 +168,9 @@ public class DirectoryDto extends BaseDto implements IDto<EMFODirectory>
             try {
                 this.setDirectoryTextPathSha256BytDirectoryTextPath();
             } catch (NoSuchAlgorithmException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             } catch (InvalidKeyException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             }
             jpaEntityDirectory.setDirectoryTextPathSha256(this.getDirectoryTextPathSha256());
         }else{

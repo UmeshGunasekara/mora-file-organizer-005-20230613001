@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.common.ds.hibernate.util;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
@@ -32,9 +33,11 @@ import java.time.ZoneId;
 @Converter(autoApply = true)
 public class LocalDateTimeConverter implements AttributeConverter<LocalDateTime, Timestamp>
 {
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(LocalDateTimeConverter.class);
     @Override
     public Timestamp convertToDatabaseColumn(LocalDateTime attribute)
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert local date time {}", (null!=attribute)?attribute.toString():null);
         if(attribute != null) {
             return Timestamp.valueOf(attribute);
         }
@@ -44,6 +47,7 @@ public class LocalDateTimeConverter implements AttributeConverter<LocalDateTime,
     @Override
     public LocalDateTime convertToEntityAttribute(Timestamp dbData)
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert Time Stamp {}", (null!=dbData)?dbData.toString():null);
         if(dbData!=null){
             return dbData.toLocalDateTime();
 //            LocalDateTime.ofInstant(new Instant(dbData), ZoneId.of("UTC"));

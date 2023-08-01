@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.common.ds.hibernate.util;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +35,7 @@ import java.util.UUID;
 public class MoraUUIDGenerator implements
         IdentifierGenerator
 {
-    final static Logger LOGGER = LogManager.getLogger(MoraUUIDGenerator.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MoraUUIDGenerator.class);
 
     @Override
     public Serializable generate(SharedSessionContractImplementor sharedSessionContractImplementor, Object o) throws

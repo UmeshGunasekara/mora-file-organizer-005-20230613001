@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.common.hex.util;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -43,7 +44,7 @@ import java.nio.charset.StandardCharsets;
  * @see <a href="https://stackoverflow.com/questions/32180069/how-do-i-perform-mysql-unhex-function-in-java">stackoverflow how-do-i-perform-mysql-unhex-function-in-java</a>
  */
 public class MoraHexUtilities {
-    final static Logger LOGGER = LogManager.getLogger(MoraHexUtilities.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MoraHexUtilities.class);
 
     private static final char[] HEX_UPPER = "0123456789ABCDEF".toCharArray();
     private static final char[] HEX_LOWER = "0123456789abcdef".toCharArray();
@@ -51,8 +52,7 @@ public class MoraHexUtilities {
     /**
      * Read Given property form given property file in project resource
      *
-     * @param propertyFileName as String Object with file name of property file
-     * @param propertyRef as String Object with reference of property
+     * @param inputString as String Object with file name of property file
      * @return String Object will return with requested property or null
      * @throws IOException with file notfound or compatibility issue
      * @apiNote Read property file and fetch requested property value in to one String Object
@@ -64,14 +64,15 @@ public class MoraHexUtilities {
         //char[] chars = Hex.encodeHex(inputString.getBytes(StandardCharsets.UTF_8), false);
         // display in lowercase, default
         char[] chars = org.apache.commons.codec.binary.Hex.encodeHex(inputString.getBytes(StandardCharsets.UTF_8));
-        return String.valueOf(chars);
+        String result = String.valueOf(chars);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to hex string input {} and get {}", inputString, result);
+        return result;
     }
 
     /**
      * Read Given property form given property file in project resource
      *
-     * @param propertyFileName as String Object with file name of property file
-     * @param propertyRef as String Object with reference of property
+     * @param bytes as String Object with file name of property file
      * @return String Object will return with requested property or null
      * @throws IOException with file notfound or compatibility issue
      * @apiNote Read property file and fetch requested property value in to one String Object
@@ -79,15 +80,16 @@ public class MoraHexUtilities {
      * in to a String we can use this
      */
     public String convertByteArrayToHexWithApacheCommons(byte[] bytes) {
-        char[] result = org.apache.commons.codec.binary.Hex.encodeHex(bytes);
-        return String.valueOf(result);
+        char[] chArray = org.apache.commons.codec.binary.Hex.encodeHex(bytes);
+        String result = String.valueOf(chArray);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to hex string and get {}", result);
+        return result;
     }
 
     /**
      * Read Given property form given property file in project resource
      *
-     * @param propertyFileName as String Object with file name of property file
-     * @param propertyRef as String Object with reference of property
+     * @param hexString as String Object with file name of property file
      * @return String Object will return with requested property or null
      * @throws IOException with file notfound or compatibility issue
      * @apiNote Read property file and fetch requested property value in to one String Object
@@ -100,17 +102,16 @@ public class MoraHexUtilities {
             byte[] bytes = org.apache.commons.codec.binary.Hex.decodeHex(hexString);
             result = new String(bytes, StandardCharsets.UTF_8);
         } catch (DecoderException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
-            e.printStackTrace();
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         }
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to hex string input {} and get {}", hexString, result);
         return result;
     }
 
     /**
      * Read Given property form given property file in project resource
      *
-     * @param propertyFileName as String Object with file name of property file
-     * @param propertyRef as String Object with reference of property
+     * @param hexString as String Object with file name of property file
      * @return String Object will return with requested property or null
      * @throws IOException with file notfound or compatibility issue
      * @apiNote Read property file and fetch requested property value in to one String Object
@@ -118,12 +119,12 @@ public class MoraHexUtilities {
      * in to a String we can use this
      */
     public byte[] convertStringToUnHexByteArrayWithApacheCommons(String hexString) {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to hex bytes input {}", hexString);
         byte[] bytes = new byte[hexString.length()/2];
         try {
             bytes = org.apache.commons.codec.binary.Hex.decodeHex(hexString);
         } catch (DecoderException e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
-            e.printStackTrace();
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         }
         return bytes;
     }
@@ -131,8 +132,7 @@ public class MoraHexUtilities {
     /**
      * Read Given property form given property file in project resource
      *
-     * @param propertyFileName as String Object with file name of property file
-     * @param propertyRef as String Object with reference of property
+     * @param inputString as String Object with file name of property file
      * @return String Object will return with requested property or null
      * @throws IOException with file notfound or compatibility issue
      * @apiNote Read property file and fetch requested property value in to one String Object
@@ -150,15 +150,16 @@ public class MoraHexUtilities {
             // convert int to hex, for decimal 97 hex 61
             hex.append(Integer.toHexString(decimal));
         }
-        return hex.toString();
+        String result = hex.toString();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to hex string input {} and get {}", inputString, result);
+        return result;
 
     }
 
     /**
      * Read Given property form given property file in project resource
      *
-     * @param propertyFileName as String Object with file name of property file
-     * @param propertyRef as String Object with reference of property
+     * @param hexString as String Object with file name of property file
      * @return String Object will return with requested property or null
      * @throws IOException with file notfound or compatibility issue
      * @apiNote Read property file and fetch requested property value in to one String Object
@@ -168,7 +169,7 @@ public class MoraHexUtilities {
     // Hex -> Decimal -> Char
     public String convertStringToUnHexWithIntegerWrapper(String hexString) {
 
-        StringBuilder result = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
         // split into two chars per loop, hexString, 0A, 0B, 0C...
         for (int i = 0; i < hexString.length() - 1; i += 2) {
@@ -176,17 +177,18 @@ public class MoraHexUtilities {
             //convert hexString to decimal
             int decimal = Integer.parseInt(tempInHex, 16);
             // convert the decimal to char
-            result.append((char) decimal);
+            sb.append((char) decimal);
         }
-        return result.toString();
+        String result = sb.toString();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to Un Hex string input {} and get {}", hexString, result);
+        return result;
 
     }
 
     /**
      * Read Given property form given property file in project resource
      *
-     * @param propertyFileName as String Object with file name of property file
-     * @param propertyRef as String Object with reference of property
+     * @param bytes as String Object with file name of property file
      * @return String Object will return with requested property or null
      * @throws IOException with file notfound or compatibility issue
      * @apiNote Read property file and fetch requested property value in to one String Object
@@ -194,7 +196,7 @@ public class MoraHexUtilities {
      * in to a String we can use this
      */
     public String convertByteArrayToHexWithIntegerWrapper(byte[] bytes) {
-        StringBuilder result = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         for (byte aByte : bytes) {
             int decimal = (int) aByte & 0xff;               // bytes widen to int, need mask, prevent sign extension
             // get last 8 bits
@@ -202,16 +204,18 @@ public class MoraHexUtilities {
             if (hex.length() % 2 == 1) {                    // if half hex, pad with zero, e.g \t
                 hex = "0" + hex;
             }
-            result.append(hex);
+            sb.append(hex);
         }
-        return result.toString();
+        String result = sb.toString();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to hex string and get {}", result);
+        return result;
     }
 
     /**
      * Read Given property form given property file in project resource
      *
-     * @param propertyFileName as String Object with file name of property file
-     * @param propertyRef as String Object with reference of property
+     * @param inputString as String Object with file name of property file
+     * @param lowercase as String Object with reference of property
      * @return String Object will return with requested property or null
      * @throws IOException with file notfound or compatibility issue
      * @apiNote Read property file and fetch requested property value in to one String Object
@@ -242,16 +246,17 @@ public class MoraHexUtilities {
             hex[j * 2 + 1] = HEX_ARRAY[v & 0x0F];  // get lower 4 bits
 
         }
-
-        return new String(hex);
+        String result = new String(hex);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to hex string input {} and get {}", inputString, result);
+        return result;
 
     }
 
     /**
      * Read Given property form given property file in project resource
      *
-     * @param propertyFileName as String Object with file name of property file
-     * @param propertyRef as String Object with reference of property
+     * @param bytes as String Object with file name of property file
+     * @param lowercase as String Object with reference of property
      * @return String Object will return with requested property or null
      * @throws IOException with file notfound or compatibility issue
      * @apiNote Read property file and fetch requested property value in to one String Object
@@ -263,22 +268,24 @@ public class MoraHexUtilities {
         char[] HEX_ARRAY = lowercase ? HEX_LOWER : HEX_UPPER;
 
         final int nBytes = bytes.length;
-        char[] result = new char[2 * nBytes];         //  1 hex contains two chars
+        char[] charArray = new char[2 * nBytes];         //  1 hex contains two chars
         //  hex = [0-f][0-f], e.g 0f or ff
 
         int j = 0;
         for (byte aByte : bytes) {                    // loop byte by byte
 
             // 0xF0 = FFFF 0000
-            result[j++] = HEX_ARRAY[(0xF0 & aByte) >>> 4];    // get the top 4 bits, first half hex char
+            charArray[j++] = HEX_ARRAY[(0xF0 & aByte) >>> 4];    // get the top 4 bits, first half hex char
 
             // 0x0F = 0000 FFFF
-            result[j++] = HEX_ARRAY[(0x0F & aByte)];          // get the bottom 4 bits, second half hex char
+            charArray[j++] = HEX_ARRAY[(0x0F & aByte)];          // get the bottom 4 bits, second half hex char
 
             // combine first and second half, we get a complete hex
         }
 
-        return String.valueOf(result);
+        String result = String.valueOf(charArray);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to hex string and get {}", result);
+        return result;
 
     }
 
@@ -294,6 +301,7 @@ public class MoraHexUtilities {
      * in to a String we can use this
      */
     public byte[] convertStringToUnHexByteArrayWithBitwiseSift(String inputString, boolean lowercase) {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to Un Hex byte input {}", inputString);
 
         char[] HEX_ARRAY = lowercase ? HEX_LOWER : HEX_UPPER;
 
@@ -332,13 +340,15 @@ public class MoraHexUtilities {
      * in to a String we can use this
      */
     public String convertByteArrayToHexWithStringFormat(byte[] bytes) {
-        StringBuilder result = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         for (byte aByte : bytes) {
-            result.append(String.format("%02x", aByte));
+            sb.append(String.format("%02x", aByte));
             // upper case
             // result.append(String.format("%02X", aByte));
         }
-        return result.toString();
+        String result = sb.toString();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to hex string and get {}", result);
+        return result;
     }
 
     /**
@@ -355,7 +365,9 @@ public class MoraHexUtilities {
     public String convertStringToHexWithSpringCrypto(String inputString) {
         // display in lowercase, default
         char[] chars = org.springframework.security.crypto.codec.Hex.encode(inputString.getBytes(StandardCharsets.UTF_8));
-        return String.valueOf(chars);
+        String result = String.valueOf(chars);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to hex string input {} and get {}", inputString, result);
+        return result;
     }
 
     /**
@@ -370,8 +382,10 @@ public class MoraHexUtilities {
      * in to a String we can use this
      */
     public String convertByteArrayToHexWithSpringCrypto(byte[] bytes) {
-        char[] result = org.springframework.security.crypto.codec.Hex.encode(bytes);
-        return new String(result);
+        char[] charArray = org.springframework.security.crypto.codec.Hex.encode(bytes);
+        String result = new String(charArray);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to hex string and get {}", result);
+        return result;
     }
 
     /**
@@ -387,7 +401,9 @@ public class MoraHexUtilities {
      */
     public String convertStringToUnHexWithSpringCrypto(String hexString) {
         byte[] bytes = org.springframework.security.crypto.codec.Hex.decode(hexString);
-        return new String(bytes, StandardCharsets.UTF_8);
+        String result = new String(bytes, StandardCharsets.UTF_8);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to Un Hex string input {} and get {}", hexString, result);
+        return result;
     }
 
     /**
@@ -402,6 +418,7 @@ public class MoraHexUtilities {
      * in to a String we can use this
      */
     public byte[] convertStringToUnHexByteArrayWithSpringCrypto(String hexString) {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to Un Hex byte input {}", hexString);
         byte[] bytes = org.springframework.security.crypto.codec.Hex.decode(hexString);
         return bytes;
     }
@@ -420,6 +437,7 @@ public class MoraHexUtilities {
      * in to a String we can use this
      */
     public void convertToHex(PrintStream out, File file) throws IOException {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Convert to hex input {}", (null!=file)?file.getAbsolutePath():null);
         InputStream is = new FileInputStream(file);
 
         int bytesCounter =0;

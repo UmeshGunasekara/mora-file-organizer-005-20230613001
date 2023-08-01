@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.app;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,7 +27,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class Calculator
 {
-    final static Logger LOGGER = LogManager.getLogger(Calculator.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(Calculator.class);
 
     /**
      * Get sum of given two integers.
@@ -39,7 +40,7 @@ public class Calculator
      */
     public int add(Integer input1, Integer input2)
     {
-        LOGGER.info("Calculator - add() method is called");
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Calculator - add() method is called");
         return input1+input2;
     }
 
@@ -54,7 +55,7 @@ public class Calculator
      */
     public double getAreaOfCircle(Double radius)
     {
-        LOGGER.info("Calculator - getAreaOfCircle() method is called");
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Calculator - getAreaOfCircle() method is called");
         return Math.PI*Math.pow(radius,2);
 //        return 0;
     }
@@ -71,7 +72,7 @@ public class Calculator
      */
     public int division(Integer input1, Integer input2)
     {
-        LOGGER.info("Calculator - division() method is called");
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Calculator - division() method is called");
         return input1/input2;
     }
 }

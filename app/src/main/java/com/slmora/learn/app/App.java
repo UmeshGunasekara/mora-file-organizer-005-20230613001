@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.app;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.property.util.MoraAccessProperties;
 import com.slmora.learn.controller.MoraFileOrganizerWalkingController;
 import com.slmora.learn.model.SourceJsonModel;
@@ -35,7 +36,7 @@ import java.util.Properties;
  */
 public class App
 {
-    final static Logger LOGGER = LogManager.getLogger(App.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(App.class);
     public static String PROP_MFO_LOC_JSON;
 
     public String getGreeting() {
@@ -70,7 +71,7 @@ public class App
                     walkingController.sourcePathWalk(Paths.get(i.getSource()), 0, i.getDrive(), i.getIsskip())
             ));
         }catch (Exception e){
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
         }
 
     }

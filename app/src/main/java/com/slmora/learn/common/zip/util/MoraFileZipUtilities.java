@@ -8,6 +8,7 @@
 package com.slmora.learn.common.zip.util;
 
 import com.slmora.learn.common.file.util.MoraFileWriteAccessUtilities;
+import com.slmora.learn.common.logging.MoraLogger;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,7 +46,7 @@ import java.util.zip.ZipInputStream;
  * @see <a href="https://www.digitalocean.com/community/tutorials/java-unzip-file-example">Java Unzip File Example</a>
  */
 public class MoraFileZipUtilities {
-    final static Logger LOGGER = LogManager.getLogger(MoraFileZipUtilities.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MoraFileZipUtilities.class);
 
     public Optional<Path> unzipAndGetPath(Path sourceZipPath, String targetFolderPath) throws IOException
     {
@@ -54,7 +55,7 @@ public class MoraFileZipUtilities {
         File destinationDirectory = new File(targetFolderPath);
         String destinationPathString=targetFolderPath;
         String zipFileName = writeAccessUtilities.removeExtension(sourceZipPath.getFileName().toString());
-
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Ready for unzip execution Source {} Destination {} and ZipFileName {}", (null!=sourceZipPath)?sourceZipPath.toAbsolutePath():null, destinationPathString, zipFileName);
         byte[] buffer = new byte[1024];
         try(ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(sourceZipPath.toAbsolutePath().toString()))) {
             ZipEntry zipEntry = zipInputStream.getNextEntry();
@@ -63,7 +64,7 @@ public class MoraFileZipUtilities {
                 File extractedDestination = getValidDestinationPath(destinationDirectory, zipEntry);
                 if (zipEntry.isDirectory()) {
                     if (!extractedDestination.isDirectory() && !extractedDestination.mkdirs()) {
-                        LOGGER.error("Failed to create directory " + extractedDestination);
+                        LOGGER.error(Thread.currentThread().getStackTrace(), "Failed to create directory {}", (null!=extractedDestination)?extractedDestination.getAbsolutePath():null);
 //                        throw new IOException("Failed to create directory " + extractedDestination);
                     }else {
                         if(extractedDestination.getAbsolutePath().endsWith(zipFileName)){
@@ -76,7 +77,7 @@ public class MoraFileZipUtilities {
                     // fix for Windows-created archives
                     File parent = extractedDestination.getParentFile();
                     if (!parent.isDirectory() && !parent.mkdirs()) {
-                        LOGGER.error("Failed to create directory " + parent);
+                        LOGGER.error(Thread.currentThread().getStackTrace(), "Failed to create directory {}", (null!=parent)?parent:null);
 //                        throw new IOException("Failed to create directory " + parent);
                     }else {
                         if (!parent.getAbsolutePath().contains(zipFileName)) {
@@ -98,13 +99,14 @@ public class MoraFileZipUtilities {
 
             zipInputStream.closeEntry();
         }
-//        catch (ZipException ze){
-//            LOGGER.error(ExceptionUtils.getStackTrace(ze));
-//        }catch (IOException e) {
-//            LOGGER.error(ExceptionUtils.getStackTrace(e));
-////            throw new RuntimeException(e);
-//        }
+        catch (ZipException ze){
+            LOGGER.error(Thread.currentThread().getStackTrace(), ze);
+        }catch (IOException e) {
+            LOGGER.error(Thread.currentThread().getStackTrace(), e);
+//            throw new RuntimeException(e);
+        }
         Path destinationPath = Path.of(destinationPathString);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Zip extracted Destination {}", (null!=destinationPath)?destinationPath.toAbsolutePath():null);
         return writeAccessUtilities.isEmpty(destinationPath)?Optional.empty():Optional.of(destinationPath);
     }
 
@@ -116,7 +118,7 @@ public class MoraFileZipUtilities {
         String destinationFilePathString = destFile.getCanonicalPath();
 
         if (!destinationFilePathString.startsWith(destinationDirectoryPathString + File.separator)) {
-            LOGGER.error("Entry is outside of the target dir: " + zipEntry.getName());
+            LOGGER.error(Thread.currentThread().getStackTrace(), "Entry is outside of the target dir {} ", (null!=zipEntry)?zipEntry.getName():null);
 //            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
         }
 

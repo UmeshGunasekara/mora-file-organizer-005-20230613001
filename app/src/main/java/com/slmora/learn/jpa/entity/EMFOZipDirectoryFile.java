@@ -7,6 +7,7 @@
  */
 package com.slmora.learn.jpa.entity;
 
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.jpa.entity.common.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -44,7 +45,7 @@ import java.io.Serial;
 @Table(name = "MFO_ZIP_DIRECTORY_FILE")
 public class EMFOZipDirectoryFile extends BaseEntity
 {
-    final static Logger LOGGER = LogManager.getLogger(EMFOZipDirectoryFile.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(EMFOZipDirectoryFile.class);
 
     @Serial
     private static final long serialVersionUID = -3592549460482579605L;

@@ -8,6 +8,7 @@
 package com.slmora.learn.controller;
 
 import com.slmora.learn.common.file.util.MoraFileWriteAccessUtilities;
+import com.slmora.learn.common.logging.MoraLogger;
 import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dao.impl.MFODirectoryDaoImpl;
 import com.slmora.learn.dto.DirectoryDto;
@@ -45,9 +46,9 @@ import java.util.UUID;
  * </pre></blockquote>
  */
 public class MFODirectoryController {
-    final static Logger LOGGER = LogManager.getLogger(MFODirectoryController.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MFODirectoryController.class);
     public void addDirectory(Path dir, Integer zipFileLevel, Integer driveCode){
-        LOGGER.info("addDirectory dir : "+dir.toAbsolutePath().toString()+", zipFileLevel"+zipFileLevel+", driveCode : "+driveCode);
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Adding directory dir {}, zipFileLevel {}, driveCode {}", (null!=dir)?dir.toAbsolutePath():null, zipFileLevel, driveCode);
         if(dir != null && dir.toFile().isDirectory()){
             IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
             MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
@@ -68,14 +69,13 @@ public class MFODirectoryController {
 
                     Path parentDir = dir.getParent();
                     if(parentDir != null && parentDir.toFile().isDirectory()){
-                        LOGGER.info("addDirectory parentDir : "+parentDir.toAbsolutePath().toString()+", zipFileLevel"+zipFileLevel+", driveCode : "+driveCode);
+                        LOGGER.debug(Thread.currentThread().getStackTrace(), "addDirectory parentDir {} ", (null!=parentDir)?parentDir.toAbsolutePath():null);
                         Optional<List<EMFODirectory>> opListEntityDir = dirService.getAllMFODirectoryByDirectoryFullPathAndZipLevelDrive(parentDir.toAbsolutePath().toString(), zipFileLevel,driveCode);
 
                         if (opListEntityDir.isPresent()&&opListEntityDir.get().size()==1) {
                             eDir.setDirectoryParent(opListEntityDir.get().get(0));
                         }else {
-                            LOGGER.error(parentDir.toAbsolutePath()
-                                    .toString()+" has not only single result");
+                            LOGGER.error(Thread.currentThread().getStackTrace(), "Directory {} has not only single result", (null!=parentDir)?parentDir.toAbsolutePath():null);
                         }
                     }
                 }else {
@@ -88,6 +88,7 @@ public class MFODirectoryController {
 
                 eDir = dirService.persistMFODirectory(eDir);
 
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Size of the directory search stack {} ", SingleSystemProperty.SEARCH_DIR_STACK.size());
                 if(SingleSystemProperty.SEARCH_DIR_STACK.size()>0) {
                     SearchPathModel lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
                     while (!isSearchPathMatching(dir, lastPathModel.getPath())) {
@@ -98,7 +99,7 @@ public class MFODirectoryController {
                             searchDir.setDirectorySearchStatus(1);
                             dirService.persistMFODirectory(searchDir);
                         }
-                        LOGGER.info("Poped from the search stack : " + SingleSystemProperty.SEARCH_DIR_STACK.pop());
+                        LOGGER.debug(Thread.currentThread().getStackTrace(), "Poped from the directory search stack {} ", SingleSystemProperty.SEARCH_DIR_STACK.pop());
                         if(SingleSystemProperty.SEARCH_DIR_STACK.size()>0){
                             lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
                         }else {
@@ -109,14 +110,12 @@ public class MFODirectoryController {
                 SingleSystemProperty.SEARCH_DIR_STACK.push(SearchPathModel.of(dir,zipFileLevel,null,null,null));
 
                 UUID uuid = uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eDir.getId());
-                LOGGER.info("Added Directory " + dir.toAbsolutePath()
+                LOGGER.info(Thread.currentThread().getStackTrace(), "Added Directory " + dir.toAbsolutePath()
                         .toString() + " with UUID : " + uuid.toString());
-//                System.out.println("Added Directory " + dir.toAbsolutePath()
-//                        .toString() + " with UUID : " + uuid.toString());
             } catch (NoSuchAlgorithmException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             } catch (InvalidKeyException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             } finally {
                 dirService.close();
             }
@@ -124,10 +123,10 @@ public class MFODirectoryController {
     }
 
     public void addDirectory(Path dir, Integer zipFileLevel, EMFOFile zipFile, Path zipParent, Integer driveCode){
-        LOGGER.info("addDirectory2 dir : "+dir.toAbsolutePath().toString()+", zipFileLevel"+zipFileLevel+", zipFile : "+zipFile.getFileFullPath()+", zipParent"+zipParent.toAbsolutePath().toString()+", driveCode : "+driveCode);
+        MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Adding directory dir {}, zipFileLevel {}, zipFile UUID {}, zipParent {}, driveCode {}", (null!=dir)?dir.toAbsolutePath():null, zipFileLevel, (null!=zipFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFile.getId()):null, (null!=zipParent)?zipParent.toAbsolutePath():null, driveCode);
         if(dir != null && dir.toFile().isDirectory()){
             IMFODirectoryService dirService = new MFODirectoryServiceImpl(new MFODirectoryDaoImpl());
-            MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
             MoraFileWriteAccessUtilities writeAccessUtilities = new MoraFileWriteAccessUtilities();
             DirectoryDto directoryDto = new DirectoryDto();
 
@@ -152,7 +151,7 @@ public class MFODirectoryController {
 
                     Path parentDir = dbDir.getParent();
                     if(parentDir != null && parentDir.toFile().isDirectory()){
-                        LOGGER.info("addDirectory2 parentDir : "+parentDir.toAbsolutePath().toString()+", zipFileLevel"+zipFileLevel+", zipFile : "+zipFile.getFileFullPath()+", driveCode : "+driveCode);
+                        LOGGER.debug(Thread.currentThread().getStackTrace(), "addDirectory parentDir {} ", (null!=parentDir)?parentDir.toAbsolutePath():null);
                         Optional<EMFODirectory> opEntityDir = dirService.getMFODirectoryByDirectoryFullPathAndZipLevelZipFileDrive(parentDir.toAbsolutePath().toString(), zipFileLevel,zipFile,driveCode);
 
                         if(opEntityDir.isPresent()){
@@ -169,6 +168,7 @@ public class MFODirectoryController {
                 eDir.setFileZip(zipFile);
                 eDir = dirService.persistMFODirectory(eDir);
 
+                LOGGER.debug(Thread.currentThread().getStackTrace(), "Size of the directory search stack {} ", SingleSystemProperty.SEARCH_DIR_STACK.size());
                 if(SingleSystemProperty.SEARCH_DIR_STACK.size()>0) {
                     SearchPathModel lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
                     while (!isSearchPathMatching(dbDir, lastPathModel.getPath())) {
@@ -178,7 +178,7 @@ public class MFODirectoryController {
                             searchDir.setDirectorySearchStatus(1);
                             dirService.persistMFODirectory(searchDir);
                         }
-                        LOGGER.info("Poped from the search stack : " + SingleSystemProperty.SEARCH_DIR_STACK.pop());
+                        LOGGER.debug(Thread.currentThread().getStackTrace(), "Poped from the directory search stack {} ", SingleSystemProperty.SEARCH_DIR_STACK.pop());
                         if(SingleSystemProperty.SEARCH_DIR_STACK.size()>0){
                             lastPathModel = SingleSystemProperty.SEARCH_DIR_STACK.peek();
                         }else {
@@ -192,14 +192,12 @@ public class MFODirectoryController {
                 zipDirectoryFileController.addZipDirectory(zipFile, eDir);
 
                 UUID uuid = uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(eDir.getId());
-                LOGGER.info("Added Directory " + dbDir.toAbsolutePath()
+                LOGGER.info(Thread.currentThread().getStackTrace(), "Added Directory " + dbDir.toAbsolutePath()
                         .toString() + " with UUID : " + uuid.toString());
-//                System.out.println("Added Directory " + dbDir.toAbsolutePath()
-//                        .toString() + " with UUID : " + uuid.toString());
             } catch (NoSuchAlgorithmException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             } catch (InvalidKeyException e) {
-                LOGGER.error(ExceptionUtils.getStackTrace(e));
+                LOGGER.error(Thread.currentThread().getStackTrace(), e);
             } finally {
                 dirService.close();
             }

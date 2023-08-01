@@ -8,6 +8,8 @@
 package com.slmora.learn.dao.impl;
 
 import com.slmora.learn.common.dao.impl.GenericDaoImpl;
+import com.slmora.learn.common.logging.MoraLogger;
+import com.slmora.learn.common.uuid.util.MoraUuidUtilities;
 import com.slmora.learn.dao.IMFODirectoryDao;
 import com.slmora.learn.jpa.entity.EMFODirectory;
 import com.slmora.learn.jpa.entity.EMFOFile;
@@ -46,11 +48,13 @@ import java.util.UUID;
  */
 public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> implements IMFODirectoryDao
 {
-    final static Logger LOGGER = LogManager.getLogger(MFODirectoryDaoImpl.class);
+    private final static MoraLogger LOGGER = MoraLogger.getLogger(MFODirectoryDaoImpl.class);
+    private MoraUuidUtilities uuidUtilities = new MoraUuidUtilities();
 
     @Override
     public Optional<byte[]> addMFODirectory(EMFODirectory directory)
     {
+        LOGGER.debug(Thread.currentThread().getStackTrace(), "Adding directory with UUID {}", (null!=directory)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(directory.getId()):null);
         return add(directory);
 //        return persistMFODirectory(directory);
     }
@@ -58,18 +62,21 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
     @Override
     public Optional<EMFODirectory> getMFODirectoryById(byte[] id)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve directory with UUID {}", (null!=id)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(id):null);
         return getById(id);
     }
 
     @Override
     public Optional<EMFODirectory> getMFODirectoryByUUID(UUID uuidKey)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve directory with UUID {}", (null!=uuidKey)?uuidKey:null);
         return getByUUID(uuidKey);
     }
 
     @Override
     public void deleteMFODirectory(EMFODirectory directory)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Delete directory with UUID {}", (null!=directory)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(directory.getId()):null);
         delete(directory);
     }
 
@@ -82,6 +89,7 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
     @Override
     public Optional<EMFODirectory> getMFODirectoryByCode(Integer code)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve directory with Code {}", code);
 ////        Transaction transaction = null;
 //        try{
 //            Session session = getSession();
@@ -115,6 +123,7 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
     @Override
     public Optional<byte[]> persistReturnIdMFODirectory(EMFODirectory directory)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Adding directory with UUID {}", (null!=directory)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(directory.getId()):null);
 //        Transaction transaction = null;
 //        try{
 //            Session session = getSession();
@@ -138,12 +147,14 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
     @Override
     public EMFODirectory persistMFODirectory(EMFODirectory directory)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Adding directory with UUID {}", (null!=directory)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(directory.getId()):null);
         return persist(directory);
     }
 
     @Override
     public Optional<List<EMFODirectory>> getAllMFODirectoryByDirectoryFullPathSha256AndZipLevel(String directoryFullPathSha256, Integer zipLevel)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve directories with directoryFullPathSha256 {}, and zipLevel {}", directoryFullPathSha256, zipLevel);
         Transaction transaction = null;
         try{
             Session session = getSession();
@@ -164,19 +175,24 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
 //            transaction=getSession().beginTransaction();
 //            T t= (T) session.get(daoType, key);
             transaction.commit();
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve directories with directoryFullPathSha256 {}, and zipLevel {} out List Size {}", directoryFullPathSha256, zipLevel, (null!=dirList)?dirList.size():null);
             return Optional.of(dirList);
 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("getAllMFODirectoryByDirectoryFullPathSha256AndZipLevel No record found for the directory full path SHA 256 : "+directoryFullPathSha256+", zipLevel : "+zipLevel);
+            LOGGER.error(Thread.currentThread().getStackTrace(), "ERRO-00001", "No directories found with directoryFullPathSha256 {}, and zipLevel {}", directoryFullPathSha256, zipLevel);
+            LOGGER.error(Thread.currentThread().getStackTrace(), ex);
             return Optional.empty();
         }catch (Throwable throwable) {
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            return Optional.empty();
-        }finally {
             if (transaction != null) {
                 transaction.rollback();
+            }
+            LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            return Optional.empty();
+        }finally {
+            if(transaction != null && transaction.isActive()){
+                transaction.commit();
             }
         }
     }
@@ -186,6 +202,7 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
                                                                                                      Integer zipLevel,
                                                                                                      Integer directoryDriveCode)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve directories with directoryFullPathSha256 {}, zipLevel {} and directoryDriveCode {}", directoryFullPathSha256, zipLevel, directoryDriveCode);
         Transaction transaction = null;
         try{
             Session session = getSession();
@@ -208,20 +225,24 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
 //            transaction=getSession().beginTransaction();
 //            T t= (T) session.get(daoType, key);
             transaction.commit();
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve directories with directoryFullPathSha256 {}, zipLevel {} and directoryDriveCode {} out List Size {}", directoryFullPathSha256, zipLevel, directoryDriveCode, (null!=dirList)?dirList.size():null);
             return Optional.of(dirList);
 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("getAllMFODirectoryByDirectoryFullPathSha256AndZipLevelDrive No record found for the directory full path SHA 256 : "+directoryFullPathSha256+", zipLevel : "+zipLevel+", directoryDriveCode : "+directoryDriveCode);
+            LOGGER.error(Thread.currentThread().getStackTrace(), "ERRO-00001", "No directories found with directoryFullPathSha256 {}, zipLevel {} and directoryDriveCode {}", directoryFullPathSha256, zipLevel, directoryDriveCode);
+            LOGGER.error(Thread.currentThread().getStackTrace(), ex);
             return Optional.empty();
         }catch (Throwable throwable) {
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
-            return Optional.empty();
-        }finally {
             if (transaction != null) {
                 transaction.rollback();
+            }
+            LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            return Optional.empty();
+        }finally {
+            if(transaction != null && transaction.isActive()){
+                transaction.commit();
             }
         }
     }
@@ -229,6 +250,7 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
     @Override
     public Optional<EMFODirectory> getMFODirectoryByDirectoryFullPathSha256AndZipLevelZipFileDrive(String directoryFullPathSha256, Integer zipLevel, EMFOFile zipFile, Integer directoryDriveCode)
     {
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve directory with directoryFullPathSha256 {}, zipLevel {}, Zip File UUID {} and directoryDriveCode {}", directoryFullPathSha256, zipLevel, (null!=zipFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFile.getId()):null, directoryDriveCode);
         Transaction transaction = null;
         try{
             Session session = getSession();
@@ -253,20 +275,24 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
 //            transaction=getSession().beginTransaction();
 //            T t= (T) session.get(daoType, key);
             transaction.commit();
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve directory with UUID {}", (null!=dir)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(dir.getId()):null);
             return Optional.of(dir);
 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("getMFODirectoryByDirectoryFullPathSha256AndZipLevelZipFileDrive No record found for the directory full path SHA 256 : "+directoryFullPathSha256+", zipLevel : "+zipLevel+", directoryDriveCode : "+directoryDriveCode);
+            LOGGER.error(Thread.currentThread().getStackTrace(), "ERRO-00001", "No directory found with directoryFullPathSha256 {}, zipLevel {}, Zip File UUID {} and directoryDriveCode {}", directoryFullPathSha256, zipLevel, (null!=zipFile)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFile.getId()):null, directoryDriveCode);
+            LOGGER.error(Thread.currentThread().getStackTrace(), ex);
             return Optional.empty();
         }catch (Throwable throwable) {
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
-            return Optional.empty();
-        }finally {
             if (transaction != null) {
                 transaction.rollback();
+            }
+            LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            return Optional.empty();
+        }finally {
+            if(transaction != null && transaction.isActive()){
+                transaction.commit();
             }
         }
     }
@@ -274,7 +300,7 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
     @Override
     public Optional<EMFODirectory> getMFODirectoryBySearchPathModelDrive(String directoryFullPathSha256, Integer directoryZipLevel, byte[] zipFileId, Integer directoryDriveCode)
     {
-        LOGGER.info("directoryFullPathSha256 : "+directoryFullPathSha256+" , directoryZipLevel : "+directoryZipLevel+" , directoryDriveCode : "+directoryDriveCode);
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve directory with directoryFullPathSha256 {}, zipLevel {}, Zip File UUID {} and directoryDriveCode {}", directoryFullPathSha256, directoryZipLevel, (null!=zipFileId)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFileId):null, directoryDriveCode);
         Transaction transaction = null;
         try{
             Session session = getSession();
@@ -308,23 +334,24 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
 //            transaction=getSession().beginTransaction();
 //            T t= (T) session.get(daoType, key);
             transaction.commit();
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve directory with UUID {}", (null!=dir)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(dir.getId()):null);
             return Optional.of(dir);
 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("getMFODirectoryByDirectoryFullPathSha256AndZipLevelZipFileDrive No record found for the directoryFullPathSha256 : "+directoryFullPathSha256+" , directoryZipLevel : "+directoryZipLevel);
+            LOGGER.error(Thread.currentThread().getStackTrace(), "ERRO-00001", "No directory found with directoryFullPathSha256 {}, zipLevel {}, Zip File UUID {} and directoryDriveCode {}", directoryFullPathSha256, directoryZipLevel, (null!=zipFileId)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(zipFileId):null, directoryDriveCode);
+            LOGGER.error(Thread.currentThread().getStackTrace(), ex);
             return Optional.empty();
         }catch (Throwable throwable) {
-//            if (transaction != null) {
-//                transaction.rollback();
-//            }
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
-            return Optional.empty();
-        }finally {
             if (transaction != null) {
                 transaction.rollback();
+            }
+            LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            return Optional.empty();
+        }finally {
+            if(transaction != null && transaction.isActive()){
+                transaction.commit();
             }
         }
     }
@@ -336,7 +363,7 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
                                                                          Integer zipFileZipLevel,
                                                                          Integer driveCode)
     {
-        LOGGER.info("directoryFullPathSha256 : "+directoryFullPathSha256+" , directoryZipLevel : "+directoryZipLevel+" , zipFileFullPathSha256 : "+zipFileFullPathSha256+" , zipFileZipLevel : "+zipFileZipLevel+" , driveCode : "+driveCode);
+        LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve directory with directoryFullPathSha256 {}, zipLevel {}, zipFileFullPathSha256 {}, zipFileZipLevel {} and DriveCode {}", directoryFullPathSha256, directoryZipLevel, zipFileFullPathSha256, zipFileZipLevel, driveCode);
         Transaction transaction = null;
         try{
             Session session = getSession();
@@ -373,23 +400,24 @@ public class MFODirectoryDaoImpl extends GenericDaoImpl<byte[], EMFODirectory> i
 //            transaction=getSession().beginTransaction();
 //            T t= (T) session.get(daoType, key);
             transaction.commit();
+            LOGGER.info(Thread.currentThread().getStackTrace(), "Retrieve directory with UUID {}", (null!=dir)?uuidUtilities.getUUIDFromOrderedUUIDByteArrayWithApacheCommons(dir.getId()):null);
             return Optional.of(dir);
 
 //            Session session = getSession();
 //            session.createNamedQuery("")
         }catch (NoResultException ex){
-            LOGGER.error("getMFODirectoryByDirectoryFullPathSha256AndZipLevelZipFileDrive No record found for the directoryFullPathSha256 : "+directoryFullPathSha256+" , directoryZipLevel : "+directoryZipLevel+" , zipFileFullPathSha256 : "+zipFileFullPathSha256+" , zipFileZipLevel : "+zipFileZipLevel+" , driveCode : "+driveCode);
+            LOGGER.error(Thread.currentThread().getStackTrace(), "ERRO-00001", "No directory found with directoryFullPathSha256 {}, zipLevel {}, zipFileFullPathSha256 {}, zipFileZipLevel {} and DriveCode {}", directoryFullPathSha256, directoryZipLevel, zipFileFullPathSha256, zipFileZipLevel, driveCode);
+            LOGGER.error(Thread.currentThread().getStackTrace(), ex);
             return Optional.empty();
         }catch (Throwable throwable) {
-//            if (transaction != null) {
-//                transaction.rollback();
-//            }
-            LOGGER.error(ExceptionUtils.getStackTrace(throwable));
-            throwable.printStackTrace();
-            return Optional.empty();
-        }finally {
             if (transaction != null) {
                 transaction.rollback();
+            }
+            LOGGER.error(Thread.currentThread().getStackTrace(), throwable);
+            return Optional.empty();
+        }finally {
+            if(transaction != null && transaction.isActive()){
+                transaction.commit();
             }
         }
     }
